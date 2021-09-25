@@ -41,6 +41,7 @@ RUN python -m venv /py && \
     mkdir -p /vol/web/media && \
     chown -R app:app /vol && \
     chmod -R 775 /vol && \
+    chmod -R 755 /vol/web/static && \
     chmod -R +x /scripts
 
 RUN pip install uwsgi
