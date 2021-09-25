@@ -3,7 +3,6 @@ from django.urls import path, include, re_path
 from django.conf.urls import url
 from rest_framework import routers
 from core.views import (
-    EntradaSerializerViewSet, 
     CadPacienteSerializerViewSet, 
     ApiEntradaSerializerViewSet,
     ApiConsultaSerializerViewSet,
@@ -17,7 +16,6 @@ from core.views import (
 
 router = routers.DefaultRouter()
 router.register(r'pacientes', CadPacienteSerializerViewSet)
-router.register(r'entradas', EntradaSerializerViewSet, basename='Entrada')
 router.register(r'api/entrada', ApiEntradaSerializerViewSet, basename='ApiEntrada')
 router.register(r'api/consuta', ApiConsultaSerializerViewSet, basename='ApiConsulta')
 router.register(r'api/enfevoluc', ApiEnfEvoluCSerializerViewSet, basename='ApiEnfevoluc')
