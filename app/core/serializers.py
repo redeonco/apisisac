@@ -1,4 +1,15 @@
-from .models import Cadpaciente, Entrada, ApiEntrada
+from .models import (
+    ApiConsulta,
+    ApiRadioterapia, 
+    Cadpaciente, 
+    Entrada, 
+    ApiEntrada,
+    ApiEnfevoluc,
+    ApiEntradaradio,
+    ApiPlanejfisicoc,
+    ApiPrescreve,
+    ApiPrescreveqt,
+)
 from rest_framework import serializers
 
 
@@ -57,4 +68,142 @@ class ApiEntradaSerializer(serializers.ModelSerializer):
             'procedimento',
             'hist',
             'total'
+        ]
+
+
+class ApiConsultaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApiConsulta
+        fields = [
+            'codpaciente',
+            'paciente',
+            'codmovimento',
+            'tipo',
+            'codconvenio',
+            'convenio',
+            'historico',
+            'data',
+            'nome',
+            'obs',
+            'numpresc',
+            'codmedico',
+            'medico'
+        ]
+
+
+class ApiEnfEvoluCSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApiEnfevoluc
+        fields = [
+            'ndoc',
+            'codpaciente',
+            'paciente',
+            'acomod',
+            'datahoraf',
+            'codmedico',
+            'enfermeiro',
+            'texto3'
+        ]
+
+
+class ApiEntradaradioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApiEntradaradio
+        fields = [
+            'identradaradio',
+            'codmovimento',
+            'codpaciente',
+            'paciente',
+            'numpresc',
+            'idplanejfisico',
+            'encerrado',
+            'observacao',
+            'usuario',
+            'datahora',
+            'nplanejamento',
+            'nomecampo',
+            'incidencia',
+            'ncampo'
+        ]
+
+
+class ApiPlanejfisicocSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApiPlanejfisicoc
+        fields = [
+            'idplanejfisicoc',
+            'codpaciente',
+            'paciente',
+            'numpresc',
+            'energia',
+            'dosetotal',
+            'dosediaria',
+            'naplicacoes',
+            'locanatomica',
+            'incidencia',
+            'ncampo',
+            'portal',
+            'tpfeixe',
+            'fase'
+        ]
+
+
+class ApiPrescreveSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApiPrescreve
+        fields = [
+            'codpaciente',
+            'codpacref',
+            'paciente',
+            'codmedico',
+            'medico',
+            'data',
+            'numero',
+            'texto',
+            'obs',
+            'aplicado'
+        ]
+
+
+class ApiPrescreveqtSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApiPrescreveqt
+        fields = [
+            'codpaciente',
+            'codpacref',
+            'paciente',
+            'codmedico',
+            'medico',
+            'data',
+            'numero',
+            'texto',
+            'obs',
+            'texto',
+            'peso',
+            'supcorp',
+            'protocolo',
+            'nciclo',
+            'aplicado'
+        ]
+
+
+class ApiRadioterapiaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApiRadioterapia
+        fields = [
+            'numpresc',
+            'codpaciente',
+            'paciente',
+            'codcidp',
+            'estadio',
+            'finalidade',
+            'intencaoradical',
+            'intencaopaliativa',
+            'tipot',
+            'tipon',
+            'tipom',
+            'naplicacoes',
+            'karno',
+            'codmed',
+            'medico'
         ]
