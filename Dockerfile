@@ -43,6 +43,8 @@ RUN python -m venv /py && \
     chmod -R 775 /vol && \
     chmod -R +x /scripts
 
+RUN pip install uwsgi
+
 ENV PATH="/scripts:/py/bin:$PATH"
 
 USER app
