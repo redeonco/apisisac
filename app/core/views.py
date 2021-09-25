@@ -37,7 +37,7 @@ class CadPacienteSerializerViewSet(viewsets.ModelViewSet):
 
 class ApiEntradaSerializerViewSet(viewsets.ModelViewSet):
     serializer_class = ApiEntradaSerializer
-    authentication_classes = (TokenAuthentication,)
+    # authentication_classes = (TokenAuthentication,)
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'head']
 
@@ -51,7 +51,7 @@ class ApiEntradaSerializerViewSet(viewsets.ModelViewSet):
 
 class ApiConsultaSerializerViewSet(viewsets.ModelViewSet):
     serializer_class = ApiConsultaSerializer
-    authentication_classes = (TokenAuthentication,)
+    # authentication_classes = (TokenAuthentication,)
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'head']
 
@@ -65,7 +65,7 @@ class ApiConsultaSerializerViewSet(viewsets.ModelViewSet):
 
 class ApiEnfEvoluCSerializerViewSet(viewsets.ModelViewSet):
     serializer_class = ApiEnfEvoluCSerializer
-    authentication_classes = (TokenAuthentication,)
+    #authentication_classes = (TokenAuthentication,)
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'head']
 
@@ -79,7 +79,7 @@ class ApiEnfEvoluCSerializerViewSet(viewsets.ModelViewSet):
 
 class ApiEntradaRadioSerializerViewSet(viewsets.ModelViewSet):
     serializer_class = ApiEntradaradioSerializer
-    authentication_classes = (TokenAuthentication,)
+    # authentication_classes = (TokenAuthentication,)
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'head']
 
@@ -93,7 +93,7 @@ class ApiEntradaRadioSerializerViewSet(viewsets.ModelViewSet):
 
 class ApiPlanejfisicocSerializerViewSet(viewsets.ModelViewSet):
     serializer_class = ApiPlanejfisicocSerializer
-    authentication_classes = (TokenAuthentication,)
+    # authentication_classes = (TokenAuthentication,)
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'head']
 
@@ -107,7 +107,7 @@ class ApiPlanejfisicocSerializerViewSet(viewsets.ModelViewSet):
 
 class ApiPrescreveSerializerViewSet(viewsets.ModelViewSet):
     serializer_class = ApiPrescreveSerializer
-    authentication_classes = (TokenAuthentication,)
+    # authentication_classes = (TokenAuthentication,)
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'head']
 
@@ -121,7 +121,7 @@ class ApiPrescreveSerializerViewSet(viewsets.ModelViewSet):
 
 class ApiPrescreveqtSerializerViewSet(viewsets.ModelViewSet):
     serializer_class = ApiPrescreveqtSerializer
-    authentication_classes = (TokenAuthentication,)
+    # authentication_classes = (TokenAuthentication,)
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'head']
 
@@ -135,7 +135,7 @@ class ApiPrescreveqtSerializerViewSet(viewsets.ModelViewSet):
 
 class ApiRadioterapiaSerializerViewSet(viewsets.ModelViewSet):
     serializer_class = ApiRadioterapiaSerializer
-    authentication_classes = (TokenAuthentication,)
+    # authentication_classes = (TokenAuthentication,)
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'head']
 
