@@ -1,8 +1,7 @@
 from .models import (
     ApiConsulta,
     ApiRadioterapia, 
-    Cadpaciente, 
-    Entrada, 
+    Cadpaciente,
     ApiEntrada,
     ApiEnfevoluc,
     ApiEntradaradio,
@@ -26,25 +25,6 @@ class CadpacienteSerializer(serializers.ModelSerializer):
             'cpf',
         ]
 
-
-class EntradaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Entrada
-        fields = [
-            'codmovimento',
-            'codpaciente',
-            'codconvenio',
-            'matricula',
-            'tipo',
-            'datahoraent',
-            'hist',
-            'codmedico',
-            'total',
-            'fechado',
-            'codamb',
-            'codcid',
-            'usuario',
-        ]
 
 
 class ApiEntradaSerializer(serializers.ModelSerializer):

@@ -6,7 +6,6 @@ from .models import (
     ApiPrescreveqt,
     ApiRadioterapia, 
     Cadpaciente, 
-    Entrada, 
     ApiEntrada,
     ApiEntradaradio,
     ApiPlanejfisicoc,
@@ -19,7 +18,6 @@ from .serializers import (
     ApiEnfEvoluCSerializer,
     ApiPrescreveqtSerializer,
     ApiRadioterapiaSerializer, 
-    EntradaSerializer, 
     CadpacienteSerializer, 
     ApiEntradaSerializer,
     ApiConsultaSerializer,
@@ -27,20 +25,6 @@ from .serializers import (
     ApiPlanejfisicocSerializer,
     ApiPrescreveSerializer,
 )
-
-
-class EntradaSerializerViewSet(viewsets.ModelViewSet):
-    serializer_class = EntradaSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = [permissions.IsAuthenticated]
-    http_method_names = ['get', 'head']
-
-    def get_queryset(self):
-        queryset = Entrada.objects.all().order_by('datahoraent')
-        codmovimento = self.request.query_params.get('codmovimento')
-        if codmovimento is not None:
-            queryset = queryset.filter(codmovimento__exact=codmovimento)
-        return queryset
 
 
 class CadPacienteSerializerViewSet(viewsets.ModelViewSet):
