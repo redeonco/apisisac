@@ -17,7 +17,7 @@ from core.views import (
 router = routers.DefaultRouter()
 router.register(r'api/pacientes', CadPacienteSerializerViewSet)
 router.register(r'api/entrada', ApiEntradaSerializerViewSet, basename='ApiEntrada')
-router.register(r'api/consuta', ApiConsultaSerializerViewSet, basename='ApiConsulta')
+router.register(r'api/consulta', ApiConsultaSerializerViewSet, basename='ApiConsulta')
 router.register(r'api/enfevoluc', ApiEnfEvoluCSerializerViewSet, basename='ApiEnfevoluc')
 router.register(r'api/entradaradio', ApiEntradaRadioSerializerViewSet, basename='ApiEntradaradio')
 router.register(r'api/planejfisicoc', ApiPlanejfisicocSerializerViewSet, basename='ApiPlanejfisicoc')
