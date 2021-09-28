@@ -8,6 +8,8 @@ from .models import (
     ApiPlanejfisicoc,
     ApiPrescreve,
     ApiPrescreveqt,
+    ApiAplicMM_PrescEletiva,
+    ApiAplicMM_PrescQT
 )
 from rest_framework import serializers
 
@@ -186,4 +188,49 @@ class ApiRadioterapiaSerializer(serializers.ModelSerializer):
             'karno',
             'codmed',
             'medico'
+        ]
+
+
+class ApiAplicMM_PrescQTSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApiAplicMM_PrescQT
+        fields = [
+            'idaplic',
+            'ndoc',
+            'npresc',
+            'codpaciente',
+            'paciente',
+            'hora',
+            'codproduto',
+            'descr',
+            'un',
+            'quant',
+            'codenf',
+            'enfermeiro',
+            'datahora',
+            'aplicado',
+            'grupop',
+            'diaquimioterapia'
+        ]
+
+
+class ApiAplicMM_PrescEletivaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ApiAplicMM_PrescEletiva
+        fields = [
+            'idaplic',
+            'ndoc',
+            'grupop',
+            'npresc',
+            'codpaciente',
+            'paciente',
+            'hora',
+            'codproduto',
+            'descr',
+            'un',
+            'quant',
+            'codenf',
+            'enfermeiro',
+            'datahora',
+            'aplicado'
         ]

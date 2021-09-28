@@ -12,6 +12,8 @@ from core.views import (
     ApiPrescreveSerializerViewSet,
     ApiPrescreveqtSerializerViewSet,
     ApiRadioterapiaSerializerViewSet,
+    ApiAplicMM_PrescQTSerializerViewSet,
+    ApiAplicMM_PrescEletivaSerializerViewSet
 )
 
 router = routers.DefaultRouter()
@@ -24,6 +26,8 @@ router.register(r'api/planejfisicoc', ApiPlanejfisicocSerializerViewSet, basenam
 router.register(r'api/prescreve', ApiPrescreveSerializerViewSet, basename='ApiPrescreve')
 router.register(r'api/prescreveqt', ApiPrescreveqtSerializerViewSet, basename='ApiPrescreveqt')
 router.register(r'api/radioterapia', ApiRadioterapiaSerializerViewSet, basename='ApiRadioterapia')
+router.register(r'api/aplicmmprescqt', ApiAplicMM_PrescQTSerializerViewSet, basename='ApiAplicMM_PrescQT')
+router.register(r'api/aplicmmpresceletiva', ApiAplicMM_PrescEletivaSerializerViewSet, basename='ApiAplicMM_PrescEletiva')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

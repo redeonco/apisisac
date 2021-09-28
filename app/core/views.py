@@ -1,6 +1,8 @@
 from django.shortcuts import render
 
 from .models import (
+    ApiAplicMM_PrescEletiva,
+    ApiAplicMM_PrescQT,
     ApiConsulta, 
     ApiEnfevoluc,
     ApiPrescreveqt,
@@ -15,6 +17,8 @@ from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework.authentication import TokenAuthentication
 from .serializers import (
+    ApiAplicMM_PrescEletivaSerializer,
+    ApiAplicMM_PrescQTSerializer,
     ApiEnfEvoluCSerializer,
     ApiPrescreveqtSerializer,
     ApiRadioterapiaSerializer, 
@@ -144,4 +148,32 @@ class ApiRadioterapiaSerializerViewSet(viewsets.ModelViewSet):
         codmovimento = self.request.query_params.get('codpaciente')
         if codmovimento is not None:
             queryset = queryset.filter(codmovimento__exact=codmovimento)
+        return queryset
+
+
+class ApiAplicMM_PrescQTSerializerViewSet(viewsets.ModelViewSet):
+    serializer_class = ApiAplicMM_PrescQTSerializer
+    # authentication_classes = (TokenAuthentication,)
+    permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['get', 'head']
+
+    def get_queryset(self):
+        queryset = ApiAplicMM_PrescQT.objects.all().order_by('npresc')
+        codmovimento = self.request.query_params.get('codpaciente')
+        if codmovimento is not None:
+            queryset = queryset.filter(codpaciente__exact=codmovimento)
+        return queryset
+
+
+class ApiAplicMM_PrescEletivaSerializerViewSet(viewsets.ModelViewSet):
+    serializer_class = ApiAplicMM_PrescEletivaSerializer
+    # authentication_classes = (TokenAuthentication,)
+    permission_classes = [permissions.IsAuthenticated]
+    http_method_names = ['get', 'head']
+
+    def get_queryset(self):
+        queryset = ApiAplicMM_PrescEletiva.objects.all().order_by('npresc')
+        codmovimento = self.request.query_params.get('codpaciente')
+        if codmovimento is not None:
+            queryset = queryset.filter(codpaciente__exact=codmovimento)
         return queryset

@@ -1,10 +1,3 @@
-# This is an auto-generated Django model module.
-# You'll have to do the following manually to clean this up:
-#   * Rearrange models' order
-#   * Make sure each model has one field with primary_key=True
-#   * Make sure each ForeignKey and OneToOneField has `on_delete` set to the desired behavior
-#   * Remove `managed = False` lines if you wish to allow Django to create, modify, and delete the table
-# Feel free to rename the models, but don't rename db_table values or field names.
 from django.db import models
 
 
@@ -211,4 +204,55 @@ class ApiRadioterapia(models.Model):
 
     def __str__(self):
         return self.codpaciente
+
+
+class ApiAplicMM_PrescQT(models.Model):
+    idaplic = models.IntegerField(primary_key=True, db_column='IDAplic')  # Field name made lowercase.
+    ndoc = models.CharField(db_column='NDoc', max_length=11, blank=True, null=True)  # Field name made lowercase.
+    npresc = models.CharField(db_column='NPresc', max_length=11, blank=True, null=True)  # Field name made lowercase.
+    codpaciente = models.CharField(db_column='CodPaciente', max_length=12, blank=True, null=True)  # Field name made lowercase.
+    paciente = models.CharField(db_column='Paciente', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    hora = models.CharField(db_column='Hora', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    codproduto = models.CharField(db_column='CodProduto', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    descr = models.CharField(db_column='Descr', max_length=150, blank=True, null=True)  # Field name made lowercase.
+    un = models.CharField(db_column='Un', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    quant = models.FloatField(db_column='Quant', blank=True, null=True)  # Field name made lowercase.
+    codenf = models.CharField(db_column='CodEnf', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    enfermeiro = models.CharField(db_column='Enfermeiro', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    datahora = models.DateTimeField(db_column='DataHora', blank=True, null=True)  # Field name made lowercase.
+    aplicado = models.CharField(db_column='Aplicado', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    grupop = models.CharField(db_column='GrupoP', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    diaquimioterapia = models.CharField(db_column='DiaQuimioterapia', max_length=10, blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'API_AplicMM_PrescQT'
+
+    def __str__(self):
+        return self.npresc
+
+
+class ApiAplicMM_PrescEletiva(models.Model):
+    idaplic = models.IntegerField(primary_key=True, db_column='IDAplic')  # Field name made lowercase.
+    ndoc = models.CharField(db_column='NDoc', max_length=11, blank=True, null=True)  # Field name made lowercase.
+    npresc = models.CharField(db_column='NPresc', max_length=11, blank=True, null=True)  # Field name made lowercase.
+    grupop = models.CharField(db_column='GrupoP', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    codpaciente = models.CharField(db_column='CodPaciente', max_length=12, blank=True, null=True)  # Field name made lowercase.
+    paciente = models.CharField(db_column='Paciente', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    hora = models.CharField(db_column='Hora', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    codproduto = models.CharField(db_column='CodProduto', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    descr = models.CharField(db_column='Descr', max_length=150, blank=True, null=True)  # Field name made lowercase.
+    un = models.CharField(db_column='Un', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    quant = models.DecimalField(db_column='Quant', max_digits=5, decimal_places=2, blank=True, null=True)  # Field name made lowercase.
+    codenf = models.CharField(db_column='CodEnf', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    enfermeiro = models.CharField(db_column='Enfermeiro', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    datahora = models.DateTimeField(db_column='DataHora', blank=True, null=True)  # Field name made lowercase.
+    aplicado = models.CharField(db_column='Aplicado', max_length=10, blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'API_AplicMM_PrescEletiva'
+
+    def __str__(self):
+        return self.npresc
         
