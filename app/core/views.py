@@ -58,12 +58,13 @@ class ApiConsultaSerializerViewSet(viewsets.ModelViewSet):
     # authentication_classes = (TokenAuthentication,)
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'head']
+# PrimaryKeyRelatedField
 
     def get_queryset(self):
         queryset = ApiConsulta.objects.all().order_by('data')
-        codmovimento = self.request.query_params.get('codmovimento')
-        if codmovimento is not None:
-            queryset = queryset.filter(codmovimento__exact=codmovimento)
+        query = self.request.query_params.get('codmovimento')
+        if query is not None:
+            queryset = queryset.filter(codmovimento__exact=query)
         return queryset
 
 

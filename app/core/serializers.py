@@ -1,3 +1,4 @@
+from rest_framework.relations import PrimaryKeyRelatedField
 from .models import (
     ApiConsulta,
     ApiRadioterapia, 
@@ -28,32 +29,9 @@ class CadpacienteSerializer(serializers.ModelSerializer):
         ]
 
 
-
-class ApiEntradaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ApiEntrada
-        fields = [
-            'codpaciente',
-            'paciente',
-            'codmovimento',
-            'matricula',
-            'tipoatd',
-            'situacao',
-            'datahoraent',
-            'datahorasai',
-            'codconvenio',
-            'convenio',
-            'plano',
-            'codmedico',
-            'medico',
-            'codamb',
-            'procedimento',
-            'hist',
-            'total'
-        ]
-
-
 class ApiConsultaSerializer(serializers.ModelSerializer):
+    # codmovimento = ApiEntradaSerializer(read_only=True)
+
     class Meta:
         model = ApiConsulta
         fields = [
@@ -70,6 +48,32 @@ class ApiConsultaSerializer(serializers.ModelSerializer):
             'numpresc',
             'codmedico',
             'medico'
+        ]
+
+class ApiEntradaSerializer(serializers.ModelSerializer):
+    consultas = ApiConsultaSerializer(source='apiconsulta_set', many=True, read_only=True)
+
+    class Meta:
+        model = ApiEntrada
+        fields = [
+            'codpaciente',
+            'paciente',
+            'codmovimento',
+            'consultas',
+            'matricula',
+            'tipoatd',
+            'situacao',
+            'datahoraent',
+            'datahorasai',
+            'codconvenio',
+            'convenio',
+            'plano',
+            'codmedico',
+            'medico',
+            'codamb',
+            'procedimento',
+            'hist',
+            'total'
         ]
 
 

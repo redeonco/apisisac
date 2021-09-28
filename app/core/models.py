@@ -49,8 +49,8 @@ class ApiEntrada(models.Model):
 class ApiConsulta(models.Model):
     codpaciente = models.CharField(db_column='CodPaciente', max_length=10, blank=True, null=True)  # Field name made lowercase.
     paciente = models.CharField(db_column='Paciente', max_length=200, blank=True, null=True)  # Field name made lowercase.
-    codmovimento = models.CharField(primary_key=True, db_column='CodMovimento', max_length=10)  # Field name made lowercase.
-    # codmovimento = models.ForeignKey(ApiEntrada, db_column='CodMovimento', max_length=10)  # Field name made lowercase.
+    # codmovimento = models.CharField(primary_key=True, db_column='CodMovimento', max_length=10)  # Field name made lowercase.
+    codmovimento = models.ForeignKey(ApiEntrada, db_column='CodMovimento', max_length=10, on_delete=models.PROTECT)  # Field name made lowercase.
     tipo = models.CharField(db_column='Tipo', max_length=50, blank=True, null=True)  # Field name made lowercase.
     codconvenio = models.CharField(db_column='CodConvenio', max_length=6, blank=True, null=True)  # Field name made lowercase.
     convenio = models.CharField(db_column='Convenio', max_length=100, blank=True, null=True)  # Field name made lowercase.
