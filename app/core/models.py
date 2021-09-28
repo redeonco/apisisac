@@ -50,6 +50,7 @@ class ApiConsulta(models.Model):
     codpaciente = models.CharField(db_column='CodPaciente', max_length=10, blank=True, null=True)  # Field name made lowercase.
     paciente = models.CharField(db_column='Paciente', max_length=200, blank=True, null=True)  # Field name made lowercase.
     codmovimento = models.CharField(primary_key=True, db_column='CodMovimento', max_length=10)  # Field name made lowercase.
+    # codmovimento = models.ForeignKey(ApiEntrada, db_column='CodMovimento', max_length=10)  # Field name made lowercase.
     tipo = models.CharField(db_column='Tipo', max_length=50, blank=True, null=True)  # Field name made lowercase.
     codconvenio = models.CharField(db_column='CodConvenio', max_length=6, blank=True, null=True)  # Field name made lowercase.
     convenio = models.CharField(db_column='Convenio', max_length=100, blank=True, null=True)  # Field name made lowercase.
@@ -214,6 +215,8 @@ class ApiAplicMM_PrescQT(models.Model):
     paciente = models.CharField(db_column='Paciente', max_length=200, blank=True, null=True)  # Field name made lowercase.
     hora = models.CharField(db_column='Hora', max_length=5, blank=True, null=True)  # Field name made lowercase.
     codproduto = models.CharField(db_column='CodProduto', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    brasindice = models.CharField(db_column='Brasindice', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    simpro = models.CharField(db_column='Simpro', max_length=20, blank=True, null=True)  # Field name made lowercase.
     descr = models.CharField(db_column='Descr', max_length=150, blank=True, null=True)  # Field name made lowercase.
     un = models.CharField(db_column='Un', max_length=10, blank=True, null=True)  # Field name made lowercase.
     quant = models.FloatField(db_column='Quant', blank=True, null=True)  # Field name made lowercase.
@@ -241,6 +244,8 @@ class ApiAplicMM_PrescEletiva(models.Model):
     paciente = models.CharField(db_column='Paciente', max_length=200, blank=True, null=True)  # Field name made lowercase.
     hora = models.CharField(db_column='Hora', max_length=5, blank=True, null=True)  # Field name made lowercase.
     codproduto = models.CharField(db_column='CodProduto', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    brasindice = models.CharField(db_column='Brasindice', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    simpro = models.CharField(db_column='Simpro', max_length=20, blank=True, null=True)  # Field name made lowercase.
     descr = models.CharField(db_column='Descr', max_length=150, blank=True, null=True)  # Field name made lowercase.
     un = models.CharField(db_column='Un', max_length=10, blank=True, null=True)  # Field name made lowercase.
     quant = models.DecimalField(db_column='Quant', max_digits=5, decimal_places=2, blank=True, null=True)  # Field name made lowercase.
