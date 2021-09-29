@@ -132,9 +132,9 @@ class ApiPrescreveqtSerializerViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = ApiPrescreveqt.objects.all().order_by('data')
-        codmovimento = self.request.query_params.get('codpaciente')
-        if codmovimento is not None:
-            queryset = queryset.filter(codmovimento__exact=codmovimento)
+        numpresc = self.request.query_params.get('numpresc')
+        if numpresc is not None:
+            queryset = queryset.filter(numero__exact=numpresc)
         return queryset
 
 
@@ -146,9 +146,9 @@ class ApiRadioterapiaSerializerViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = ApiRadioterapia.objects.all().order_by('numpresc')
-        codmovimento = self.request.query_params.get('codpaciente')
-        if codmovimento is not None:
-            queryset = queryset.filter(codmovimento__exact=codmovimento)
+        numpresc = self.request.query_params.get('numpresc')
+        if numpresc is not None:
+            queryset = queryset.filter(numpresc__exact=numpresc)
         return queryset
 
 

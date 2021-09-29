@@ -67,12 +67,12 @@ class ApiConsulta(models.Model):
         db_table = 'API_Consulta'
 
     def __str__(self):
-        return self.codmovimento
+        return self.id
 
 
 class ApiEnfevoluc(models.Model):
-    ndoc = models.CharField(db_column='NDoc', max_length=11, blank=True, null=True)  # Field name made lowercase.
-    codpaciente = models.CharField(primary_key=True, db_column='CodPaciente', max_length=11)  # Field name made lowercase.
+    ndoc = models.CharField(db_column='NDoc', max_length=11, primary_key=True)  # Field name made lowercase.
+    codpaciente = models.ForeignKey(ApiEntrada, db_column='CodPaciente', max_length=11, on_delete=models.PROTECT)  # Field name made lowercase.
     paciente = models.CharField(db_column='Paciente', max_length=200, blank=True, null=True)  # Field name made lowercase.
     acomod = models.CharField(db_column='Acomod', max_length=50, blank=True, null=True)  # Field name made lowercase.
     datahoraf = models.DateTimeField(db_column='DataHoraF', blank=True, null=True)  # Field name made lowercase.
@@ -85,57 +85,7 @@ class ApiEnfevoluc(models.Model):
         db_table = 'API_EnfEvoluC'
 
     def __str__(self):
-        return self.codpaciente
-
-
-class ApiEntradaradio(models.Model):
-    identradaradio = models.CharField(primary_key=True, db_column='idEntradaRadio', max_length=10)  # Field name made lowercase.
-    codmovimento = models.CharField(db_column='CodMovimento', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    codpaciente = models.CharField(db_column='CodPaciente', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    paciente = models.CharField(db_column='Paciente', max_length=200, blank=True, null=True)  # Field name made lowercase.
-    numpresc = models.CharField(db_column='NumPresc', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    idplanejfisico = models.CharField(db_column='idPlanejFisico', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    encerrado = models.CharField(db_column='Encerrado', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    observacao = models.CharField(db_column='Observacao', max_length=200, blank=True, null=True)  # Field name made lowercase.
-    usuario = models.CharField(db_column='Usuario', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    datahora = models.DateTimeField(db_column='DataHora', blank=True, null=True)  # Field name made lowercase.
-    nplanejamento = models.IntegerField(db_column='NPlanejamento', blank=True, null=True)  # Field name made lowercase.
-    nomecampo = models.CharField(db_column='NomeCampo', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    incidencia = models.CharField(db_column='Incidencia', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    ncampo = models.IntegerField(db_column='NCampo', blank=True, null=True)  # Field name made lowercase.
-
-    class Meta:
-        managed = False
-        db_table = 'API_EntradaRadio'
-
-    def __str__(self):
-        return self.codmovimento
-
-
-class ApiPlanejfisicoc(models.Model):
-    idplanejfisicoc = models.CharField(primary_key=True, db_column='idPlanejFisicoC', max_length=10)  # Field name made lowercase.
-    codpaciente = models.CharField(db_column='CodPaciente', max_length=11, blank=True, null=True)  # Field name made lowercase.
-    paciente = models.CharField(db_column='Paciente', max_length=200, blank=True, null=True)  # Field name made lowercase.
-    numpresc = models.CharField(db_column='NumPresc', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    aparelho = models.CharField(db_column='Aparelho', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    energia = models.CharField(db_column='Energia', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    dosetotal = models.CharField(db_column='DoseTotal', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    dosediaria = models.CharField(db_column='DoseDiaria', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    naplicacoes = models.IntegerField(db_column='NAplicacoes', blank=True, null=True)  # Field name made lowercase.
-    dosemonitor = models.CharField(db_column='DoseMonitor', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    locanatomica = models.CharField(db_column='LocAnatomica', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    incidencia = models.CharField(db_column='Incidencia', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    ncampo = models.IntegerField(db_column='NCampo', blank=True, null=True)  # Field name made lowercase.
-    portal = models.IntegerField(db_column='Portal', blank=True, null=True)  # Field name made lowercase.
-    tpfeixe = models.CharField(db_column='TpFeixe', max_length=20, blank=True, null=True)  # Field name made lowercase.
-    fase = models.IntegerField(db_column='Fase', blank=True, null=True)  # Field name made lowercase.
-
-    class Meta:
-        managed = False
-        db_table = 'API_PlanejFisicoC'
-
-    def __str__(self):
-        return self.codmovimento
+        return self.ndoc
 
 
 class ApiPrescreve(models.Model):
@@ -159,7 +109,7 @@ class ApiPrescreve(models.Model):
 
 
 class ApiPrescreveqt(models.Model):
-    codpaciente = models.CharField(db_column='CodPaciente', max_length=11, blank=True, null=True)  # Field name made lowercase.
+    codpaciente = models.ForeignKey(ApiEntrada, db_column='CodPaciente', max_length=11, on_delete=models.PROTECT, related_name='prescqt_set')  # Field name made lowercase.
     codpacref = models.CharField(db_column='CodPacRef', max_length=10, blank=True, null=True)  # Field name made lowercase.
     paciente = models.CharField(db_column='Paciente', max_length=200, blank=True, null=True)  # Field name made lowercase.
     codmedico = models.CharField(db_column='CodMedico', max_length=10, blank=True, null=True)  # Field name made lowercase.
@@ -179,7 +129,7 @@ class ApiPrescreveqt(models.Model):
         db_table = 'API_PrescreveQT'
 
     def __str__(self):
-        return self.codpaciente
+        return self.numero
 
 
 class ApiRadioterapia(models.Model):
@@ -204,13 +154,38 @@ class ApiRadioterapia(models.Model):
         db_table = 'API_Radioterapia'
 
     def __str__(self):
-        return self.codpaciente
+        return self.numpresc
+
+
+class ApiEntradaradio(models.Model):
+    identradaradio = models.CharField(primary_key=True, db_column='idEntradaRadio', max_length=10)  # Field name made lowercase.
+    codmovimento = models.CharField(db_column='CodMovimento', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    codpaciente = models.CharField(db_column='CodPaciente', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    paciente = models.CharField(db_column='Paciente', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    numpresc = models.ForeignKey(ApiRadioterapia, db_column='NumPresc', max_length=10, on_delete=models.PROTECT, related_name='numpresc_set')  # Field name made lowercase.
+    idplanejfisico = models.CharField(db_column='idPlanejFisico', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    encerrado = models.CharField(db_column='Encerrado', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    observacao = models.CharField(db_column='Observacao', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    usuario = models.CharField(db_column='Usuario', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    datahora = models.DateTimeField(db_column='DataHora', blank=True, null=True)  # Field name made lowercase.
+    nplanejamento = models.IntegerField(db_column='NPlanejamento', blank=True, null=True)  # Field name made lowercase.
+    nomecampo = models.CharField(db_column='NomeCampo', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    incidencia = models.CharField(db_column='Incidencia', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    ncampo = models.IntegerField(db_column='NCampo', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'API_EntradaRadio'
+
+    def __str__(self):
+        return self.codmovimento
+
 
 
 class ApiAplicMM_PrescQT(models.Model):
     idaplic = models.IntegerField(primary_key=True, db_column='IDAplic')  # Field name made lowercase.
     ndoc = models.CharField(db_column='NDoc', max_length=11, blank=True, null=True)  # Field name made lowercase.
-    npresc = models.CharField(db_column='NPresc', max_length=11, blank=True, null=True)  # Field name made lowercase.
+    npresc = models.ForeignKey(ApiPrescreveqt, db_column='NPresc', max_length=11, on_delete=models.PROTECT, related_name='npresc_set')  # Field name made lowercase.
     codpaciente = models.CharField(db_column='CodPaciente', max_length=12, blank=True, null=True)  # Field name made lowercase.
     paciente = models.CharField(db_column='Paciente', max_length=200, blank=True, null=True)  # Field name made lowercase.
     hora = models.CharField(db_column='Hora', max_length=5, blank=True, null=True)  # Field name made lowercase.
@@ -260,4 +235,29 @@ class ApiAplicMM_PrescEletiva(models.Model):
 
     def __str__(self):
         return self.npresc
-        
+
+
+class ApiPlanejfisicoc(models.Model):
+    idplanejfisicoc = models.CharField(primary_key=True, db_column='idPlanejFisicoC', max_length=10)  # Field name made lowercase.
+    codpaciente = models.CharField(db_column='CodPaciente', max_length=11, blank=True, null=True)  # Field name made lowercase.
+    paciente = models.CharField(db_column='Paciente', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    numpresc = models.ForeignKey(ApiRadioterapia, db_column='NumPresc', max_length=10, on_delete=models.PROTECT, related_name='planej_set')  # Field name made lowercase.
+    aparelho = models.CharField(db_column='Aparelho', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    energia = models.CharField(db_column='Energia', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    dosetotal = models.CharField(db_column='DoseTotal', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    dosediaria = models.CharField(db_column='DoseDiaria', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    naplicacoes = models.IntegerField(db_column='NAplicacoes', blank=True, null=True)  # Field name made lowercase.
+    dosemonitor = models.CharField(db_column='DoseMonitor', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    locanatomica = models.CharField(db_column='LocAnatomica', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    incidencia = models.CharField(db_column='Incidencia', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    ncampo = models.IntegerField(db_column='NCampo', blank=True, null=True)  # Field name made lowercase.
+    portal = models.IntegerField(db_column='Portal', blank=True, null=True)  # Field name made lowercase.
+    tpfeixe = models.CharField(db_column='TpFeixe', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    fase = models.IntegerField(db_column='Fase', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'API_PlanejFisicoC'
+
+    def __str__(self):
+        return self.idplanejfisicoc

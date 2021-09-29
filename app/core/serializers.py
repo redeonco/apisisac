@@ -50,32 +50,6 @@ class ApiConsultaSerializer(serializers.ModelSerializer):
             'medico'
         ]
 
-class ApiEntradaSerializer(serializers.ModelSerializer):
-    consultas = ApiConsultaSerializer(source='apiconsulta_set', many=True, read_only=True)
-
-    class Meta:
-        model = ApiEntrada
-        fields = [
-            'codpaciente',
-            'paciente',
-            'codmovimento',
-            'consultas',
-            'matricula',
-            'tipoatd',
-            'situacao',
-            'datahoraent',
-            'datahorasai',
-            'codconvenio',
-            'convenio',
-            'plano',
-            'codmedico',
-            'medico',
-            'codamb',
-            'procedimento',
-            'hist',
-            'total'
-        ]
-
 
 class ApiEnfEvoluCSerializer(serializers.ModelSerializer):
     class Meta:
@@ -89,27 +63,6 @@ class ApiEnfEvoluCSerializer(serializers.ModelSerializer):
             'codmedico',
             'enfermeiro',
             'texto3'
-        ]
-
-
-class ApiEntradaradioSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ApiEntradaradio
-        fields = [
-            'identradaradio',
-            'codmovimento',
-            'codpaciente',
-            'paciente',
-            'numpresc',
-            'idplanejfisico',
-            'encerrado',
-            'observacao',
-            'usuario',
-            'datahora',
-            'nplanejamento',
-            'nomecampo',
-            'incidencia',
-            'ncampo'
         ]
 
 
@@ -151,29 +104,31 @@ class ApiPrescreveSerializer(serializers.ModelSerializer):
         ]
 
 
-class ApiPrescreveqtSerializer(serializers.ModelSerializer):
+class ApiEntradaradioSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ApiPrescreveqt
+        model = ApiEntradaradio
         fields = [
+            'identradaradio',
+            'codmovimento',
             'codpaciente',
-            'codpacref',
             'paciente',
-            'codmedico',
-            'medico',
-            'data',
-            'numero',
-            'texto',
-            'obs',
-            'texto',
-            'peso',
-            'supcorp',
-            'protocolo',
-            'nciclo',
-            'aplicado'
+            'numpresc',
+            'idplanejfisico',
+            'encerrado',
+            'observacao',
+            'usuario',
+            'datahora',
+            'nplanejamento',
+            'nomecampo',
+            'incidencia',
+            'ncampo'
         ]
 
 
 class ApiRadioterapiaSerializer(serializers.ModelSerializer):
+    sessoes = ApiEntradaradioSerializer(source='numpresc_set', many=True, read_only=True)
+    planejamento = ApiPlanejfisicocSerializer(source='planej_set', many=True, read_only=True)
+
     class Meta:
         model = ApiRadioterapia
         fields = [
@@ -191,7 +146,9 @@ class ApiRadioterapiaSerializer(serializers.ModelSerializer):
             'naplicacoes',
             'karno',
             'codmed',
-            'medico'
+            'medico',
+            'planejamento',
+            'sessoes',
         ]
 
 
@@ -241,4 +198,61 @@ class ApiAplicMM_PrescEletivaSerializer(serializers.ModelSerializer):
             'enfermeiro',
             'datahora',
             'aplicado'
+        ]
+
+
+
+class ApiPrescreveqtSerializer(serializers.ModelSerializer):
+    gasto = ApiAplicMM_PrescQTSerializer(source='npresc_set', many=True, read_only=True)
+
+    class Meta:
+        model = ApiPrescreveqt
+        fields = [
+            'numero',
+            'data',
+            'codpaciente',
+            'codpacref',
+            'paciente',
+            'codmedico',
+            'medico',
+            'texto',
+            'obs',
+            'texto',
+            'peso',
+            'supcorp',
+            'protocolo',
+            'nciclo',
+            'aplicado',
+            'gasto',
+        ]        
+
+
+class ApiEntradaSerializer(serializers.ModelSerializer):
+    consultorio = ApiConsultaSerializer(source='apiconsulta_set', many=True, read_only=True)
+    evolucoes = ApiEnfEvoluCSerializer(source='apienfevoluc_set', many=True, read_only=True)
+    prescqt = ApiPrescreveqtSerializer(source='prescqt_set', many=True, read_only=True)
+
+    class Meta:
+        model = ApiEntrada
+        fields = [
+            'codpaciente',
+            'paciente',
+            'codmovimento',
+            'matricula',
+            'tipoatd',
+            'situacao',
+            'datahoraent',
+            'datahorasai',
+            'codconvenio',
+            'convenio',
+            'plano',
+            'codmedico',
+            'medico',
+            'codamb',
+            'procedimento',
+            'hist',
+            'total',
+            'consultorio',
+            'prescqt',
+            'evolucoes',
         ]
