@@ -1,4 +1,3 @@
-from app.core.views import CadPacienteSerializerViewSet2
 from django.contrib import admin
 from django.urls import path, include, re_path
 from django.conf.urls import url
@@ -14,7 +13,8 @@ from core.views import (
     ApiPrescreveqtSerializerViewSet,
     ApiRadioterapiaSerializerViewSet,
     ApiAplicMM_PrescQTSerializerViewSet,
-    ApiAplicMM_PrescEletivaSerializerViewSet
+    ApiAplicMM_PrescEletivaSerializerViewSet,
+    CadPacienteSerializerViewSet2
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
