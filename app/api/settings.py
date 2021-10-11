@@ -40,6 +40,7 @@ ALLOWED_HOSTS.extend(
 
 INSTALLED_APPS = [
     'core',
+    'mosaiq_app',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
@@ -100,6 +101,20 @@ DATABASES = {
             'ssl': False
             },
     },
+    'mosaiq': {
+        'ENGINE': 'sql_server.pyodbc',
+        'NAME': config('DB_MOSAIQ_NAME'),
+        'USER': config('DB_MOSAIQ_USER'),
+        'PASSWORD': config('DB_MOSAIQ_PASSWORD'),
+        'HOST': config('DB_MOSAIQ_HOST'),
+        'PORT': config('DB_MOSAIQ_PORT'),
+        'HOST_IS_SERVER': True,
+
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+            'ssl': False
+            },
+    },
 }
 
 REST_FRAMEWORK = {
@@ -107,6 +122,8 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 30,
     'DATETIME_FORMAT': "%d/%m/%Y - %H:%M:%S",
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
 }
@@ -155,3 +172,5 @@ MEDIA_URL = '/media/'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+DATABASE_ROUTERS = ['api.DBRoutes.DBRoutes'] 

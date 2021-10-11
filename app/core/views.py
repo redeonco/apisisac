@@ -34,7 +34,7 @@ from .serializers import (
 class CadPacienteSerializerViewSet(viewsets.ModelViewSet):
     queryset = Cadpaciente.objects.all().order_by('codpaciente')
     serializer_class = CadpacienteSerializer
-    authentication_classes = (TokenAuthentication,)
+    # authentication_classes = (TokenAuthentication,)
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'head']
 

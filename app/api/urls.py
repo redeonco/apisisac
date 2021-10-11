@@ -13,8 +13,7 @@ from core.views import (
     ApiPrescreveqtSerializerViewSet,
     ApiRadioterapiaSerializerViewSet,
     ApiAplicMM_PrescQTSerializerViewSet,
-    ApiAplicMM_PrescEletivaSerializerViewSet,
-    CadPacienteSerializerViewSet2
+    ApiAplicMM_PrescEletivaSerializerViewSet
 )
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -23,7 +22,6 @@ from rest_framework_simplejwt.views import (
 
 router = routers.DefaultRouter()
 router.register(r'api/pacientes', CadPacienteSerializerViewSet)
-router.register(r'api/pacientes2', CadPacienteSerializerViewSet2)
 router.register(r'api/entrada', ApiEntradaSerializerViewSet, basename='ApiEntrada')
 router.register(r'api/consulta', ApiConsultaSerializerViewSet, basename='ApiConsulta')
 router.register(r'api/enfevoluc', ApiEnfEvoluCSerializerViewSet, basename='ApiEnfevoluc')
