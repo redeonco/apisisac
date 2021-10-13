@@ -278,3 +278,96 @@ class Agenda(models.Model):
 
     def __str__(self):
         return str(self.idagenda)
+
+
+class Entrada(models.Model):
+    codpaciente = models.CharField(db_column='CodPaciente', max_length=10, blank=True, null=True)
+    codmovimento = models.CharField(db_column='CodMovimento', primary_key=True, max_length=10)
+    tipo = models.CharField(db_column='Tipo', max_length=25, blank=True, null=True) 
+    fechado = models.CharField(db_column='Fechado', max_length=20, blank=True, null=True) 
+    datahoraent = models.DateTimeField(db_column='DataHoraEnt', blank=True, null=True)
+    datasist = models.DateTimeField(db_column='DataSist', blank=True, null=True)
+    local = models.CharField(db_column='Local', max_length=20, blank=True, null=True)
+    usuario = models.CharField(db_column='Usuario', max_length=20, blank=True, null=True)
+    codconvenio = models.CharField(db_column='CodConvenio', max_length=6, blank=True, null=True)
+    plano = models.CharField(db_column='Plano', max_length=6, blank=True, null=True)
+    codmedico = models.CharField(db_column='CodMedico', max_length=6, blank=True, null=True)
+    hist = models.CharField(db_column='Hist', max_length=200, blank=True, null=True) 
+    total = models.FloatField(db_column='Total', blank=True, null=True) 
+    grupoemp = models.CharField(db_column='GrupoEmp', max_length=2, blank=True, null=True) 
+    filial = models.CharField(db_column='Filial', max_length=2, blank=True, null=True) 
+
+    class Meta:
+        managed = False
+        db_table = 'Entrada'
+
+    def __str__(self):
+        return self.codmovimento
+
+
+class Planejfisico(models.Model):
+    idplanejfisico = models.CharField(primary_key=True, db_column='idPlanejFisico', max_length=10)  # Field name made lowercase.
+    codpaciente = models.CharField(db_column='CodPaciente', max_length=11, blank=True, null=True)  # Field name made lowercase.
+    numpresc = models.ForeignKey(ApiRadioterapia, db_column='NumPresc', max_length=10, on_delete=models.PROTECT, related_name='planej_set')  # Field name made lowercase.
+    incidencia = models.CharField(db_column='Incidencia', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    nomecampo = models.CharField(db_column='NomeCampo', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    nplanejamento = models.IntegerField(db_column='NPlanejamento', blank=True, null=True)  # Field name made lowercase.
+    ntratamento = models.IntegerField(db_column='NTratamento', blank=True, null=True)  # Field name made lowercase.
+    ncampo = models.IntegerField(db_column='NCampo', blank=True, null=True)  # Field name made lowercase.
+    fase = models.IntegerField(db_column='Fase', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'PlanejFisico'
+
+    def __str__(self):
+        return self.idplanejfisicoc
+
+
+class Radioterapia(models.Model):
+    numpresc = models.CharField(primary_key=True, db_column='NumPresc', max_length=10)  # Field name made lowercase.
+    codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', max_length=11, on_delete=models.PROTECT)
+    codcidp = models.CharField(db_column='CodCidP', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    estadio = models.CharField(db_column='Estadio', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    finalidade = models.CharField(db_column='Finalidade', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    intencaoradical = models.BooleanField(db_column='IntencaoRadical', blank=True, null=True)  # Field name made lowercase.
+    intencaopaliativa = models.BooleanField(db_column='IntencaoPaliativa', blank=True, null=True)  # Field name made lowercase.
+    tipot = models.CharField(db_column='TipoT', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    tipon = models.CharField(db_column='TipoN', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    tipom = models.CharField(db_column='TipoM', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    naplicacoes = models.IntegerField(db_column='NAplicacoes', blank=True, null=True)  # Field name made lowercase.
+    karno = models.CharField(db_column='Karno', max_length=5, blank=True, null=True)  # Field name made lowercase.
+    codmed = models.CharField(db_column='CodMed', max_length=10, blank=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = 'Radioterapia'
+
+    def __str__(self):
+        return str(self.numpresc)
+
+
+class Entradaradio(models.Model):
+    codmovimento = models.CharField(db_column='CodMovimento', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    codpaciente = models.CharField(db_column='CodPaciente', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    numpresc = models.ForeignKey(Radioterapia, db_column='NumPresc', max_length=10, on_delete=models.PROTECT, related_name='numpresc_set')  # Field name made lowercase.
+    idplanejfisico = models.CharField(db_column='idPlanejFisico', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    encerrado = models.CharField(db_column='Encerrado', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    observacao = models.CharField(db_column='Observacao', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    usuario = models.CharField(db_column='Usuario', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    datahora = models.DateTimeField(db_column='DataHora', blank=True, null=True)  # Field name made lowercase.
+    datasist = models.DateTimeField(db_column='DataSist', blank=True, null=True)  # Field name made lowercase.
+    nplanejamento = models.IntegerField(db_column='NPlanejamento', blank=True, null=True)  # Field name made lowercase.
+    nomecampo = models.CharField(db_column='NomeCampo', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    incidencia = models.CharField(db_column='Incidencia', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    grupoemp = models.CharField(db_column='GrupoEmp', max_length=2, blank=True, null=True)  # Field name made lowercase.
+    filial = models.CharField(db_column='Filial', max_length=2, blank=True, null=True)  # Field name made lowercase.
+    ntratamento = models.IntegerField(db_column='NTratamento', blank=True, null=True)  # Field name made lowercase.
+    ncampo = models.IntegerField(db_column='NCampo', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'EntradaRadio'
+
+    def __str__(self):
+        return self.codmovimento
