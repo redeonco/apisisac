@@ -264,13 +264,13 @@ class ApiPlanejfisicoc(models.Model):
 
 
 class Agenda(models.Model):
-    idagenda = models.IntegerField(primary_key=True, db_column='IDAgenda', max_length=10)  # Field name made lowercase.
+    idagenda = models.IntegerField(primary_key=True, db_column='IDAgenda')  # Field name made lowercase.
     datahora = models.DateTimeField(db_column='DataHora')  # Field name made lowercase.
     codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', on_delete=models.PROTECT)  # Field name made lowercase.
     nome = models.CharField(db_column='Nome', max_length=10)  # Field name made lowercase.
     confatd = models.CharField(db_column='ConfAtd', max_length=2, blank=True, null=True)  # Field name made lowercase.
     codmovimento = models.CharField(db_column='CodMovimento', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    usuario = models.CharField(db_column='Usuario', max_length='100', blank=True, null=True)
+    usuario = models.CharField(db_column='Usuario', max_length=100, blank=True, null=True)
 
     class Meta:
         managed = False

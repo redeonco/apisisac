@@ -32,6 +32,10 @@ RUN apt-get update -yqq \
     && sed -i 's,^\(CipherString[ ]*=\).*,\1'DEFAULT@SECLEVEL=1',g' /etc/ssl/openssl.cnf\
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update \
+      && apt-get install -y redis-server
+EXPOSE 6379
+
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
     apt-get install -y unixodbc && \

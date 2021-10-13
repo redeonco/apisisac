@@ -16,7 +16,7 @@ class Patient(models.Model):
 
 
 class Schedule(models.Model):
-    id_agenda = models.IntegerField(primary_key=True, db_column='Sch_Id', max_length=250)
+    id_agenda = models.IntegerField(primary_key=True, db_column='Sch_Id')
     dataagenda = models.DateTimeField(db_column='App_DtTm', blank=True, null=True)
     id_paciente = models.ForeignKey(Patient, db_column='Pat_ID1', blank=True, null=True, max_length=250, on_delete=models.PROTECT)
     status = models.CharField(db_column='SchStatus_Hist_SD', blank=True, null=True, max_length=250)
