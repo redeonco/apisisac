@@ -3,21 +3,31 @@ from mosaiq_app.models import *
 from core.models import Agenda, Cadpaciente, Entrada, Entradaradio, Planejfisico, Radioterapia
 from datetime import datetime, date
 from django.db.models import Q
+from django.core.mail import send_mail
 
 
 @shared_task
-def add(x, y):
-    return x + y
-
+def sendmail(lista, qtdconfirmado, data):
+    send_mail(
+        'Núcleo de Sistemas - Relatório API - SISAC',
+        'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa Atualiza Agenda, em ' + data.strftime("%d/%m/%Y às %H:%M:%S") +
+        '. \nQuantidade de pacientes confirmados na agenda do SISAC: ' + str(qtdconfirmado) + 
+        '. \nPacientes não confirmados: ' + str(lista) + 
+        '. \nVerificar se os pacientes realizaram tratamento na máquina.',
+        'chamado@oncoradium.com.br',
+        ['tony.carvalho@oncoradium.com.br'],
+        fail_silently=False,
+    )
 
 @shared_task
-def mul(x, y):
-    return x * y
-
-
-@shared_task
-def xsum(numbers):
-    return sum(numbers)
+def mailtest():
+    send_mail(
+        'Núcleo de Sistemas - Relatório API - SISAC',
+        'Teste',
+        'chamado@oncoradium.com.br',
+        ['tony.carvalho@oncoradium.com.br'],
+        fail_silently=False,
+    )
 
 
 @shared_task
@@ -106,6 +116,7 @@ def atualizaagenda():
                 agenda_sisac.confatd = 'S'
                 agenda_sisac.usuario = 'API'
                 agenda_sisac.codmovimento = novo_codmov
+                agenda_sisac.datasist = datetime.now()
                 agenda_sisac.save()
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Paciente confirmado.')
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iteração concluída para o paciente', codpac_sisac)
@@ -125,5 +136,9 @@ def atualizaagenda():
         cpf_paciente = obj.id_paciente.cpf
         codpac_sisac = Cadpaciente.objects.filter(cpf=cpf_paciente).first()
         list.append(codpac_sisac.paciente)
+
+    print(str(len(list)), 'paciente(s) não confirmado(s):', str(list), ' Verifique se houve tratamento realizado para o(s) paciente(s) informado(s) em', date.today().strftime("%d/%m/%Y") + '.')
+
+    sendmail(list, i, datetime.now())
 
     

@@ -271,6 +271,7 @@ class Agenda(models.Model):
     confatd = models.CharField(db_column='ConfAtd', max_length=2, blank=True, null=True)  # Field name made lowercase.
     codmovimento = models.CharField(db_column='CodMovimento', max_length=50, blank=True, null=True)  # Field name made lowercase.
     usuario = models.CharField(db_column='Usuario', max_length=100, blank=True, null=True)
+    datasist = models.DateTimeField(db_column='DataSist') 
 
     class Meta:
         managed = False
