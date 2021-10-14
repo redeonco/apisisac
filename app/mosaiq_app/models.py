@@ -5,6 +5,7 @@ class Patient(models.Model):
     id_paciente = models.CharField(primary_key=True, db_column='Pat_ID1', max_length=250)
     firstname = models.CharField(db_column='First_Name', blank=True, null=True, max_length=250)
     lastname = models.CharField(db_column='Last_Name', blank=True, null=True, max_length=250)
+    cpf = models.CharField(db_column='SS_Number', blank=True, null=True, max_length=11)
     datanasc = models.DateTimeField(db_column='Birth_DtTm', blank=True, null=True)
 
     class Meta:
@@ -20,6 +21,7 @@ class Schedule(models.Model):
     dataagenda = models.DateTimeField(db_column='App_DtTm', blank=True, null=True)
     id_paciente = models.ForeignKey(Patient, db_column='Pat_ID1', blank=True, null=True, max_length=250, on_delete=models.PROTECT)
     status = models.CharField(db_column='SchStatus_Hist_SD', blank=True, null=True, max_length=250)
+    suppressed = models.CharField(db_column='Suppressed', blank=True, null=True, max_length=2)
 
     class Meta:
         managed = False

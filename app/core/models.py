@@ -321,7 +321,7 @@ class Planejfisico(models.Model):
         db_table = 'PlanejFisico'
 
     def __str__(self):
-        return self.idplanejfisicoc
+        return str(self.idplanejfisico)
 
 
 class Radioterapia(models.Model):
