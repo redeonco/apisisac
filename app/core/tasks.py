@@ -34,7 +34,7 @@ def atualizaagenda():
     horainicial = datetime.now()
 
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Consultando agenda MOSAIQ...')
-    query_mosaiq = Schedule.objects.filter(dataagenda__year=date.today().year, dataagenda__month=date.today().month, dataagenda__day='13').filter(status=' C')
+    query_mosaiq = Schedule.objects.filter(dataagenda__year=date.today().year, dataagenda__month=date.today().month, dataagenda__day=date.today().day).filter(status=' C')
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Consulta concluída com sucesso.')
 
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iniciando iteração no resultado da consulta...')
@@ -118,7 +118,7 @@ def atualizaagenda():
     tempodecorrido = horafinal - horainicial
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Tempo total decorrido:', tempodecorrido)
 
-    query_mosaiq2 = Schedule.objects.filter(dataagenda__year=date.today().year, dataagenda__month=date.today().month, dataagenda__day='13').filter(~Q(status=' C')).filter(~Q(suppressed='1'))
+    query_mosaiq2 = Schedule.objects.filter(dataagenda__year=date.today().year, dataagenda__month=date.today().month, dataagenda__day=date.today().day).filter(~Q(status=' C')).filter(~Q(suppressed='1'))
 
     list = []
     for obj in query_mosaiq2.iterator():
