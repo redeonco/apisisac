@@ -126,4 +126,4 @@ def atualizaagenda():
         codpac_sisac = Cadpaciente.objects.filter(cpf=cpf_paciente).first()
         list.append(codpac_sisac.paciente)
 
-    print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Pacientes não confirmados:', list, 'Verificar se pacientes realizaram tratamento no dia', date.today().strftime("%d/%m/%Y") + '.')
+    
