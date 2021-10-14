@@ -7,3 +7,7 @@ venv/
 *.pyc
 media
 /data
+*.bak
+*.data
+*.pid
+*.dir

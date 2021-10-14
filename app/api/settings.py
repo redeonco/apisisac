@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'core',
     'mosaiq_app',
     'django_celery_results',
+    'django_celery_beat',
     'rest_framework',
     'rest_framework.authtoken',
     'rest_framework_simplejwt',
@@ -189,6 +190,8 @@ CELERY_RESULT_BACKEND = 'django-db'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'America/Sao_Paulo'
+DJANGO_CELERY_BEAT_TZ_AWARE = False
 
 EMAIL_HOST = 'smtp-cluster.idc2.mandic.com.br'
 EMAIL_PORT = '587'

@@ -40,6 +40,7 @@ RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
     apt-get install -y unixodbc && \
     /py/bin/pip install -r requirements.txt && \
+    /py/bin/pip install django-celery-beat && \
     adduser --disabled-password --no-create-home app && \
     mkdir -p /vol/web/static && \
     mkdir -p /vol/web/media && \
