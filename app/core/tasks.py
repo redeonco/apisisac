@@ -7,7 +7,17 @@ from django.core.mail import send_mail
 
 
 @shared_task
-def sendmail(lista, qtdconfirmado, data):
+def sendmail(qtdconfirmado, data):
+    send_mail(
+        'Núcleo de Sistemas - Relatório API - SISAC',
+        'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa Atualiza Agenda, em ' + data.strftime("%d/%m/%Y às %H:%M:%S") +
+        '. \nQuantidade de pacientes confirmados na agenda do SISAC: ' + str(qtdconfirmado) + '.',
+        'chamado@oncoradium.com.br',
+        ['tony.carvalho@oncoradium.com.br'],
+        fail_silently=False,
+    )
+@shared_task
+def sendmail_lista(lista, qtdconfirmado, data):
     send_mail(
         'Núcleo de Sistemas - Relatório API - SISAC',
         'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa Atualiza Agenda, em ' + data.strftime("%d/%m/%Y às %H:%M:%S") +
@@ -29,9 +39,18 @@ def mailtest():
         fail_silently=False,
     )
 
-
+# Tarefa para atualizar a agenda de tratamento da radioterapia do SISAC comparando com a agenda de tratamento do MOSAIQ
+# A tarefa olha para a agenda do MOSAIQ quais pacientes estão marcados como Completed
+# Para cada paciente marcado como Completed, a tarefa realiza iterações no banco de dados SISAC
+# Gerando registros na tabela Entrada, EntradaRadio e Agenda
+# Confirmando na agenda de radioterapia do SISAC os pacientes tratados no MOSAIQ
 @shared_task
 def atualizaagenda():
+    # Função que realiza incremento da sequencial no código de movimento do paciente.
+    # Código de movimento é o registro de atividade do paciente dentro do SISAC
+    # Onde os 6 primeiros dígitos compõem o número do prontuário,
+    # E o final, separado por um ponto(.), é a sequência do registro.
+    # Exemplo: Se a função receber o parâmetro '006049.10', retornará '006049.11'.
     def addcodmovimento(codmovimento):
         cut = codmovimento.split('.')
         seqadd = int(cut[1]) + 1
@@ -41,28 +60,51 @@ def atualizaagenda():
 
         return codfinal
     
+    # Marca a hora de início da tarefa
     horainicial = datetime.now()
 
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Consultando agenda MOSAIQ...')
-    query_mosaiq = Schedule.objects.filter(dataagenda__year=date.today().year, dataagenda__month=date.today().month, dataagenda__day='15').filter(status=' C')
+    
+    # Consulta na tabela Schedule do MOSAIQ pacientes agendados para hoje com status 'C' Completed (significa que realizaram tratamento)
+    query_mosaiq = Schedule.objects.filter(dataagenda__year=date.today().year, dataagenda__month=date.today().month, 
+                                            dataagenda__day='15').filter(status=' C')
+    
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Consulta concluída com sucesso.')
-
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iniciando iteração no resultado da consulta...')
+
+    #Inicia contador do número de iterações
     i = 0
+
+    # Inicia iterações para cada resultado obtido pela consulta anterior
     for obj in query_mosaiq.iterator():
         print('---------------------------------------------')
+
+        # Guarda o CPF e a Data do Agendamento coletados no MOSAIQ para buscar correspondência no banco de dados SISAC
         cpf_paciente = obj.id_paciente.cpf
         dataagenda_mosaiq = obj.dataagenda
 
+        # Busca um paciente no cadastro do SISAC que contenha o mesmo CPF do cadastro no MOSAIQ
         codpac_sisac = Cadpaciente.objects.filter(cpf=cpf_paciente).first()
+
+        # Verifica se o resultado da busca pelo CPF é válido. Se válido, inicia próxima etapa.
         if codpac_sisac is not None:     
-            print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iniciando execuções para o paciente', codpac_sisac)       
+            print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iniciando execuções para o paciente', codpac_sisac)   
+
+            # Verifica qual último código de movimento do paciente na tabela Entrada do SISAC,
+            # Em seguida chama a função addcodmovimento para incrementar a sequência.
+            # O resultado do incremento é utilizado posteriormente para gerar novos registros nas tabelas do SISAC.    
             ultimo_codmov = Entrada.objects.filter(codpaciente=codpac_sisac.pk).order_by('datahoraent').last()
             novo_codmov = addcodmovimento(str(ultimo_codmov))
 
-            agenda_sisac = Agenda.objects.filter(codpaciente=codpac_sisac).filter(datahora__year=date.today().year, datahora__month=date.today().month, datahora__day='15').filter(tipo='RAD').first()
+            # Verifica na tabela Agenda do SISAC algum agendamento de radioterapia para o paciente na data de hoje.
+            agenda_sisac = Agenda.objects.filter(codpaciente=codpac_sisac).filter(datahora__year=date.today().year, 
+                                            datahora__month=date.today().month, datahora__day='15').filter(tipo='RAD').first()
+
+            # Verifica se o resultado da busca na agenda é válido. Se válido, inicia próxima etapa.
             if agenda_sisac is not None:
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Gerando registro na tabela entrada...')
+
+                # Gera registro de sessão de radioterapia na tabela entrada.
                 entrada = Entrada()
                 entrada.codpaciente = codpac_sisac.pk
                 entrada.codmovimento = novo_codmov
@@ -93,12 +135,12 @@ def atualizaagenda():
                 # Verifica número de aplicações de radioterapia para a fase 1
                 naplicfase1 = Planejfisicoc.objects.filter(numpresc=prescricao).order_by('fase').first().naplicacoes
 
-                # Define número de aplicações da fase 2 SE HOUVER fase 2
+                # Se houver fase 2, define número de aplicações da fase 2
                 if Planejfisicoc.objects.filter(numpresc=prescricao).order_by('fase').last().fase > 1:
                     naplicfase2 = Planejfisicoc.objects.filter(numpresc=prescricao).order_by('fase').last().naplicacoes
                 
                 # Define fase atual baseado na quantidade de sessões realizadas. 
-                # Se quantidade realizada for menor que total de aplicações da Fase 1, então Fase = 
+                # Se quantidade realizada for menor que total de aplicações da Fase 1, então Fase = 1
                 # Se quantidade realizada for maior ou igual ao total de aplicações da Fase 1, então Fase = 2
                 if sessoesrealizadas < naplicfase1:
                     fase = Planejfisicoc.objects.filter(numpresc=prescricao).order_by('fase').first().fase        
@@ -112,6 +154,11 @@ def atualizaagenda():
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iniciando iteração no resultado da busca...')
                 n = 0
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Gerando registros na tabela EntradaRadio...')
+
+                # Inicia iterações sobre o resultado da consulta na tabela PlanejFisico.
+                # O planejamento contém detalhes técnicos de cada um dos campos que paciente irá realizar.
+                # Para cada campo encontrado no planejamento, a interação irá gerar um registro na tabela EntradaRadio,
+                # Referênciando os detalhes técnicos presentes no planejamento e na prescrição médica.
                 for planej in planejamento.iterator():
                     entradaradio = Entradaradio()
                     entradaradio.codmovimento = novo_codmov
@@ -135,6 +182,10 @@ def atualizaagenda():
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', n, 'registro(s) gerado(s) na tabela EntradaRadio.')
 
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Confirmando paciente na tabela Agenda Radioterapia...')
+
+                # Todas as etapas acima realizadas, finalmente acessa o agendamento de radioterapia localizada no início da tarefa,
+                # Marca como confirmado, atribuindo 'S' na coluna ConfAtd e inserindo o código de movimento gerado pela função addcodmovimento,
+                # Que faz referência o histórico gerado para o paciente nas etapas anteriores.
                 agenda_sisac.confatd = 'S'
                 agenda_sisac.usuario = 'API'
                 agenda_sisac.codmovimento = novo_codmov
@@ -147,18 +198,30 @@ def atualizaagenda():
     print('---------------------------------------------')
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Atualização da agenda concluída com sucesso.', i, 'pacientes foram confirmados na agenda de tratamento de radioterapia SISAC.')
 
+    # Marca a hora final e calcula tempo total decorrido.
     horafinal = datetime.now()
     tempodecorrido = horafinal - horainicial
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Tempo total decorrido:', tempodecorrido)
 
-    query_sisac2 = Agenda.objects.filter(datahora__year=date.today().year, datahora__month=date.today().month, datahora__day='15').filter(~Q(confatd='S')).filter(tipo='RAD')
+    # Consulta na agenda de radioterapia do SISAC se possui algum paciente que não foi confirmado
+    query_sisac2 = Agenda.objects.filter(datahora__year=date.today().year, datahora__month=date.today().month, 
+                                            datahora__day='15').filter(~Q(confatd='S')).filter(tipo='RAD')
 
+    # Se houver algum paciente não confirmado,
+    # Itera sobre o resultado, adicionando os pacientes não tratados em uma lista    
     list = []
-    for obj in query_sisac2.iterator():
-        list.append(str(obj.codpaciente_id) + ' - ' + str(obj.codpaciente))
+    if query_sisac2 is not None:
+        for obj in query_sisac2.iterator():
+            list.append(str(obj.codpaciente_id) + ' - ' + str(obj.codpaciente))
+        print(str(len(list)), 'paciente(s) não confirmado(s):', str(list), ' Verifique se houve tratamento realizado para o(s) paciente(s) informado(s) em', date.today().strftime("%d/%m/%Y") + '.')
 
-    print(str(len(list)), 'paciente(s) não confirmado(s):', str(list), ' Verifique se houve tratamento realizado para o(s) paciente(s) informado(s) em', date.today().strftime("%d/%m/%Y") + '.')
-
-    sendmail(list, i, datetime.now())
+    # Se houver paciente não confirmado na agenda do SISAC, chama a função sendmail_lista,
+    # Que enviará email de relatório contendo a quantidade de pacientes tratados e a lista de pacientes não confirmados.
+    # Se todos os pacientes foram confirmados, chama a função sendmail,
+    # Que enviará email de relatório contendo a quantidade de pacientes tratados.
+    if len(list) > 0:
+        sendmail_lista(list, i, datetime.now())
+    else:
+        sendmail(i, datetime.now())
 
     
