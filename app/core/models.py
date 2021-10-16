@@ -272,6 +272,7 @@ class Agenda(models.Model):
     codmovimento = models.CharField(db_column='CodMovimento', max_length=50, blank=True, null=True)  # Field name made lowercase.
     usuario = models.CharField(db_column='Usuario', max_length=100, blank=True, null=True)
     datasist = models.DateTimeField(db_column='DataSist') 
+    tipo = models.CharField(db_column='Tipo')
 
     class Meta:
         managed = False
@@ -372,3 +373,29 @@ class Entradaradio(models.Model):
 
     def __str__(self):
         return self.codmovimento
+
+
+class Planejfisicoc(models.Model):
+    idplanejfisicoc = models.CharField(primary_key=True, db_column='idPlanejFisicoC', max_length=10)  # Field name made lowercase.
+    codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', max_length=11, on_delete=models.PROTECT)  # Field name made lowercase.
+    numpresc = models.ForeignKey(Radioterapia, db_column='NumPresc', max_length=10, on_delete=models.PROTECT)  # Field name made lowercase.
+    energia = models.CharField(db_column='Energia', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    dtt = models.CharField(db_column='DTT', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    dtd = models.CharField(db_column='DTD', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    naplicacoes = models.IntegerField(db_column='NAplicacoes', blank=True, null=True)  # Field name made lowercase.
+    dosemonitor = models.CharField(db_column='DoseMonitor', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    datasist = models.DateTimeField(db_column='DataSist')
+    ativo = models.CharField(db_column='Ativo')
+    nplanejamento = models.IntegerField(db_column='NPlanejamento', blank=True, null=True)  # Field name made lowercase.
+    ntratamento = models.IntegerField(db_column='NTratamento', blank=True, null=True)  # Field name made lowercase.
+    locanatomica = models.CharField(db_column='LocAnatomica')
+    ncampo = models.IntegerField(db_column='NCampo', blank=True, null=True)  # Field name made lowercase.
+    iniciotrat = models.IntegerField(db_column='InicioTrat', blank=True, null=True)  # Field name made lowercase.
+    fase = models.IntegerField(db_column='Fase', blank=True, null=True)  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'PlanejFisicoC'
+
+    def __str__(self):
+        return str(self.idplanejfisicoc)
