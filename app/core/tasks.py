@@ -67,7 +67,7 @@ def atualizaagenda():
     
     # Consulta na tabela Schedule do MOSAIQ pacientes agendados para hoje com status 'C' Completed (significa que realizaram tratamento)
     query_mosaiq = Schedule.objects.filter(dataagenda__year=date.today().year, dataagenda__month=date.today().month, 
-                                            dataagenda__day='15').filter(status=' C')
+                                            dataagenda__day=date.today().day).filter(status=' C')
     
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Consulta concluída com sucesso.')
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iniciando iteração no resultado da consulta...')
@@ -98,7 +98,7 @@ def atualizaagenda():
 
             # Verifica na tabela Agenda do SISAC algum agendamento de radioterapia para o paciente na data de hoje.
             agenda_sisac = Agenda.objects.filter(codpaciente=codpac_sisac).filter(datahora__year=date.today().year, 
-                                            datahora__month=date.today().month, datahora__day='15').filter(tipo='RAD').first()
+                                            datahora__month=date.today().month, datahora__day=date.today().day).filter(tipo='RAD').first()
 
             # Verifica se o resultado da busca na agenda é válido. Se válido, inicia próxima etapa.
             if agenda_sisac is not None:
@@ -205,7 +205,7 @@ def atualizaagenda():
 
     # Consulta na agenda de radioterapia do SISAC se possui algum paciente que não foi confirmado
     query_sisac2 = Agenda.objects.filter(datahora__year=date.today().year, datahora__month=date.today().month, 
-                                            datahora__day='15').filter(~Q(confatd='S')).filter(tipo='RAD')
+                                            datahora__day=date.today().day).filter(~Q(confatd='S')).filter(tipo='RAD')
 
     # Se houver algum paciente não confirmado,
     # Itera sobre o resultado, adicionando os pacientes não tratados em uma lista    
