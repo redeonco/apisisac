@@ -272,7 +272,7 @@ class Agenda(models.Model):
     codmovimento = models.CharField(db_column='CodMovimento', max_length=50, blank=True, null=True)  # Field name made lowercase.
     usuario = models.CharField(db_column='Usuario', max_length=100, blank=True, null=True)
     datasist = models.DateTimeField(db_column='DataSist') 
-    tipo = models.CharField(db_column='Tipo')
+    tipo = models.CharField(db_column='Tipo', max_length=5)
 
     class Meta:
         managed = False
@@ -385,10 +385,10 @@ class Planejfisicoc(models.Model):
     naplicacoes = models.IntegerField(db_column='NAplicacoes', blank=True, null=True)  # Field name made lowercase.
     dosemonitor = models.CharField(db_column='DoseMonitor', max_length=100, blank=True, null=True)  # Field name made lowercase.
     datasist = models.DateTimeField(db_column='DataSist')
-    ativo = models.CharField(db_column='Ativo')
+    ativo = models.CharField(db_column='Ativo', max_length=5)
     nplanejamento = models.IntegerField(db_column='NPlanejamento', blank=True, null=True)  # Field name made lowercase.
     ntratamento = models.IntegerField(db_column='NTratamento', blank=True, null=True)  # Field name made lowercase.
-    locanatomica = models.CharField(db_column='LocAnatomica')
+    locanatomica = models.CharField(db_column='LocAnatomica', max_length=250)
     ncampo = models.IntegerField(db_column='NCampo', blank=True, null=True)  # Field name made lowercase.
     iniciotrat = models.IntegerField(db_column='InicioTrat', blank=True, null=True)  # Field name made lowercase.
     fase = models.IntegerField(db_column='Fase', blank=True, null=True)  # Field name made lowercase.

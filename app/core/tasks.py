@@ -16,6 +16,7 @@ def sendmail(qtdconfirmado, data):
         ['tony.carvalho@oncoradium.com.br'],
         fail_silently=False,
     )
+
 @shared_task
 def sendmail_lista(lista, qtdconfirmado, data):
     send_mail(
@@ -77,8 +78,6 @@ def atualizaagenda():
 
     # Inicia iterações para cada resultado obtido pela consulta anterior
     for obj in query_mosaiq.iterator():
-        print('---------------------------------------------')
-
         # Guarda o CPF e a Data do Agendamento coletados no MOSAIQ para buscar correspondência no banco de dados SISAC
         cpf_paciente = obj.id_paciente.cpf
         dataagenda_mosaiq = obj.dataagenda
@@ -88,8 +87,6 @@ def atualizaagenda():
 
         # Verifica se o resultado da busca pelo CPF é válido. Se válido, inicia próxima etapa.
         if codpac_sisac is not None:     
-            print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iniciando execuções para o paciente', codpac_sisac)   
-
             # Verifica qual último código de movimento do paciente na tabela Entrada do SISAC,
             # Em seguida chama a função addcodmovimento para incrementar a sequência.
             # O resultado do incremento é utilizado posteriormente para gerar novos registros nas tabelas do SISAC.    
@@ -98,10 +95,12 @@ def atualizaagenda():
 
             # Verifica na tabela Agenda do SISAC algum agendamento de radioterapia para o paciente na data de hoje.
             agenda_sisac = Agenda.objects.filter(codpaciente=codpac_sisac).filter(datahora__year=date.today().year, 
-                                            datahora__month=date.today().month, datahora__day=date.today().day).filter(tipo='RAD').first()
-
+                                            datahora__month=date.today().month, datahora__day=date.today().day).filter(tipo='RAD').filter(~Q(confatd='S')).first()
+            
             # Verifica se o resultado da busca na agenda é válido. Se válido, inicia próxima etapa.
-            if agenda_sisac is not None:
+            if agenda_sisac is not None:                
+                print('---------------------------------------------')
+                print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iniciando execuções para o paciente', codpac_sisac) 
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Gerando registro na tabela entrada...')
 
                 # Gera registro de sessão de radioterapia na tabela entrada.
@@ -194,7 +193,7 @@ def atualizaagenda():
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Paciente confirmado.')
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iteração concluída para o paciente', codpac_sisac)
                 
-        i += 1
+                i += 1
     print('---------------------------------------------')
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Atualização da agenda concluída com sucesso.', i, 'pacientes foram confirmados na agenda de tratamento de radioterapia SISAC.')
 
@@ -219,9 +218,23 @@ def atualizaagenda():
     # Que enviará email de relatório contendo a quantidade de pacientes tratados e a lista de pacientes não confirmados.
     # Se todos os pacientes foram confirmados, chama a função sendmail,
     # Que enviará email de relatório contendo a quantidade de pacientes tratados.
-    if len(list) > 0:
-        sendmail_lista(list, i, datetime.now())
-    else:
-        sendmail(i, datetime.now())
+    # if len(list) > 0:
+    #     sendmail_lista(list, i, datetime.now())
+    # else:
+    #    sendmail(i, datetime.now())
 
-    
+  
+def gravarentrada(list):
+    # Utilizar método get response da API e atribuir resultado no objeto list
+    # A resposta será um objeto do tipo Lista, contendo vários objetos do tipo dicionário
+    # Cada dicionário será um registro a ser inserido na tabela Entrada
+
+    # Iterar sobre a lista para acessar e armazenar os dados de cada dicionário na tabela Entrada
+    for dict in list:
+        # Instancia um objeto da classe Entrada, define seus atributos com os valores coletados do dicionário
+        # E posteriormente guarda o novo registro na tabela chamando o método save()
+        entrada = Entrada
+        entrada.codmovimento = dict[codmovimento]
+        entrada.codpaciente = dict[codpaciente]
+        # ...
+        entrada.save() 

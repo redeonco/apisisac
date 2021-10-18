@@ -44,12 +44,14 @@ class ApiEntradaSerializerViewSet(viewsets.ModelViewSet):
     # authentication_classes = (TokenAuthentication,)
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'head']
+    filterset_fields = {'datahoraent':['gte', 'lte', 'exact', 'gt', 'lt']}
 
     def get_queryset(self):
         queryset = ApiEntrada.objects.all().order_by('datahoraent')
         codmovimento = self.request.query_params.get('codmovimento')
         if codmovimento is not None:
             queryset = queryset.filter(codmovimento__exact=codmovimento)
+
         return queryset
 
 
@@ -58,7 +60,6 @@ class ApiConsultaSerializerViewSet(viewsets.ModelViewSet):
     # authentication_classes = (TokenAuthentication,)
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'head']
-# PrimaryKeyRelatedField
 
     def get_queryset(self):
         queryset = ApiConsulta.objects.all().order_by('data')
