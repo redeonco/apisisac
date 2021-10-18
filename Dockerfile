@@ -47,7 +47,8 @@ RUN python -m venv /py && \
     chown -R app:app /vol && \
     chmod -R 775 /vol && \
     chmod -R 755 /vol/web/static && \
-    chmod -R +x /scripts
+    chmod -R +x /scripts && \
+    chmod -R 664 /app/celery.sh
 
 RUN pip install uwsgi
 
@@ -55,4 +56,4 @@ ENV PATH="/scripts:/py/bin:$PATH"
 
 USER app
 
-CMD ["run.sh"]
+CMD ["celery.sh"]

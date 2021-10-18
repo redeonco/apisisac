@@ -7,10 +7,11 @@ services:
     restart: always
     command: >
       sh -c "
+             sh -x celery.sh &&
              redis-server --daemonize yes &&
              python manage.py makemigrations &&
              python manage.py migrate &&
-             python manage.py runserver 0.0.0.0:8000"  
+             python manage.py runserver 0.0.0.0:8000"
     ports:
       - 8000:8000
     volumes:
