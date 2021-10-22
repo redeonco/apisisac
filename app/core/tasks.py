@@ -436,7 +436,7 @@ def teste3(pac):
                     
                 
 
-
+@shared_task
 def teste4():
     # Localiza planejamentos no MOSAIQ que aprovados na data de hoje.
     # Não significa que geraram uma nova versão do tratamento
