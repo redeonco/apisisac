@@ -1,13 +1,23 @@
-version: '3.9'
+version: "3.9"
 
 services:
   app:
     build:
       context: .
     restart: always
+    command: >
+      sh -c "
+             sh -x celery.sh &&
+             redis-server --daemonize yes &&
+             python manage.py migrate &&
+             python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - 8000:8000
     volumes:
-      - static-data:/vol/web
+      - ./app:/app
+      - ./data/web:/vol/web
     environment: 
+      - DB_POSTGRES_HOST=db
       - SECRET_KEY=${SECRET_KEY}
       - ALLOWED_HOSTS=${ALLOWED_HOSTS}
       - DB_NAME=${DB_NAME}
@@ -15,17 +25,18 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
-
-  proxy:
-    build:
-      context: ./proxy
+      - DB_MOSAIQ_NAME=${DB_MOSAIQ_NAME}
+      - DB_MOSAIQ_USER=${DB_MOSAIQ_USER}
+      - DB_MOSAIQ_PASSWORD=${DB_MOSAIQ_PASSWORD}
+      - DB_MOSAIQ_HOST=${DB_MOSAIQ_HOST}
+      - DB_MOSAIQ_PORT=${DB_MOSAIQ_PORT}
+    depends_on:
+      - db
+  
+  db:
+    image: postgres:13-alpine 
     restart: always
-    depends_on: 
-      - app
-    ports:
-      - 80:8000
-    volumes: 
-      - static-data:/vol/static
-
-volumes:
-  static-data:
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres     
