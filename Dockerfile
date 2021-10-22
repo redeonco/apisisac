@@ -52,10 +52,6 @@ RUN python -m venv /py && \
 
 RUN pip install uwsgi
 
-RUN pip install virtualenv && virtualenv -p python /app/venv
-RUN /app/venv/bin/pip install -r requirements.txt
-RUN /app/venv/bin/python /app/manage.py makemigrations
-
 ENV PATH="/scripts:/py/bin:$PATH"
 
 USER app
