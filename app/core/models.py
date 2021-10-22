@@ -1,3 +1,4 @@
+import uuid
 from django.db import models
 
 
@@ -307,25 +308,6 @@ class Entrada(models.Model):
         return self.codmovimento
 
 
-class Planejfisico(models.Model):
-    idplanejfisico = models.CharField(primary_key=True, db_column='idPlanejFisico', max_length=10)  # Field name made lowercase.
-    codpaciente = models.CharField(db_column='CodPaciente', max_length=11, blank=True, null=True)  # Field name made lowercase.
-    numpresc = models.ForeignKey(ApiRadioterapia, db_column='NumPresc', max_length=10, on_delete=models.PROTECT, related_name='planej_set2')  # Field name made lowercase.
-    incidencia = models.CharField(db_column='Incidencia', max_length=50, blank=True, null=True)  # Field name made lowercase.
-    nomecampo = models.CharField(db_column='NomeCampo', max_length=100, blank=True, null=True)  # Field name made lowercase.
-    nplanejamento = models.IntegerField(db_column='NPlanejamento', blank=True, null=True)  # Field name made lowercase.
-    ntratamento = models.IntegerField(db_column='NTratamento', blank=True, null=True)  # Field name made lowercase.
-    ncampo = models.IntegerField(db_column='NCampo', blank=True, null=True)  # Field name made lowercase.
-    fase = models.IntegerField(db_column='Fase', blank=True, null=True)  # Field name made lowercase.
-
-    class Meta:
-        managed = False
-        db_table = 'PlanejFisico'
-
-    def __str__(self):
-        return str(self.idplanejfisico)
-
-
 class Radioterapia(models.Model):
     numpresc = models.CharField(primary_key=True, db_column='NumPresc', max_length=10)  # Field name made lowercase.
     codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', max_length=11, on_delete=models.PROTECT)
@@ -338,6 +320,8 @@ class Radioterapia(models.Model):
     tipon = models.CharField(db_column='TipoN', max_length=10, blank=True, null=True)  # Field name made lowercase.
     tipom = models.CharField(db_column='TipoM', max_length=10, blank=True, null=True)  # Field name made lowercase.
     naplicacoes = models.IntegerField(db_column='NAplicacoes', blank=True, null=True)  # Field name made lowercase.
+    ntratamento = models.IntegerField(db_column='NTratamento', blank=True, null=True)  # Field name made lowercase.
+    idradio = models.IntegerField(db_column='idRadio', blank=True, null=True)  # Field name made lowercase.
     karno = models.CharField(db_column='Karno', max_length=5, blank=True, null=True)  # Field name made lowercase.
     codmed = models.CharField(db_column='CodMed', max_length=10, blank=True, null=True)
 
@@ -376,26 +360,157 @@ class Entradaradio(models.Model):
 
 
 class Planejfisicoc(models.Model):
-    idplanejfisicoc = models.CharField(primary_key=True, db_column='idPlanejFisicoC', max_length=10)  # Field name made lowercase.
+    # Quando o Django precisa inserir registros novos no banco,
+    # A coluna chave primária precisa ser do tipo models.AutoField.
+    # Dessa forma, quem atribui um valor para a coluna, é o próprio banco, e não o Django.
+    # Evitando assim o erro de inserir valor explícito em uma coluna com IDENTITY INSERT ON. =)
+    idplanejfisicoc = models.AutoField(primary_key=True, db_column='idPlanejFisicoC', editable=False)  # Field name made lowercase.
     codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', max_length=11, on_delete=models.PROTECT)  # Field name made lowercase.
+    codmovimento = models.CharField(db_column='CodMovimento', max_length=11)  # Field name made lowercase.
     numpresc = models.ForeignKey(Radioterapia, db_column='NumPresc', max_length=10, on_delete=models.PROTECT)  # Field name made lowercase.
     energia = models.CharField(db_column='Energia', max_length=50, blank=True, null=True)  # Field name made lowercase.
     dtt = models.CharField(db_column='DTT', max_length=50, blank=True, null=True)  # Field name made lowercase.
     dtd = models.CharField(db_column='DTD', max_length=100, blank=True, null=True)  # Field name made lowercase.
     naplicacoes = models.IntegerField(db_column='NAplicacoes', blank=True, null=True)  # Field name made lowercase.
-    dosemonitor = models.CharField(db_column='DoseMonitor', max_length=100, blank=True, null=True)  # Field name made lowercase.
     datasist = models.DateTimeField(db_column='DataSist')
     ativo = models.CharField(db_column='Ativo', max_length=5)
+    unidade_monitora = models.CharField(db_column='DoseMonitor', max_length=20, blank=True, null=True)  # Field name made lowercase.
     nplanejamento = models.IntegerField(db_column='NPlanejamento', blank=True, null=True)  # Field name made lowercase.
     ntratamento = models.IntegerField(db_column='NTratamento', blank=True, null=True)  # Field name made lowercase.
     locanatomica = models.CharField(db_column='LocAnatomica', max_length=250)
     ncampo = models.IntegerField(db_column='NCampo', blank=True, null=True)  # Field name made lowercase.
+    ordemcampo = models.IntegerField(db_column='OrdemCampo', blank=True, null=True)  # Field name made lowercase.
     iniciotrat = models.IntegerField(db_column='InicioTrat', blank=True, null=True)  # Field name made lowercase.
+    incidencia = models.CharField(db_column='Incidencia', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    tpfeixe = models.CharField(db_column='TpFeixe', max_length=50, blank=True, null=True)  # Field name made lowercase.
     fase = models.IntegerField(db_column='Fase', blank=True, null=True)  # Field name made lowercase.
+    aparelho = models.CharField(db_column='Aparelho', max_length=20, default='ACELERADOR LINEAR')  # Field name made lowercase.
+    tamanhocampos = models.CharField(db_column='TamanhoCampos', max_length=5, default='0')  # Field name made lowercase.
+    campoequivapente = models.CharField(db_column='CampoEquivalente', max_length=5, default='0')  # Field name made lowercase.
+    campocolimado = models.CharField(db_column='CampoColimado', max_length=5, default='0')  # Field name made lowercase.
+    distsuperficie = models.CharField(db_column='DistSuperficie', max_length=5, default='0')  # Field name made lowercase.
+    distisocentro = models.CharField(db_column='DistIsocentro', max_length=5, default='0')  # Field name made lowercase.
+    profundidade = models.CharField(db_column='Profundidade', max_length=5, default='0')  # Field name made lowercase.
+    doseprofunda = models.CharField(db_column='DoseProfunda', max_length=5, default='0')  # Field name made lowercase.
+    razaotecido = models.CharField(db_column='RazaoTecido', max_length=5, default='0')  # Field name made lowercase.
+    dosemaxcampo = models.CharField(db_column='DoseMaxCampo', max_length=5, default='0')  # Field name made lowercase.
+    rendimento = models.CharField(db_column='Rendimento', max_length=5, default='0')  # Field name made lowercase.
+    fatcalibracao = models.CharField(db_column='FatCalibracao', max_length=5, default='0')  # Field name made lowercase.
+    fatbandeja = models.CharField(db_column='FatBandeja', max_length=5, default='0')  # Field name made lowercase.
+    fatfiltro = models.CharField(db_column='FatFiltro', max_length=5, default='0')  # Field name made lowercase.
+    fatdistancia = models.CharField(db_column='FatDistancia', max_length=5, default='0')  # Field name made lowercase.
+    RendPinal = models.CharField(db_column='RendPinal', max_length=5, default='0')  # Field name made lowercase.
+    tempaplicacao = models.CharField(db_column='TempAplicacao', max_length=5, default='0')  # Field name made lowercase.
+    grupoemp = models.CharField(db_column='GrupoEmp', max_length=5, default='01')  # Field name made lowercase.
+    filial = models.CharField(db_column='Filial', max_length=5, default='01')  # Field name made lowercase.
+    fatrendimento = models.CharField(db_column='FatRendimento', max_length=5, default='0')  # Field name made lowercase.
+    portal = models.CharField(db_column='Portal', max_length=5, default='0')  # Field name made lowercase.
+    usuario = models.CharField(db_column='Usuario', max_length=30)
 
     class Meta:
         managed = False
         db_table = 'PlanejFisicoC'
 
     def __str__(self):
-        return str(self.idplanejfisicoc)
+        return str(self.codpaciente)
+
+    # def save(self, *args, **kwargs):
+    #     if self.idplanejfisicoc:
+    #         self._meta.local_fields = [f for f in self._meta.local_fields if f.name != 'idplanejfisicoc']
+    #         super().save(*args, **kwargs)
+
+
+class Planejfisico(models.Model):
+    idplanejfisico = models.AutoField(primary_key=True, db_column='idPlanejFisico', max_length=10)  # Field name made lowercase.
+    idplanejfisicoc = models.ForeignKey(Planejfisicoc, db_column='idPlanejFisicoC', on_delete=models.PROTECT)  # Field name made lowercase.
+    codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', max_length=11, on_delete=models.PROTECT)  # Field name made lowercase.
+    codmovimento = models.CharField(db_column='CodMovimento', max_length=11)  # Field name made lowercase.
+    numpresc = models.ForeignKey(Radioterapia, db_column='NumPresc', max_length=10, on_delete=models.PROTECT, related_name='planej_set2')  # Field name made lowercase.
+    incidencia = models.CharField(db_column='Incidencia', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    energia = models.CharField(db_column='Energia', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    tecnica = models.CharField(db_column='Tecnica', max_length=10, blank=True, null=True)  # Field name made lowercase.
+    unidade_monitora = models.CharField(db_column='UnMonitoracao', max_length=20, blank=True, null=True)  # Field name made lowercase.
+    angulacao = models.CharField(db_column='Angulacao', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    nomecampo = models.CharField(db_column='NomeCampo', max_length=100, blank=True, null=True)  # Field name made lowercase.
+    nplanejamento = models.IntegerField(db_column='NPlanejamento', blank=True, null=True)  # Field name made lowercase.
+    ntratamento = models.IntegerField(db_column='NTratamento', blank=True, null=True)  # Field name made lowercase.
+    ncampo = models.IntegerField(db_column='NCampo', blank=True, null=True)  # Field name made lowercase.
+    fase = models.IntegerField(db_column='Fase', blank=True, null=True)  # Field name made lowercase.
+    ativo = models.CharField(db_column='Ativo', max_length=5)
+    aparelho = models.CharField(db_column='Aparelho', default='ACELERADOR LINEAR', max_length=20)
+    distanciafonte = models.CharField(db_column='DistanciaFonte', default='0', max_length=5)
+    tamanhocampo = models.CharField(db_column='TamanhoCampo', default='', max_length=5)
+    tempoalicacao = models.CharField(db_column='TempoAlicacao', default='0', max_length=5)
+    datasist = models.DateTimeField(db_column='DataSist')
+    grupoemp = models.CharField(db_column='GrupoEmp', default='01', max_length=2)
+    filial = models.CharField(db_column='Filial', default='01', max_length=2)
+    obs = models.CharField(db_column='Obs', default='', max_length=5)
+    bandeja = models.CharField(db_column='Bandeja', default='', max_length=5)
+    checacampo = models.CharField(db_column='ChecaCampo', default='0', max_length=5)
+    tratado = models.CharField(db_column='Tratado', default='NAO', max_length=5)
+    suportedecabeca = models.CharField(db_column='SuporteDeCabeca', default='', max_length=5)
+    abridordeboca = models.CharField(db_column='AbridorDeBoca', default='0', max_length=5)
+    baset = models.CharField(db_column='BaseT', default='0', max_length=5)
+    bolus = models.CharField(db_column='Bolus', default='0', max_length=5)
+    extensordemesa = models.CharField(db_column='ExtensorDeMesa', default='0', max_length=5)
+    hemibloqueador = models.CharField(db_column='HemiBloqueador', default='0', max_length=5)
+    mascara = models.CharField(db_column='Mascara', default='0', max_length=5)
+    moldepersonalizado = models.CharField(db_column='MoldePersonalizado', default='0', max_length=5)
+    rampademama = models.CharField(db_column='RampaDeMama', default='0', max_length=5)
+    suportedeface = models.CharField(db_column='SuporteDeFace', default='0', max_length=5)
+    suportedeperna = models.CharField(db_column='SuporteDePerna', default='0', max_length=5)
+    vaclock = models.CharField(db_column='VacLock', default='0', max_length=5)
+    bolusdetalhe = models.CharField(db_column='BolusDetalhe', default='', max_length=5)
+    basetdetalhe = models.CharField(db_column='BaseTDetalhe', default='', max_length=5)
+    retratordeombrodetalhe = models.CharField(db_column='RetratorDeOmbroDetalhe', default='', max_length=5)
+    suportedefacedetalhe = models.CharField(db_column='SuporteDeFaceDetalhe', default='', max_length=5)
+    suportedepernadetalhe = models.CharField(db_column='SuporteDePernaDetalhe', default='', max_length=5)
+    isopor = models.CharField(db_column='Isopor', default='0', max_length=5)
+    baseuniversal = models.CharField(db_column='BaseUniversal', default='0', max_length=5)
+    suportedepes = models.CharField(db_column='SuporteDePes', default='', max_length=5)
+    rampademapadetalhe = models.CharField(db_column='RampaDeMamaDetalhe', default='', max_length=5)
+    dtt = models.CharField(db_column='DTT', max_length=50, blank=True, null=True)
+    dtd = models.CharField(db_column='DTD', max_length=100, blank=True, null=True)   
+    usuario = models.CharField(db_column='Usuario', max_length=30)
+
+    class Meta:
+        managed = False
+        db_table = 'PlanejFisico'
+
+    def __str__(self):
+        return str(self.ncampo)
+
+
+class PrescrRadio(models.Model):
+    idprescrradio = models.AutoField(primary_key=True, db_column='idPrescrRadio')
+    idradio = models.IntegerField(db_column='idRadio')
+    ncampos = models.IntegerField(db_column='NCampos')
+    codmovimento = models.CharField(db_column='CodMovimento', max_length=11)
+    locanatomica = models.CharField(db_column='LocAnatomica', max_length=100)
+    prof = models.CharField(db_column='Prof', max_length=5, default='')
+    datasist = models.DateTimeField(db_column='DataSist')
+    grupoemp = models.CharField(db_column='GrupoEmp', max_length=2, default='01')
+    filial = models.CharField(db_column='Filial', max_length=2, default='01')
+    numpresc = models.ForeignKey(Radioterapia, db_column='NumPresc', on_delete=models.PROTECT)
+    incidencia = models.CharField(db_column='Incidencia', max_length=20)
+    naplicacoes = models.IntegerField(db_column='NAplicacoes')
+    portal = models.IntegerField(db_column='Portal', default=5)
+    ntratamento = models.IntegerField(db_column='NTratamento')
+    tratado = models.CharField(db_column='Tratado', max_length=3, default='NAO')
+    iniciotrat = models.IntegerField(db_column='InicioTrat')
+    codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', on_delete=models.PROTECT)
+    nrestudo = models.IntegerField(db_column='NReestudo', default=0)
+    usuario = models.CharField(db_column='Usuario', max_length=100, default='API')
+    energia = models.CharField(db_column='Energia', max_length=7)
+    tecnica = models.CharField(db_column='Tecnica', max_length=20)
+    tpfeixe = models.CharField(db_column='TpFeixe', max_length=20)
+    dosettotal = models.IntegerField(db_column='DoseTTotal')
+    dosetdiaria = models.IntegerField(db_column='DoseTDiaria')
+    fase = models.IntegerField(db_column='Fase')
+
+    class Meta:
+        managed = False
+        db_table = 'PrescrRadio'
+    
+    def __str__(self):
+        return str(self.idprescrradio)
