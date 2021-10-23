@@ -441,7 +441,13 @@ def teste4():
     # Localiza planejamentos no MOSAIQ que aprovados na data de hoje.
     # Não significa que geraram uma nova versão do tratamento
     # Pois para pacientes novos, a data de Criação é igual à data de Aprovação
-    campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month=date.today().month, sanct_dt__day=date.today().day)
+    query_mosaiq = Schedule.objects.filter(dataagenda__year=date.today().year, dataagenda__month=date.today().month, 
+                                            dataagenda__day=date.today().day).exclude(id_paciente=10084)
+    pac = []
+    for i in query_mosaiq:
+        pac.append(i.id_paciente)
+
+    campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(id_paciente__in=pac)
 
     # Inicializa uma lista para os pacientes com tratamento versionado
     list_versionado = []
@@ -469,23 +475,23 @@ def teste4():
             return False
 
     # Para cada resultado da busca anterior, realiza iteração 
-    for obj in campos:
+    # for obj in campos:
         # Procura registros na tabela TxField, realizando consulta reversa pelo PCP_ID obtido da consulta anterior, filtrando onde versão é maior que 0
         # Versão 0 sempre é a atual. Quanto maior for o número, mais antiga é a versão do tratamento.
         # A ideia aqui é localizar na tabela Fase tratamentos que foram aprovados hoje, e que possuem versões antigas de tratamento
         # Significando que realmente o paciente sofreu alteração no planejamento
         # E para cada paciente com tratamendo alterado, algoritimo vai atualizar o histórico no SISAC com o novo planejamento
-        query = TxField.objects.filter(id_fase__pcp_id=obj.id_fase.pcp_id)# .filter(version__gt=0)
-        for i in query:
-            list_versionado.append(i.id_fase.pcp_id_id)
+        # query = TxField.objects.filter(id_fase__pcp_id=obj.id_fase.pcp_id)# .filter(version__gt=0)
+        # for i in query:
+          #  list_versionado.append(i.id_fase.pcp_id_id)
 
     campos2 = campos.filter(id_fase__pcp_id__in=list_versionado).filter(version=0).filter(dose_campo__gt=0)
 
     i = 0
-    for obj in campos2.iterator():
+    for obj in campos.iterator():
         i += 1
         print('iteração campo', i)
-        codpac_sisac = Cadpaciente.objects.get(cpf=obj.id_paciente.cpf)
+        codpac_sisac = Cadpaciente.objects.exclude(cpf='').get(cpf=obj.id_paciente.cpf)
         if codpac_sisac is not None:
             print('paciente encontrado')
             planejfisicoc = Planejfisicoc.objects.filter(codpaciente=codpac_sisac).filter(ncampo=obj.numero_campo).filter(fase=obj.id_fase.numerofase).filter(ativo=1)
@@ -506,6 +512,7 @@ def teste4():
             else:
                 print('planejamento NÃO encontrado para o paciente', codpac_sisac, 'numero do campo', obj.numero_campo)
                 print('gerando registro na tabela PlanejFisicoC')
+                print(obj)
                 novo_planejfisicoc = Planejfisicoc()
                 novo_planejfisicoc.codpaciente = codpac_sisac
                 novo_planejfisicoc.codmovimento = codpac_sisac.codpaciente
@@ -530,7 +537,11 @@ def teste4():
                     if obj.id_fase.numerofase == 1:
                         iniciotrat = 1
                     else:
-                        faseanterior = Fase.objects.filter(pcp_id=obj.id_fase.pcp_id).order_by('numerofase').filter(numerofase=obj.id_fase.numerofase - 1).first()
+                        fases = Fase.objects.filter(pcp_id=obj.id_fase.pcp_id).order_by('numerofase')
+                        list_fases = []
+                        for fas in fases:
+                            list_fases.append(fas)
+                        faseanterior = list_fases[list_fases.index(obj.id_fase) - 1]
                         iniciotrat = faseanterior.qtdsessoes + 1
                         
                 else:
@@ -624,7 +635,11 @@ def teste4():
                     if obj.id_fase.numerofase == 1:
                         iniciotrat = 1
                     else:
-                        faseanterior = Fase.objects.filter(pcp_id=obj.id_fase.pcp_id).order_by('numerofase').filter(numerofase=obj.id_fase.numerofase - 1).first()
+                        fases = Fase.objects.filter(pcp_id=obj.id_fase.pcp_id).order_by('numerofase')
+                        list_fases = []
+                        for fas in fases:
+                            list_fases.append(fas)
+                        faseanterior = list_fases[list_fases.index(obj.id_fase) - 1]
                         iniciotrat = faseanterior.qtdsessoes + 1
                         
                 else:
