@@ -674,7 +674,7 @@ def cria_agenda_radio():
         codpac_sisac = Cadpaciente.objects.get(cpf=pac.id_paciente.cpf)
         if codpac_sisac is not None:
             primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(planejado='S')
-            if primeira_agenda.count() == 1:
+            if primeira_agenda.count() <= 1:
                 primeira_agenda.tipo = ''
                 primeira_agenda.tipooriginal = ''
                 primeira_agenda.save()
