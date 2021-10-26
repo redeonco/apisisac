@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from django.db import IntegrityError
 from celery import shared_task
 from mosaiq_app.models import *
 from core.models import (
@@ -50,6 +51,17 @@ def mailtest():
         fail_silently=False,
     )
 
+@shared_task
+def sendmail_cria_agenda(tarefa, msg):
+    send_mail(
+        'Núcleo de Sistemas - Relatório API - SISAC',
+        'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa ' + tarefa + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S") +
+        '. \nA tarefa retornou a seguinte resposta: ' + msg + '.',
+        'chamado@oncoradium.com.br',
+        ['tony.carvalho@oncoradium.com.br'],
+        fail_silently=False,
+    )
+
 # Tarefa para atualizar a agenda de tratamento da radioterapia do SISAC comparando com a agenda de tratamento do MOSAIQ
 # A tarefa olha para a agenda do MOSAIQ quais pacientes estão marcados como Completed
 # Para cada paciente marcado como Completed, a tarefa realiza iterações no banco de dados SISAC
@@ -78,7 +90,7 @@ def atualizaagenda():
     
     # Consulta na tabela Schedule do MOSAIQ pacientes agendados para hoje com status 'C' Completed (significa que realizaram tratamento)
     query_mosaiq = Schedule.objects.filter(dataagenda__year=date.today().year, dataagenda__month=date.today().month, 
-                                            dataagenda__day=date.today().day).filter(~Q(activity='MV')).filter(status=' C')
+                                            dataagenda__day=date.today().day).filter(~Q(activity='MV')).filter(status=' C').filter(version=0).filter(~Q(suppressed=1))
     
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Consulta concluída com sucesso.')
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iniciando iteração no resultado da consulta...')
@@ -237,16 +249,13 @@ def atualizaagenda():
 
 
 @shared_task
-def teste3(pac):
+def atualiza_planej():
     # Localiza planejamentos no MOSAIQ que aprovados na data de hoje.
     # Não significa que geraram uma nova versão do tratamento
     # Pois para pacientes novos, a data de Criação é igual à data de Aprovação
-    campos = TxField.objects.filter(id_paciente=pac).filter(version=0).filter(dose_campo__gt=0)
+    campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month=date.today().month, sanct_dt__day=date.today().day)
 
-    # Inicializa uma lista para os pacientes com tratamento versionado
-    list_versionado = []
-
-    # Inicializa um dicionário para as unidades de medida da energia do tratamento
+   # Inicializa um dicionário para as unidades de medida da energia do tratamento
     energia_unidade_dict = {
         '0': '',
         '1': 'KV',
@@ -268,24 +277,11 @@ def teste3(pac):
         except ObjectDoesNotExist:
             return False
 
-    # Para cada resultado da busca anterior, realiza iteração 
-    for obj in campos:
-        # Procura registros na tabela TxField, realizando consulta reversa pelo PCP_ID obtido da consulta anterior, filtrando onde versão é maior que 0
-        # Versão 0 sempre é a atual. Quanto maior for o número, mais antiga é a versão do tratamento.
-        # A ideia aqui é localizar na tabela Fase tratamentos que foram aprovados hoje, e que possuem versões antigas de tratamento
-        # Significando que realmente o paciente sofreu alteração no planejamento
-        # E para cada paciente com tratamendo alterado, algoritimo vai atualizar o histórico no SISAC com o novo planejamento
-        query = TxField.objects.filter(id_fase__pcp_id=obj.id_fase.pcp_id)# .filter(version__gt=0)
-        for i in query:
-            list_versionado.append(i.id_fase.pcp_id_id)
-
-    campos2 = campos.filter(id_fase__pcp_id__in=list_versionado).filter(version=0).filter(dose_campo__gt=0)
-
     i = 0
-    for obj in campos2.iterator():
+    for obj in campos.iterator():
         i += 1
         print('iteração campo', i)
-        codpac_sisac = Cadpaciente.objects.get(cpf=obj.id_paciente.cpf)
+        codpac_sisac = Cadpaciente.objects.exclude(cpf='').get(cpf=obj.id_paciente.cpf)
         if codpac_sisac is not None:
             print('paciente encontrado')
             planejfisicoc = Planejfisicoc.objects.filter(codpaciente=codpac_sisac).filter(ncampo=obj.numero_campo).filter(fase=obj.id_fase.numerofase).filter(ativo=1)
@@ -306,6 +302,7 @@ def teste3(pac):
             else:
                 print('planejamento NÃO encontrado para o paciente', codpac_sisac, 'numero do campo', obj.numero_campo)
                 print('gerando registro na tabela PlanejFisicoC')
+                print(obj)
                 novo_planejfisicoc = Planejfisicoc()
                 novo_planejfisicoc.codpaciente = codpac_sisac
                 novo_planejfisicoc.codmovimento = codpac_sisac.codpaciente
@@ -330,7 +327,11 @@ def teste3(pac):
                     if obj.id_fase.numerofase == 1:
                         iniciotrat = 1
                     else:
-                        faseanterior = Fase.objects.filter(pcp_id=obj.id_fase.pcp_id).order_by('numerofase').filter(numerofase=obj.id_fase.numerofase - 1).first()
+                        fases = Fase.objects.filter(pcp_id=obj.id_fase.pcp_id).order_by('numerofase')
+                        list_fases = []
+                        for fas in fases:
+                            list_fases.append(fas)
+                        faseanterior = list_fases[list_fases.index(obj.id_fase) - 1]
                         iniciotrat = faseanterior.qtdsessoes + 1
                         
                 else:
@@ -424,7 +425,11 @@ def teste3(pac):
                     if obj.id_fase.numerofase == 1:
                         iniciotrat = 1
                     else:
-                        faseanterior = Fase.objects.filter(pcp_id=obj.id_fase.pcp_id).order_by('numerofase').filter(numerofase=obj.id_fase.numerofase - 1).first()
+                        fases = Fase.objects.filter(pcp_id=obj.id_fase.pcp_id).order_by('numerofase')
+                        list_fases = []
+                        for fas in fases:
+                            list_fases.append(fas)
+                        faseanterior = list_fases[list_fases.index(obj.id_fase) - 1]
                         iniciotrat = faseanterior.qtdsessoes + 1
                         
                 else:
@@ -433,16 +438,17 @@ def teste3(pac):
                 novapresc.iniciotrat = iniciotrat
                 novapresc.save()
 
-                    
-                
+            primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(planejado='N').filter(confatd='N').order_by('idagenda').first()
+            primeira_agenda.planejado = 'S'    
+                                    
 
 @shared_task
-def teste4():
+def força_atualiza_planej():
     # Localiza planejamentos no MOSAIQ que aprovados na data de hoje.
     # Não significa que geraram uma nova versão do tratamento
     # Pois para pacientes novos, a data de Criação é igual à data de Aprovação
     query_mosaiq = Schedule.objects.filter(dataagenda__year=date.today().year, dataagenda__month=date.today().month, 
-                                            dataagenda__day=date.today().day).exclude(id_paciente=10084)
+                                            dataagenda__day=date.today().day).filter(version=0).filter(~Q(suppressed=1)).exclude(id_paciente=10084)
     pac = []
     for i in query_mosaiq:
         pac.append(i.id_paciente)
@@ -647,3 +653,120 @@ def teste4():
 
                 novapresc.iniciotrat = iniciotrat
                 novapresc.save()
+
+
+def cria_agenda_radio():
+    # Função para gerar nova senha da agenda. Pega a última senha existente e adiciona 1
+    def senhanova():
+        ultimasenha = Agenda.objects.last().senha # 0006001
+        novasenha = int(ultimasenha) + 1
+        zeros = 7 - len(str(novasenha)) 
+        senhafinal = '0' * zeros + str(novasenha)
+
+        return senhafinal
+
+
+    agenda_mosaiq_dia = Schedule.objects.filter(dataagenda__year=date.today().year, dataagenda__month=date.today().month, dataagenda__day=date.today().day).filter(activity='3D').filter(version=0).filter(~Q(suppressed=1))
+
+    agendamento_existente = []
+
+    for pac in agenda_mosaiq_dia:
+        codpac_sisac = Cadpaciente.objects.get(cpf=pac.id_paciente.cpf)
+        if codpac_sisac is not None:
+            primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(planejado='S')
+            if primeira_agenda.count() == 1:
+                primeira_agenda.tipo = ''
+                primeira_agenda.tipooriginal = ''
+                primeira_agenda.save()
+                agenda_mosaiq = Schedule.objects.filter(id_paciente=pac.id_paciente).filter(activity='3D').filter(~Q(suppressed=1))
+                for agd in agenda_mosaiq:
+                    checa_agenda = Agenda.objects.filter(datahora=agd.dataagenda).filter(tipo='RAD')
+                    if checa_agenda.count() > 0:
+                        print(f'Já existe agendamento no dia {agd.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")}.')
+                        dict = {}
+                        dict['IDAgenda_SISAC'] = checa_agenda.first().idagenda
+                        dict['Paciente'] = str(checa_agenda.first().codpaciente.codpaciente) + ' - ' + str(checa_agenda.first().codpaciente.paciente)
+                        dict['DataHora_Existente'] = checa_agenda.first().datahora.strftime("%d/%m/%Y - %H:%M:%S")
+                        dict['Tentou_Encaixar'] = str(codpac_sisac.codpaciente) + ' - ' + str(codpac_sisac.paciente)
+                        agendamento_existente.append(dict)
+                    else:
+                        agenda = Agenda()
+                        agenda.codmedico = '103'
+                        agenda.datahora = agd.dataagenda
+                        agenda.nome = codpac_sisac.paciente
+                        agenda.codconvenio = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last().codconvenio
+                        agenda.codpaciente = codpac_sisac
+                        agenda.obs = 'Sessão de Radioterapia'
+                        agenda.usuario = 'API'
+                        agenda.descr = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last().codconvenio.descr
+                        agenda.datasist = datetime.now()
+                        agenda.confatd = 'N'
+                        agenda.tipo = 'RAD'
+                        agenda.plano = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last().plano
+                        agenda.telefone = codpac_sisac.telefone2
+                        senha = senhanova()
+                        agenda.senha = senha
+                        agenda.ntratradio = Radioterapia.objects.filter(codpaciente=codpac_sisac).last().ntratamento
+                        agenda.planejado = 'S'
+                        agenda.whatsapp = codpac_sisac.whatsapp
+                        agenda.tipooriginal = 'RAD'
+                        agenda.save()
+
+    if len(agendamento_existente) > 0:
+        msg = f'A tarefa de criação de agenda automática do SISAC reportou existência de agendamentos existentes. \nViolação de integridade foi evitada para o(s) seguinte(s) agendamento(s):{agendamento_existente}'
+        sendmail_cria_agenda('Cria Agenda Radio SISAC', msg)
+
+
+def atualiza_datahora_agenda():
+    violacao = []
+    sem_agenda_sisac = []
+    atualizados = []
+    agenda_mosaiq = Schedule.objects.filter(dataagenda__gte=date.today()).order_by('dataagenda').filter(activity='3D').filter(~Q(status=' C')).filter(version=0).filter(~Q(suppressed=1))
+    for pac in agenda_mosaiq:
+        print(f'Encontrado agenda MOSAIQ para o paciente {pac.id_paciente} dia {pac.dataagenda}')
+        codpac_sisac = Cadpaciente.objects.get(cpf=pac.id_paciente.cpf)
+        if codpac_sisac is not None:
+            print(f'Encontrado relacinamento para o paciente {codpac_sisac} no SISAC.')
+            agenda_sisac = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(confatd='N').filter(datahora__year=pac.dataagenda.year, datahora__month=pac.dataagenda.month, datahora__day=pac.dataagenda.day).first()
+            if agenda_sisac is not None:
+                print(f'Encontrado agenda para o paciente {codpac_sisac}, dia {agenda_sisac.datahora}')
+                if agenda_sisac.datahora == pac.dataagenda:
+                    print(f'Agendamento no SISAC é igual ao agendamento no MOSAIQ... Nada a fazer.')
+                    print('---------------------------------------------------')
+                else:
+                    agenda_dia = Agenda.objects.filter(tipo='RAD').filter(datahora=pac.dataagenda)
+                    if agenda_dia.count() > 0:
+                        print(f'Paciente {agenda_dia.first().codpaciente} ocupando o horário {pac.dataagenda}. A alteração forçada provocaria violação de integridade.')
+                        print('---------------------------------------------------')
+                        dict = {}
+                        dict['CodPaciente'] = str(codpac_sisac.codpaciente) + ' - ' + str(codpac_sisac.paciente)
+                        dict['DataHora_Atual'] = agenda_sisac.datahora.strftime("%d/%m/%Y - %H:%M:%S")
+                        dict['DataHora_MOSAIQ'] = pac.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")
+                        dict['Ocupado_Por'] = str(agenda_dia.first().codpaciente.codpaciente) + ' - ' + str(agenda_dia.first().codpaciente.paciente)
+                        violacao.append(dict)
+                    else:
+                        agenda_sisac.datahora = pac.dataagenda
+                        agenda_sisac.save()
+                        print(f'Agendamento ID {agenda_sisac.idagenda} SISAC Atualizada. Data/hora antiga: {agenda_sisac.datahora}. Data/Hora nova: {pac.dataagenda}')
+                        print('---------------------------------------------------')
+                        dict = {}
+                        dict['CodPaciente'] = str(codpac_sisac.codpaciente) + ' - ' + str(codpac_sisac.paciente)
+                        dict['IDAgenda_SISAC'] = agenda_sisac.idagenda
+                        dict['DataHora_Atualizada'] = pac.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")
+                        atualizados.append(dict)
+            else:
+                print(f'Nenhum agendamento no SISAC encontrado para o paciente {codpac_sisac} no dia {pac.dataagenda}')
+                print('---------------------------------------------------')
+                dict = {}
+                dict['CodPaciente'] = str(codpac_sisac.codpaciente) + ' - ' + str(codpac_sisac.paciente)
+                dict['DataHora_MOSAIQ'] = pac.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")
+                sem_agenda_sisac.append(dict)
+    print('---------------------------------------------------')
+    print('Procedimento concluído')
+    print(f'Segue lista de violações de integridade encontradas: {violacao}')
+    print(f'Segue lista de agendamentos sem referência no SISAC: {sem_agenda_sisac}')
+    print(f'Segue lista de agendamentos atualizados no SISAC: {atualizados}')
+
+    msg = f'Segue lista de violações de integridade encontradas: {violacao}. \n\nSegue lista de agendamentos sem referência no SISAC: {sem_agenda_sisac}. \n\nSegue lista de agendamentos atualizados no SISAC: {atualizados}'
+    sendmail_cria_agenda('Atualiza Agenda Radio SISAC', msg)
+

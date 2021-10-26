@@ -23,6 +23,7 @@ class Schedule(models.Model):
     status = models.CharField(db_column='SchStatus_Hist_SD', blank=True, null=True, max_length=250)
     suppressed = models.CharField(db_column='Suppressed', blank=True, null=True, max_length=2)
     activity = models.CharField(db_column='Activity', blank=True, null=True, max_length=10)
+    version = models.IntegerField(db_column='Version')
 
     class Meta:
         managed = False

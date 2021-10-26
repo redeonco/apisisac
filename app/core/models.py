@@ -10,6 +10,8 @@ class Cadpaciente(models.Model):
     idade = models.CharField(db_column='IDADE', max_length=5, blank=True, null=True)  # Field name made lowercase.
     rg = models.CharField(db_column='RG', max_length=20, blank=True, null=True)  # Field name made lowercase.
     cpf = models.CharField(db_column='CPF', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    telefone2 = models.CharField(db_column='Telefone2', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    whatsapp = models.CharField(db_column='WhatsApp', max_length=15, blank=True, null=True)  # Field name made lowercase.
 
     class Meta:
         managed = False
@@ -264,16 +266,63 @@ class ApiPlanejfisicoc(models.Model):
         return self.idplanejfisicoc
 
 
+class CadConvenio(models.Model):
+    codconvenio = models.CharField(primary_key=True, db_column='CodConvenio', max_length=5)
+    descr = models.CharField(db_column='Descr', max_length=100)
+
+    class Meta:
+        managed = False
+        db_table = 'CadConvenio'
+
+    def __str__(self):
+        return str(self.codconvenio)
+
+
 class Agenda(models.Model):
-    idagenda = models.IntegerField(primary_key=True, db_column='IDAgenda')  # Field name made lowercase.
-    datahora = models.DateTimeField(db_column='DataHora')  # Field name made lowercase.
-    codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', on_delete=models.PROTECT)  # Field name made lowercase.
-    nome = models.CharField(db_column='Nome', max_length=10)  # Field name made lowercase.
-    confatd = models.CharField(db_column='ConfAtd', max_length=2, blank=True, null=True)  # Field name made lowercase.
-    codmovimento = models.CharField(db_column='CodMovimento', max_length=50, blank=True, null=True)  # Field name made lowercase.
+    idagenda = models.AutoField(primary_key=True, db_column='IDAgenda')
+    codmedico = models.CharField(db_column='CodMedico', max_length=5)
+    datahora = models.DateTimeField(db_column='DataHora')
+    nome = models.CharField(db_column='Nome', max_length=250)
+    codconvenio = models.ForeignKey(CadConvenio, db_column='CodConvenio', max_length=5, on_delete=models.PROTECT)
+    codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', on_delete=models.PROTECT)
+    obs = models.CharField(db_column='Obs', max_length=200)
     usuario = models.CharField(db_column='Usuario', max_length=100, blank=True, null=True)
+    descr = models.CharField(db_column='Descr', max_length=100, default='')
     datasist = models.DateTimeField(db_column='DataSist') 
+    numero = models.CharField(db_column='Numero', max_length=20, default='')
+    endereco = models.CharField(db_column='Endereco', max_length=200, default='')
+    cidade = models.CharField(db_column='Cidade', max_length=100, default='')
+    cep = models.CharField(db_column='Cep', max_length=20, default='')
+    cpf = models.CharField(db_column='CPF', max_length=20, default='')
+    estado = models.CharField(db_column='Estado', max_length=20, default='')
+    cemarc = models.CharField(db_column='Cemarc', max_length=20, default='')
+    confatd = models.CharField(db_column='ConfAtd', max_length=2, blank=True, null=True)
+    bairro = models.CharField(db_column='Bairro', max_length=20, default='')
+    profissao = models.CharField(db_column='PROFISSAO', max_length=20, default='')
+    sexo = models.CharField(db_column='Sexo', max_length=20, default='')
+    ec = models.CharField(db_column='EC', max_length=20, default='')
+    oe = models.CharField(db_column='OE', max_length=20, default='')
+    filiacao = models.CharField(db_column='Filiacao', max_length=20, default='')
+    rg = models.CharField(db_column='RG', max_length=20, default='')
+    retorno = models.CharField(db_column='Retorno', max_length=20, default='N')
     tipo = models.CharField(db_column='Tipo', max_length=5)
+    matricula = models.CharField(db_column='Matricula', max_length=20, default='')
+    plano = models.CharField(db_column='Plano', max_length=20, default='')
+    telefone = models.CharField(db_column='Telefone', max_length=20, default='')
+    grupoemp = models.CharField(db_column='GrupoEmp', max_length=2, default='01')
+    filial = models.CharField(db_column='Filial', max_length=2, default='01')
+    ordem = models.CharField(db_column='Ordem', max_length=2, default='0')
+    senha = models.CharField(db_column='Senha', max_length=12, default='')
+    reconvoca = models.CharField(db_column='Reconvoca', max_length=20, default='')
+    codmovimento = models.CharField(db_column='CodMovimento', max_length=50, blank=True, null=True)
+    ntratradio = models.IntegerField(db_column='Ntratradio')
+    celular = models.CharField(db_column='Celular', max_length=20, default='')
+    datanasc2 = models.DateTimeField(db_column='DataNasc2')
+    email = models.CharField(db_column='EMail', max_length=50, default='')
+    local = models.CharField(db_column='Local', max_length=50, default='')
+    planejado = models.CharField(db_column='Planejado', max_length=5)
+    whatsapp = models.CharField(db_column='WhatsApp', max_length=11)
+    tipooriginal = models.CharField(db_column='TipoOriginal', max_length=10)
 
     class Meta:
         managed = False
@@ -284,7 +333,7 @@ class Agenda(models.Model):
 
 
 class Entrada(models.Model):
-    codpaciente = models.CharField(db_column='CodPaciente', max_length=10, blank=True, null=True)
+    codpaciente = models.ForeignKey(Cadpaciente ,db_column='CodPaciente', max_length=10, on_delete=models.PROTECT)
     codmovimento = models.CharField(db_column='CodMovimento', primary_key=True, max_length=10)
     tipo = models.CharField(db_column='Tipo', max_length=25, blank=True, null=True) 
     fechado = models.CharField(db_column='Fechado', max_length=20, blank=True, null=True) 
@@ -292,7 +341,7 @@ class Entrada(models.Model):
     datasist = models.DateTimeField(db_column='DataSist', blank=True, null=True)
     local = models.CharField(db_column='Local', max_length=20, blank=True, null=True)
     usuario = models.CharField(db_column='Usuario', max_length=20, blank=True, null=True)
-    codconvenio = models.CharField(db_column='CodConvenio', max_length=6, blank=True, null=True)
+    codconvenio = models.ForeignKey(CadConvenio, db_column='CodConvenio', max_length=6, on_delete=models.PROTECT)
     plano = models.CharField(db_column='Plano', max_length=6, blank=True, null=True)
     codmedico = models.CharField(db_column='CodMedico', max_length=6, blank=True, null=True)
     hist = models.CharField(db_column='Hist', max_length=200, blank=True, null=True) 
