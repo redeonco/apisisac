@@ -280,8 +280,10 @@ def atualiza_planej():
     i = 0
     for obj in campos.iterator():
         i += 1
-        print('iteração campo', i)
-        codpac_sisac = Cadpaciente.objects.exclude(cpf='').get(cpf=obj.id_paciente.cpf)
+        print('iteração campo', i, obj)
+
+        codpac_sisac = Cadpaciente.objects.exclude(cpf='').filter(cpf=obj.id_paciente.cpf).order_by('datasist').last()
+
         if codpac_sisac is not None:
             print('paciente encontrado')
             planejfisicoc = Planejfisicoc.objects.filter(codpaciente=codpac_sisac).filter(ncampo=obj.numero_campo).filter(fase=obj.id_fase.numerofase).filter(ativo=1)
@@ -335,7 +337,7 @@ def atualiza_planej():
                         iniciotrat = faseanterior.qtdsessoes + 1
                         
                 else:
-                    iniciotrat = obj.fase_id.reference_fraction
+                    iniciotrat = obj.id_fase.reference_fraction
 
                 novo_planejfisicoc.iniciotrat = iniciotrat
                 novo_planejfisicoc.incidencia = '3D'
@@ -433,13 +435,18 @@ def atualiza_planej():
                         iniciotrat = faseanterior.qtdsessoes + 1
                         
                 else:
-                    iniciotrat = obj.fase_id.reference_fraction
+                    iniciotrat = obj.id_fase.reference_fraction
 
                 novapresc.iniciotrat = iniciotrat
                 novapresc.save()
 
             primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(planejado='N').filter(confatd='N').order_by('idagenda').first()
-            primeira_agenda.planejado = 'S'    
+            if primeira_agenda is not None:
+                primeira_agenda.planejado = 'S'            
+                primeira_agenda.save() 
+                print(f'Alterado a agenda do paciente {codpac_sisac}, dia {primeira_agenda.datahora} com status Planejado OK.')
+            else:
+                pass
                                     
 
 @shared_task
@@ -551,7 +558,7 @@ def força_atualiza_planej():
                         iniciotrat = faseanterior.qtdsessoes + 1
                         
                 else:
-                    iniciotrat = obj.fase_id.reference_fraction
+                    iniciotrat = obj.id_fase.reference_fraction
 
                 novo_planejfisicoc.iniciotrat = iniciotrat
                 novo_planejfisicoc.incidencia = '3D'
@@ -649,7 +656,7 @@ def força_atualiza_planej():
                         iniciotrat = faseanterior.qtdsessoes + 1
                         
                 else:
-                    iniciotrat = obj.fase_id.reference_fraction
+                    iniciotrat = obj.id_fase.reference_fraction
 
                 novapresc.iniciotrat = iniciotrat
                 novapresc.save()

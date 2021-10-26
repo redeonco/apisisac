@@ -12,6 +12,7 @@ class Cadpaciente(models.Model):
     cpf = models.CharField(db_column='CPF', max_length=15, blank=True, null=True)  # Field name made lowercase.
     telefone2 = models.CharField(db_column='Telefone2', max_length=15, blank=True, null=True)  # Field name made lowercase.
     whatsapp = models.CharField(db_column='WhatsApp', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    datasist = models.DateTimeField(db_column='DataSist')
 
     class Meta:
         managed = False
