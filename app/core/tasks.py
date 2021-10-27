@@ -662,6 +662,7 @@ def força_atualiza_planej():
                 novapresc.save()
 
 
+@shared_task
 def cria_agenda_radio():
     # Função para gerar nova senha da agenda. Pega a última senha existente e adiciona 1
     def senhanova():
@@ -791,6 +792,7 @@ def atualiza_datahora_agenda():
     sendmail_cria_agenda('Atualiza Agenda Radio SISAC', msg)
 
 
+@shared_task
 def atualiza_agenda_sisac():
     agenda_mosaiq_editada_hoje = Schedule.objects.filter(create_dt__year=date.today().year, create_dt__month=date.today().month, create_dt__day=date.today().day).filter(activity='3D').filter(version=0).filter(~Q(suppressed=1)).filter(~Q(status=' C'))
 
@@ -815,11 +817,6 @@ def atualiza_agenda_sisac():
                 else:
                     if agenda.codpaciente != codpac_sisac:                        
                         print(f'Agendamento do dia {agenda.datahora.strftime("%d/%m/%Y - %H:%M:%S")} pertence ao paciente {agenda.codpaciente}. Inválido alterar para {codpac_sisac}')
-
-
-                
-    
-
 
 
 @shared_task
