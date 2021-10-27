@@ -24,6 +24,8 @@ class Schedule(models.Model):
     suppressed = models.CharField(db_column='Suppressed', blank=True, null=True, max_length=2)
     activity = models.CharField(db_column='Activity', blank=True, null=True, max_length=10)
     version = models.IntegerField(db_column='Version')
+    edit_dt = models.DateTimeField(db_column='Edit_DtTm')
+    create_dt = models.DateTimeField(db_column='Create_DtTm')
 
     class Meta:
         managed = False

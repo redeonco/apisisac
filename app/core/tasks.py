@@ -673,14 +673,18 @@ def cria_agenda_radio():
         return senhafinal
 
 
-    agenda_mosaiq_dia = Schedule.objects.filter(dataagenda__year=date.today().year, dataagenda__month=date.today().month, dataagenda__day='28').filter(activity='3D').filter(version=0).filter(~Q(suppressed=1))
+    agenda_mosaiq_criada_hoje = Schedule.objects.filter(create_dt__year=date.today().year, create_dt__month=date.today().month, create_dt__day=date.today().day).filter(activity='3D').filter(version=0).filter(~Q(suppressed=1))
 
+    novos_pacientes_agendados = []
     agendamento_existente = []
 
-    for pac in agenda_mosaiq_dia:
-        codpac_sisac = Cadpaciente.objects.get(cpf=pac.id_paciente.cpf)
-        if codpac_sisac is not None:
-            print(pac, pac.id_paciente)
+    for paciente in agenda_mosaiq_criada_hoje:
+        if paciente.id_paciente not in novos_pacientes_agendados:
+            novos_pacientes_agendados.append(paciente.id_paciente)
+
+    for pac in novos_pacientes_agendados:
+        codpac_sisac = Cadpaciente.objects.get(cpf=pac.cpf)
+        if codpac_sisac is not None:            
             primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(planejado='S')
             if primeira_agenda.count() <= 1:
                 altera_primeira_agenda = primeira_agenda.first()
@@ -690,6 +694,7 @@ def cria_agenda_radio():
                     altera_primeira_agenda.save()
                 agenda_mosaiq = Schedule.objects.filter(id_paciente=pac.id_paciente).filter(activity='3D').filter(~Q(suppressed=1))
                 for agd in agenda_mosaiq:
+                    print(f'Iniciando iterações para paciente {codpac_sisac}...')
                     checa_agenda = Agenda.objects.filter(datahora=agd.dataagenda).filter(tipo='RAD')
                     if checa_agenda.count() > 0:
                         print(f'Já existe agendamento no dia {agd.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")}.')
@@ -700,6 +705,7 @@ def cria_agenda_radio():
                         dict['Tentou_Encaixar'] = str(codpac_sisac.codpaciente) + ' - ' + str(codpac_sisac.paciente)
                         agendamento_existente.append(dict)
                     else:
+                        print(f'Criando agenda para paciente {codpac_sisac}, dia {agd.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")}')
                         agenda = Agenda()
                         agenda.codmedico = '103'
                         agenda.datahora = agd.dataagenda
@@ -722,11 +728,15 @@ def cria_agenda_radio():
                         agenda.tipooriginal = 'RAD'
                         agenda.save()
 
+            else:
+                print(f'Nada a fazer para o paciente {codpac_sisac}...')
+
     if len(agendamento_existente) > 0:
         msg = f'A tarefa de criação de agenda automática do SISAC reportou existência de agendamentos existentes. \nViolação de integridade foi evitada para o(s) seguinte(s) agendamento(s):{agendamento_existente}'
         sendmail_cria_agenda('Cria Agenda Radio SISAC', msg)
+    print(f'Tarefa concluída.')
 
-
+#Função cagada
 def atualiza_datahora_agenda():
     violacao = []
     sem_agenda_sisac = []
@@ -779,6 +789,37 @@ def atualiza_datahora_agenda():
 
     msg = f'Segue lista de violações de integridade encontradas: {violacao}. \n\nSegue lista de agendamentos sem referência no SISAC: {sem_agenda_sisac}. \n\nSegue lista de agendamentos atualizados no SISAC: {atualizados}'
     sendmail_cria_agenda('Atualiza Agenda Radio SISAC', msg)
+
+
+def atualiza_agenda_sisac():
+    agenda_mosaiq_editada_hoje = Schedule.objects.filter(create_dt__year=date.today().year, create_dt__month=date.today().month, create_dt__day=date.today().day).filter(activity='3D').filter(version=0).filter(~Q(suppressed=1)).filter(~Q(status=' C'))
+
+    novos_pacientes_agendados = []
+
+    for paciente in agenda_mosaiq_editada_hoje:
+        if paciente.id_paciente not in novos_pacientes_agendados:
+            novos_pacientes_agendados.append(paciente.id_paciente)
+
+    for pac in novos_pacientes_agendados:
+        codpac_sisac = Cadpaciente.objects.get(cpf=pac.cpf)
+        if codpac_sisac is not None:
+            agenda_mosaiq = Schedule.objects.filter(dataagenda__gte=date.today()).order_by('dataagenda').filter(id_paciente=pac.id_paciente).filter(activity='3D').filter(~Q(suppressed=1)).filter(~Q(status=' C'))
+            for agd in agenda_mosaiq:
+                agenda = Agenda.objects.filter(datahora=agd.dataagenda).filter(tipo='RAD').filter(planejado='S').first()
+                if agenda is None:
+                    agenda_sisac = Agenda.objects.filter(codpaciente=codpac_sisac).filter(datahora__year=agd.dataagenda.year, datahora__month=agd.dataagenda.month, datahora__day=agd.dataagenda.day).filter(tipo='RAD').first() 
+                    if agenda_sisac is not None:
+                        agenda_sisac.datahora = agd.dataagenda
+                        agenda_sisac.save()
+                        print(f'Agenda do paciente {codpac_sisac} atualizada. Dia/hora anterior: {agenda_sisac.datahora.strftime("%d/%m/%Y - %H:%M:%S")}. Dia/hora atuaç: {agd.dataagenda}')                            
+                else:
+                    if agenda.codpaciente != codpac_sisac:                        
+                        print(f'Agendamento do dia {agenda.datahora.strftime("%d/%m/%Y - %H:%M:%S")} pertence ao paciente {agenda.codpaciente}. Inválido alterar para {codpac_sisac}')
+
+
+                
+    
+
 
 
 @shared_task
