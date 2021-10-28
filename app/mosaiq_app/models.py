@@ -105,6 +105,7 @@ class TxFieldPoint(models.Model):
     energia_unidade = models.IntegerField(db_column='Energy_Unit_Enum')
     gantry = models.IntegerField(db_column='Gantry_Ang')
     colimador = models.IntegerField(db_column='Coll_Ang')
+    mesa = models.IntegerField(db_column='Couch_Ang')
 
     class Meta:
         managed = False

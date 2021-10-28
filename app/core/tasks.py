@@ -253,7 +253,7 @@ def atualiza_planej():
     # Localiza planejamentos no MOSAIQ que aprovados na data de hoje.
     # Não significa que geraram uma nova versão do tratamento
     # Pois para pacientes novos, a data de Criação é igual à data de Aprovação
-    campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month=date.today().month, sanct_dt__day=date.today().day)
+    campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month=date.today().month, sanct_dt__day__gte='27')
 
    # Inicializa um dicionário para as unidades de medida da energia do tratamento
     energia_unidade_dict = {
@@ -359,7 +359,9 @@ def atualiza_planej():
                     planej.unidade_monitora = obj.unidade_monitora
                     planej.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
                     planej.tecnica = obj.id_fase.tecnica
-                    planej.angulacao = 'G-' + str(obj.txfieldpoint_set.first().gantry) + ';M-000;C-' + str(obj.txfieldpoint_set.first().colimador)
+                    planej.angulacao = 'G-' + str(obj.txfieldpoint_set.first().gantry) + ';M-' + str(obj.txfieldpoint_set.first().mesa) + ';C-' + str(obj.txfieldpoint_set.first().colimador)
+                    planej.datasist = datetime.now()
+                    planej.usuario = 'API'
                     planej.save()
             else:
                 novo_planejfisico = Planejfisico()
@@ -371,7 +373,7 @@ def atualiza_planej():
                 novo_planejfisico.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
                 novo_planejfisico.tecnica = obj.id_fase.tecnica
                 novo_planejfisico.unidade_monitora = obj.unidade_monitora
-                novo_planejfisico.angulacao = 'G-' + str(obj.txfieldpoint_set.first().gantry) + ';M-000;C-' + str(obj.txfieldpoint_set.first().colimador)
+                novo_planejfisico.angulacao = 'G-' + str(obj.txfieldpoint_set.first().gantry) + ';M-' + str(obj.txfieldpoint_set.first().mesa) + ';C-' + str(obj.txfieldpoint_set.first().colimador)
                 novo_planejfisico.nplanejamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
                 novo_planejfisico.ntratamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
                 novo_planejfisico.ncampo = obj.numero_campo
