@@ -794,7 +794,7 @@ def atualiza_datahora_agenda():
 
 @shared_task
 def atualiza_agenda_sisac():
-    agenda_mosaiq_editada_hoje = Schedule.objects.filter(create_dt__year=date.today().year, create_dt__month=date.today().month, create_dt__day=date.today().day).filter(activity='3D').filter(version=0).filter(~Q(suppressed=1)).filter(~Q(status=' C'))
+    agenda_mosaiq_editada_hoje = Schedule.objects.filter(edit_dt__year=date.today().year, edit_dt__month=date.today().month, edit_dt__day=date.today().day).filter(activity='3D').filter(version=0).filter(~Q(suppressed=1)).filter(~Q(status=' C'))
 
     novos_pacientes_agendados = []
 
