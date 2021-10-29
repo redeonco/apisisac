@@ -140,7 +140,7 @@ def atualizaagenda():
 
                 # Gera registro de sessão de radioterapia na tabela entrada.
                 entrada = Entrada()
-                entrada.codpaciente = codpac_sisac.pk
+                entrada.codpaciente = codpac_sisac
                 entrada.codmovimento = novo_codmov
                 entrada.tipo = '4'
                 entrada.fechado = 'E'
@@ -161,7 +161,7 @@ def atualizaagenda():
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Buscando registros de prescrição e planejamento...')
 
                 # Seleciona Última Prescrição do Paciente
-                prescricao = Radioterapia.objects.filter(codpaciente=codpac_sisac.pk).order_by('numpresc').last()
+                prescricao = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last()
 
                 # Verifica quantidade de sessões de radioterapia realizadas
                 sessoesrealizadas = Agenda.objects.filter(tipo='RAD').filter(confatd='S').filter(codpaciente=codpac_sisac).count()
