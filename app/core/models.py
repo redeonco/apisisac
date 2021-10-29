@@ -333,20 +333,26 @@ class Agenda(models.Model):
         return str(self.idagenda)
 
 
-class Entrada(models.Model):
-    codpaciente = models.ForeignKey(Cadpaciente ,db_column='CodPaciente', max_length=10, on_delete=models.PROTECT)
+class Entrada(models.Model):    
     codmovimento = models.CharField(db_column='CodMovimento', primary_key=True, max_length=10)
-    tipo = models.CharField(db_column='Tipo', max_length=25, blank=True, null=True) 
-    fechado = models.CharField(db_column='Fechado', max_length=20, blank=True, null=True) 
-    datahoraent = models.DateTimeField(db_column='DataHoraEnt', blank=True, null=True)
-    datasist = models.DateTimeField(db_column='DataSist', blank=True, null=True)
-    local = models.CharField(db_column='Local', max_length=20, blank=True, null=True)
-    usuario = models.CharField(db_column='Usuario', max_length=20, blank=True, null=True)
+    codpaciente = models.ForeignKey(Cadpaciente ,db_column='CodPaciente', max_length=10, on_delete=models.PROTECT)
     codconvenio = models.ForeignKey(CadConvenio, db_column='CodConvenio', max_length=6, on_delete=models.PROTECT)
-    plano = models.CharField(db_column='Plano', max_length=6, blank=True, null=True)
-    codmedico = models.CharField(db_column='CodMedico', max_length=6, blank=True, null=True)
+    matricula = models.CharField(db_column='Matricula', max_length=30, blank=True, null=True)
+    tipo = models.CharField(db_column='Tipo', max_length=25, blank=True, null=True) 
+    datahoraent = models.DateTimeField(db_column='DataHoraEnt', blank=True, null=True)
+    guia = models.CharField(db_column='Guia', max_length=30, default='')
+    prontuario = models.CharField(db_column='Prontuario', max_length=30, default='')
     hist = models.CharField(db_column='Hist', max_length=200, blank=True, null=True) 
+    codmedico = models.CharField(db_column='CodMedico', max_length=6, blank=True, null=True)
+    local = models.CharField(db_column='Local', max_length=20, blank=True, null=True)
+    acomod = models.CharField(db_column='Acomod', max_length=30, default='')
+    recep = models.CharField(db_column='Recep', max_length=30, default='API')    
     total = models.FloatField(db_column='Total', blank=True, null=True) 
+    fechado = models.CharField(db_column='Fechado', max_length=20, blank=True, null=True) 
+    codamb = models.CharField(db_column='CodAmb', max_length=15)    
+    datasist = models.DateTimeField(db_column='DataSist', blank=True, null=True)
+    usuario = models.CharField(db_column='Usuario', max_length=20, blank=True, null=True)
+    plano = models.CharField(db_column='Plano', max_length=6, blank=True, null=True)
     grupoemp = models.CharField(db_column='GrupoEmp', max_length=2, blank=True, null=True) 
     filial = models.CharField(db_column='Filial', max_length=2, blank=True, null=True) 
     codcid = models.CharField(db_column='CodCid', max_length=10, blank=True, null=True)
@@ -473,7 +479,7 @@ class Planejfisicoc(models.Model):
 
 
 class Planejfisico(models.Model):
-    idplanejfisico = models.AutoField(primary_key=True, db_column='idPlanejFisico', max_length=10)  # Field name made lowercase.
+    idplanejfisico = models.AutoField(primary_key=True, db_column='idPlanejFisico')  # Field name made lowercase.
     idplanejfisicoc = models.ForeignKey(Planejfisicoc, db_column='idPlanejFisicoC', on_delete=models.PROTECT)  # Field name made lowercase.
     codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', max_length=11, on_delete=models.PROTECT)  # Field name made lowercase.
     codmovimento = models.CharField(db_column='CodMovimento', max_length=11)  # Field name made lowercase.
@@ -566,3 +572,147 @@ class PrescrRadio(models.Model):
     
     def __str__(self):
         return str(self.idprescrradio)
+
+
+class SolicExa(models.Model):
+    nsolic = models.IntegerField(db_column='NSolic')
+    codpaciente = models.CharField(db_column='CodPaciente', max_length=11)
+    codamb = models.CharField(db_column='CodAmb', max_length=15)
+    descr = models.CharField(db_column='Descr', max_length=500)
+    codmedico = models.CharField(db_column='CodMedico', max_length=5)
+    tipo = models.CharField(db_column='Tipo', max_length=10)
+    datasist = models.DateTimeField(db_column='DataSist')
+    codcid = models.CharField(db_column='CodCid', max_length=10)
+    grupoemp = models.CharField(db_column='GrupoEmp', max_length=2)
+    filial = models.CharField(db_column='Filial', max_length=2)
+    quant = models.IntegerField(db_column='Quant')
+    codpacref = models.CharField(db_column='CodPacRef', max_length=11)
+    item = models.AutoField(primary_key=True, db_column='Item')
+    codconvenio = models.CharField(db_column='CodConvenio', max_length=5)
+    npresc = models.IntegerField(db_column='NumeroPrescricao')
+
+    class Meta:
+        managed = False
+        db_table = 'SolicExa'
+    
+    def __str__(self):
+        return str(self.codamb)
+
+
+class Fatura(models.Model):
+    codpaciente = models.ForeignKey(Entrada, db_column='CodPaciente', max_length=11, on_delete=models.PROTECT)
+    grupo = models.CharField(db_column='Grupo', max_length=5)
+    codtaxa = models.CharField(db_column='CodTaxa', max_length=15)
+    chave = models.CharField(db_column='Chave', max_length=15, default='')
+    descr = models.CharField(db_column='Descr', max_length=500)
+    data = models.DateTimeField(db_column='Data')
+    valor = models.FloatField(db_column='Valor', max_length=15)
+    quant = models.IntegerField(db_column='Quant')
+    filme = models.IntegerField(db_column='Filme', default=0)
+    codmedico = models.CharField(db_column='CodMedico', max_length=5)
+    datasist = models.DateTimeField(db_column='DataSist')
+    usuario = models.CharField(db_column='Usuario', max_length=20, default='API')
+    codamb = models.CharField(db_column='CodAmb', max_length=15)
+    ch = models.FloatField(db_column='Ch', max_length=15)
+    un = models.CharField(db_column='Un', max_length=10, default='')
+    custoop = models.IntegerField(db_column='CustoOp', default=0)
+    local = models.CharField(db_column='Local', max_length=10, default='112')
+    grupoimp = models.CharField(db_column='GrupoImp', max_length=10, default='112')
+    valorp = models.FloatField(db_column='ValorP', max_length=15, default=0)
+    honor = models.FloatField(db_column='Honor', max_length=15)
+    med = models.FloatField(db_column='Med', max_length=15, default=0)
+    mat = models.FloatField(db_column='Mat', max_length=15, default=0)
+    diaria = models.FloatField(db_column='Diaria', max_length=15, default=0)
+    taxa = models.FloatField(db_column='Taxa', max_length=15, default=0)
+    gas = models.FloatField(db_column='Gas', max_length=15, default=0)
+    vprof = models.FloatField(db_column='VProf', max_length=15, default=0)
+    voutros = models.FloatField(db_column='VOutros', max_length=15, default=0)
+    valponto = models.FloatField(db_column='ValPonto', max_length=15, default=0)
+    ptosadt = models.FloatField(db_column='PtoSadt', max_length=15, default=0)
+    vpprof = models.FloatField(db_column='VpProf', max_length=15)
+    diaapt = models.FloatField(db_column='DiaApt', max_length=15, default=0)
+    diauti = models.FloatField(db_column='DiaUti', max_length=15, default=0)
+    diaenf = models.FloatField(db_column='DiaEnf', max_length=15, default=0)
+    obs = models.CharField(db_column='Obs', max_length=500)
+    custo = models.FloatField(db_column='Custo', max_length=15, default=0)
+    glosa = models.FloatField(db_column='Glosa', max_length=15, default=0)
+    numaux = models.CharField(db_column='NumAux', max_length=10, default='10')
+    grupoemp = models.CharField(db_column='GrupoEmp', max_length=2, default='01')
+    filial = models.CharField(db_column='Filial', max_length=2, default='01')
+    codmedemp = models.CharField(db_column='CodMedEmp', max_length=5, default='')
+    cota = models.IntegerField(db_column='Cota', default=1)
+    usuposto = models.CharField(db_column='UsuPosto', max_length=5, default='')
+    graumedico = models.CharField(db_column='GrauMedico', max_length=5, default='')
+    tabtiss = models.CharField(db_column='TabTiss', max_length=5, default='')
+    tipoacomod = models.CharField(db_column='TipoAcomod', max_length=5, default='N')
+    codtiss = models.CharField(db_column='CodTiss', max_length=5, default='')
+    viaacesso = models.CharField(db_column='ViaAcesso', max_length=5, default='')
+    tecutiliz = models.CharField(db_column='TecUtilIZ', max_length=5, default='')
+    localac = models.CharField(db_column='LocalAC', max_length=5, default='112')
+    valoracresc = models.FloatField(db_column='ValorAcresc', max_length=15, default=0)
+    opm = models.FloatField(db_column='OPM', max_length=15, default=0)
+    qtdsolic = models.IntegerField(db_column='QtdSolic', default=1)
+    codgasto = models.IntegerField(db_column='CodGasto', default=0)
+    dente = models.CharField(db_column='Dente', max_length=5, default='')
+    regiaodente = models.CharField(db_column='RegiaoDente', max_length=5, default='')
+    face = models.CharField(db_column='Face', max_length=5, default='')
+    seq = models.AutoField(primary_key=True, db_column='Seq')
+    cbo = models.CharField(db_column='CBO', max_length=5, default='')
+    itempresc = models.CharField(db_column='ItemPresc', max_length=5, default='')
+    npresc = models.IntegerField(db_column='NPresc', default=0)
+    hora = models.CharField(db_column='Hora', max_length=5, default='')
+    vrepasse = models.FloatField(db_column='VRepasse', max_length=15, default=0)
+    qtdtiss = models.IntegerField(db_column='QtdTiss', default=1)
+    grupoproc = models.CharField(db_column='GrupoProc', max_length=5, default='')
+    codtuss = models.CharField(db_column='CodTuss', max_length=5, default='')
+    codproprio = models.CharField(db_column='CodProprio', max_length=5, default='')
+    unproprio = models.CharField(db_column='UnProprio', max_length=5, default='')
+
+    class Meta:
+        managed = False
+        db_table = 'Fatura'
+    
+    def __str__(self):
+        return str(self.seq)
+
+
+class Exame(models.Model):
+    idexame = models.AutoField(primary_key=True, db_column='IDExame')
+    codpaciente = models.ForeignKey(Entrada, db_column='CodPaciente', max_length=11, on_delete=models.PROTECT)
+    codamb = models.CharField(db_column='CodAmb', max_length=15)
+    local = models.CharField(db_column='Local', max_length=10, default='112')
+    descr = models.CharField(db_column='Descr', max_length=500)
+    ok = models.CharField(db_column='Ok', max_length=5, default='')
+    quant = models.IntegerField(db_column='Quant')
+    codmedico = models.CharField(db_column='CodMedico', max_length=5)
+    interno = models.CharField(db_column='Interno', max_length=5, default='Ext')
+    contexa = models.CharField(db_column='ContExa', max_length=5, default='1')
+    usuario = models.CharField(db_column='Usuario', max_length=20, default='API')
+    datasist = models.DateTimeField(db_column='DataSist')
+    chave = models.CharField(db_column='Chave', max_length=11)
+    medcred = models.CharField(db_column='MedCred', max_length=2, default='N')
+    valor = models.FloatField(db_column='Valor', max_length=15)
+    etiq = models.CharField(db_column='Etiq', max_length=5, default='')
+    solic = models.CharField(db_column='Solic', max_length=5, default='')
+    guia = models.CharField(db_column='Guia', max_length=5, default='')
+    senha = models.CharField(db_column='Senha', max_length=5, default='')
+    tipo = models.CharField(db_column='Tipo', max_length=5, default='R')
+    codigo = models.IntegerField(db_column='Codigo')
+    dataproc = models.DateTimeField(db_column='DataProc')
+    codsolic = models.CharField(db_column='CodSolic', max_length=5, default='')
+    autoriza = models.CharField(db_column='Autoriza', max_length=5, default='N')
+    grupoemp = models.CharField(db_column='GrupoEmp', max_length=5, default='01')
+    filial = models.CharField(db_column='Filial', max_length=5, default='01')
+    numaux = models.CharField(db_column='NumAux', max_length=5, default='1')
+    modalidade = models.CharField(db_column='Modalidade', max_length=5, default='')
+    codpacref = models.ForeignKey(Cadpaciente, db_column='CodPacRef', max_length=10, on_delete=models.PROTECT)
+    codtuss = models.CharField(db_column='CodTuss', max_length=5, default='')
+    cbosus = models.CharField(db_column='CBOSus', max_length=5, default='')
+    statusconsulta = models.CharField(db_column='Statusconsulta', max_length=5, default='')
+
+    class Meta:
+        managed = False
+        db_table = 'Exame'
+    
+    def __str__(self):
+        return str(self.idexame)

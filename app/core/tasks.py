@@ -10,7 +10,8 @@ from core.models import (
     Planejfisico, 
     Radioterapia, 
     Planejfisicoc,
-    PrescrRadio
+    PrescrRadio,
+    SolicExa
     )
 from datetime import datetime, date
 from django.db.models import Q
@@ -227,15 +228,20 @@ def atualizaagenda():
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Paciente confirmado.')
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iteração concluída para o paciente', codpac_sisac)
 
+                # Verifica a quantidade de sessões realizadas.
+                qtd_realizada = Agenda.objects.filter(tipo='RAD').filter(confatd='S').filter(codpaciente=codpac_sisac).count()
+
+
+                if qtd_realizada == 1:
+                    print(f'Primeira sessão de radioterapia do paciente {codpac_sisac}. Iniciando lançamento do pacote do tratamento na conta do paciente...')
+                    codamb = SolicExa.objects.filter(npresc=prescricao).order_by('item').first()
+                    
+
 
                 
-
-                # Verifica a quantidade de sessões realizadas.
                 # Se qtd realizada = quantidade prescrita, significa que paciente teve alta
                 # Então insere flag TRATADO = 'SIM' na prescrição e no planejamento do paciente.
                 # Paciente recebeu alta e um email é enviado informando.
-                qtd_realizada = Agenda.objects.filter(tipo='RAD').filter(confatd='S').filter(codpaciente=codpac_sisac).count()
-
                 if prescricao.naplicacoes == qtd_realizada:
                     prescricao.tratado = 'SIM'
                     prescricao.save()
