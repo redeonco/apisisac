@@ -62,6 +62,16 @@ def sendmail_cria_agenda(tarefa, msg):
         fail_silently=False,
     )
 
+@shared_task
+def sendmail_alta_paciente(pac):
+    send_mail(
+        'Relatório API - SISAC - Alta de Paciente',
+        'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Última sessão de radioterapia realizada para o paciente' + pac + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S"),
+        'chamado@oncoradium.com.br',
+        ['tony.carvalho@oncoradium.com.br', 'iara.souza@oncoradium.com.br'],
+        fail_silently=False,
+    )
+
 # Tarefa para atualizar a agenda de tratamento da radioterapia do SISAC comparando com a agenda de tratamento do MOSAIQ
 # A tarefa olha para a agenda do MOSAIQ quais pacientes estão marcados como Completed
 # Para cada paciente marcado como Completed, a tarefa realiza iterações no banco de dados SISAC
@@ -153,7 +163,7 @@ def atualizaagenda():
                 prescricao = Radioterapia.objects.filter(codpaciente=codpac_sisac.pk).order_by('numpresc').last()
 
                 # Verifica quantidade de sessões de radioterapia realizadas
-                sessoesrealizadas = Entrada.objects.filter(codpaciente=codpac_sisac).filter(hist__icontains='Sessão de Radioterapia').count()
+                sessoesrealizadas = Agenda.objects.filter(tipo='RAD').filter(confatd='S').filter(codpaciente=codpac_sisac).count()
 
                 # Verifica número de aplicações de radioterapia para a fase 1
                 naplicfase1 = Planejfisicoc.objects.filter(numpresc=prescricao).order_by('fase').first().naplicacoes
@@ -216,7 +226,33 @@ def atualizaagenda():
                 agenda_sisac.save()
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Paciente confirmado.')
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iteração concluída para o paciente', codpac_sisac)
+
+
                 
+
+                # Verifica a quantidade de sessões realizadas.
+                # Se qtd realizada = quantidade prescrita, significa que paciente teve alta
+                # Então insere flag TRATADO = 'SIM' na prescrição e no planejamento do paciente.
+                # Paciente recebeu alta e um email é enviado informando.
+                qtd_realizada = Agenda.objects.filter(tipo='RAD').filter(confatd='S').filter(codpaciente=codpac_sisac).count()
+
+                if prescricao.naplicacoes == qtd_realizada:
+                    prescricao.tratado = 'SIM'
+                    prescricao.save()
+
+                    for planej in planejamento:
+                        planej.tratado = 'SIM'
+                        planej.save()
+
+                    prescrradio = PrescrRadio.objects.filter(numpresc=prescricao)
+
+                    for presc in prescrradio:
+                        presc.tratado = 'SIM'
+                        presc.save()
+                    
+                    print(f'Última sessão do paciente{codpac_sisac}. {qtd_realizada} sessões realizadas. Inserida flag TRATADO=SIM para o tratamento do paciente.')
+                    sendmail_alta_paciente(codpac_sisac)
+
                 i += 1
     print('---------------------------------------------')
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Atualização da agenda concluída com sucesso.', i, 'pacientes foram confirmados na agenda de tratamento de radioterapia SISAC.')

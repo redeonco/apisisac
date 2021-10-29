@@ -349,6 +349,8 @@ class Entrada(models.Model):
     total = models.FloatField(db_column='Total', blank=True, null=True) 
     grupoemp = models.CharField(db_column='GrupoEmp', max_length=2, blank=True, null=True) 
     filial = models.CharField(db_column='Filial', max_length=2, blank=True, null=True) 
+    codcid = models.CharField(db_column='CodCid', max_length=10, blank=True, null=True)
+    consultaok = models.CharField(db_column='ConsultaOk', max_length=5, blank=True, null=True)
 
     class Meta:
         managed = False
