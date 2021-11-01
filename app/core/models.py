@@ -270,7 +270,7 @@ class ApiPlanejfisicoc(models.Model):
 class CadConvenio(models.Model):
     codconvenio = models.CharField(primary_key=True, db_column='CodConvenio', max_length=5)
     descr = models.CharField(db_column='Descr', max_length=100)
-    hm = models.CharField(db_column='HM')
+    hm = models.CharField(db_column='HM', max_length=5)
 
     class Meta:
         managed = False
