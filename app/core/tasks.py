@@ -376,7 +376,7 @@ def atualiza_planej():
                 # Se houver, define início tratamento com o valor obtido da coluna Reference_Fraction, tabela Fase
                 lista_fases = []
                 if checafase(obj.id_fase) == False:
-                    fases = Fase.objects.filter(id_paciente=obj.id_paciente) 
+                    fases = Fase.objects.filter(id_paciente=obj.id_paciente).filter(reference_sit_set_id__isnull=True)
                     nfase = 0
                     contador = 0
                     for fase in fases:
@@ -489,7 +489,7 @@ def atualiza_planej():
                 # Se houver, define início tratamento com o valor obtido da coluna Reference_Fraction, tabela Fase
                 lista_fases = []
                 if checafase(obj.id_fase) == False:
-                    fases = Fase.objects.filter(id_paciente=obj.id_paciente)
+                    fases = Fase.objects.filter(id_paciente=obj.id_paciente).filter(reference_sit_set_id__isnull=True)
                     nfase = 0
                     contador = 0
                     for fase in fases:
