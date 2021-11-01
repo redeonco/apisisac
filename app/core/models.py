@@ -382,6 +382,7 @@ class Radioterapia(models.Model):
     idradio = models.IntegerField(db_column='idRadio', blank=True, null=True)  # Field name made lowercase.
     karno = models.CharField(db_column='Karno', max_length=5, blank=True, null=True)  # Field name made lowercase.
     codmed = models.CharField(db_column='CodMed', max_length=10, blank=True, null=True)
+    tratado = models.CharField(db_column='Tratado', max_length=10, blank=True, null=True)
 
     class Meta:
         managed = False
@@ -464,6 +465,7 @@ class Planejfisicoc(models.Model):
     fatrendimento = models.CharField(db_column='FatRendimento', max_length=5, default='0')  # Field name made lowercase.
     portal = models.CharField(db_column='Portal', max_length=5, default='0')  # Field name made lowercase.
     usuario = models.CharField(db_column='Usuario', max_length=30)
+    id_mosaiq = models.IntegerField(db_column='ID_MOSAIQ')
 
     class Meta:
         managed = False
@@ -530,6 +532,7 @@ class Planejfisico(models.Model):
     dtt = models.CharField(db_column='DTT', max_length=50, blank=True, null=True)
     dtd = models.CharField(db_column='DTD', max_length=100, blank=True, null=True)   
     usuario = models.CharField(db_column='Usuario', max_length=30)
+    id_mosaiq = models.IntegerField(db_column='ID_MOSAIQ')
 
     class Meta:
         managed = False
@@ -565,6 +568,7 @@ class PrescrRadio(models.Model):
     dosettotal = models.IntegerField(db_column='DoseTTotal')
     dosetdiaria = models.IntegerField(db_column='DoseTDiaria')
     fase = models.IntegerField(db_column='Fase')
+    id_mosaiq = models.IntegerField(db_column='ID_MOSAIQ')
 
     class Meta:
         managed = False
