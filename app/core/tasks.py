@@ -1,6 +1,8 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import IntegrityError
 from celery import shared_task
+from config.models import TAB_Parametro
+from core.models import CadConvenio, Exame, Fatura, TabAmb
 from mosaiq_app.models import *
 from core.models import (
     Agenda, 
@@ -93,6 +95,22 @@ def atualizaagenda():
         codfinal = cut[0] + '.' + str(seqadd)  
 
         return codfinal
+    
+    def incrementa_codigoexame():
+        prm_exame = TAB_Parametro.objects.get(prm_nome='TAB_EXAME')
+        novo_codigo = prm_exame.prm_sequencia + 1
+        prm_exame.prm_sequencia = novo_codigo
+        prm_exame.save()
+
+        return novo_codigo
+
+    def incrementa_natendimento():
+        prm_exame = TAB_Parametro.objects.get(prm_nome='TAB_ATENDIMENTO')
+        novo_codigo = prm_exame.prm_sequencia + 1
+        prm_exame.prm_sequencia = novo_codigo
+        prm_exame.save()
+
+        return novo_codigo
     
     # Marca a hora de início da tarefa
     horainicial = datetime.now()
@@ -238,10 +256,86 @@ def atualizaagenda():
 
 
                 if qtd_realizada == 1:
-                    print(f'Primeira sessão de radioterapia do paciente {codpac_sisac}. Iniciando lançamento do pacote do tratamento na conta do paciente...')
-                    codamb = SolicExa.objects.filter(npresc=prescricao).order_by('item').first()
+                    codamb = SolicExa.objects.filter(npresc=prescricao).order_by('item').first().codamb
+                    prescricao = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last()
+                    print(f'Primeira sessão de radioterapia do paciente {codpac_sisac}. Iniciando lançamento do pacote do tratamento na conta do paciente...')                    
+                    primeira_entrada = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').first()
+                    codconvenio = primeira_entrada.codconvenio
+                    matricula = primeira_entrada.matricula
+                    codmedico = primeira_entrada.codmedico
+                    plano = primeira_entrada.plano
+                    ultimo_codmov = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last()
+                    novo_codmov = addcodmovimento(str(ultimo_codmov))
                     
+                    # Gerar registro do pacote de tratamento na tabela Entrada
+                    
+                    if Entrada.objects.filter(codpaciente=codpac_sisac).filter(codamb=codamb).count() == 0:
+                        entrada = Entrada()
+                        entrada.codmovimento = novo_codmov
+                        entrada.codpaciente = codpac_sisac
+                        entrada.codconvenio = codconvenio
+                        entrada.matricula = matricula
+                        entrada.tipo = '4'
+                        entrada.datahoraent = datetime.now()
+                        entrada.hist = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
+                        entrada.codmedico = codmedico
+                        entrada.local = '112'
+                        entrada.recep = 'API'
+                        entrada.total = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+                        entrada.fechado = 'P'
+                        entrada.codamb = codamb
+                        entrada.datasist = datetime.now()
+                        entrada.plano = plano
+                        entrada.tabhm = CadConvenio.objects.get(codconvenio=codconvenio).hm
+                        entrada.datahoraint = datetime.now()
+                        entrada.localini = '112'
+                        novocodigo_natendimento = incrementa_natendimento()
+                        entrada.natendimento = novocodigo_natendimento
+                        entrada.datamarcada = datetime.now()
+                        entrada.save()
 
+                    # Gerar registro do pacote de tratamento na tabela Fatura
+                    if Fatura.objects.filter(codpaciente__icontains=codpac_sisac.codpaciente).filter(codamb=codamb).count() == 0:
+                        fatura = Fatura()
+                        fatura.codpaciente = novo_codmov
+                        fatura.grupo = '1'
+                        fatura.codtaxa = codamb
+                        fatura.descr = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
+                        fatura.data = datetime.now()
+                        fatura.valor = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+                        fatura.quant = '1'
+                        fatura.filme = '0'
+                        fatura.codmedico = codmedico
+                        fatura.datasist = datetime.now()
+                        fatura.usuario = 'API'
+                        fatura.codamb = codamb
+                        fatura.ch = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+                        fatura.local = '112'
+                        fatura.honor = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+                        fatura.vpprof = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+                        fatura.obs = f'Tab.Honor {CadConvenio.objects.get(codconvenio=codconvenio).hm} {CadConvenio.objects.get(codconvenio=CadConvenio.objects.get(codconvenio=codconvenio).hm).descr}'
+                        fatura.localac = '112'
+                        fatura.save()
+
+                    # Gerar registro do pacote de tratamento na tabela Exame
+                    if Exame.objects.filter(codpaciente__icontains=codpac_sisac.codpaciente).filter(codamb=codamb).count() == 0:
+                        exame = Exame()
+                        exame.codpaciente = novo_codmov
+                        exame.codamb = codamb
+                        exame.local = '112'
+                        exame.descr = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
+                        exame.quant = '1'
+                        exame.codmedico = codmedico
+                        exame.usuario = 'API'
+                        exame.datasist = datetime.now()
+                        exame.chave = novo_codmov
+                        exame.valor = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+                        exame.tipo = 'R'
+                        exame.dataproc = datetime.now()
+                        exame.codpacref = codpac_sisac
+                        novocodigo_exame = incrementa_codigoexame()
+                        exame.codigo = novocodigo_exame
+                        exame.save()
 
                 
                 # Se qtd realizada = quantidade prescrita, significa que paciente teve alta
@@ -1155,3 +1249,112 @@ def fase(pac):
         list.append(dict)
         contador += 1
     return list
+
+
+
+
+def inserepacote(pac):
+    codpac_sisac = Cadpaciente.objects.get(codpaciente=pac)
+
+    def addcodmovimento(codmovimento):
+        cut = codmovimento.split('.')
+        seqadd = int(cut[1]) + 1
+        if seqadd < 10:
+            seqadd = '0' + str(seqadd)
+        codfinal = cut[0] + '.' + str(seqadd)  
+
+        return codfinal
+    
+    def incrementa_codigoexame():
+        prm_exame = TAB_Parametro.objects.get(prm_nome='TAB_EXAME')
+        novo_codigo = prm_exame.prm_sequencia + 1
+        prm_exame.prm_sequencia = novo_codigo
+        prm_exame.save()
+
+        return novo_codigo
+
+    def incrementa_natendimento():
+        prm_exame = TAB_Parametro.objects.get(prm_nome='TAB_ATENDIMENTO')
+        novo_codigo = prm_exame.prm_sequencia + 1
+        prm_exame.prm_sequencia = novo_codigo
+        prm_exame.save()
+
+        return novo_codigo
+
+
+    prescricao = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last()
+    print(f'Primeira sessão de radioterapia do paciente {codpac_sisac}. Iniciando lançamento do pacote do tratamento na conta do paciente...')
+    codamb = SolicExa.objects.filter(npresc=prescricao).order_by('item').first().codamb
+    primeira_entrada = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').first()
+    codconvenio = primeira_entrada.codconvenio
+    matricula = primeira_entrada.matricula
+    codmedico = primeira_entrada.codmedico
+    plano = primeira_entrada.plano
+    ultimo_codmov = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last()
+    novo_codmov = addcodmovimento(str(ultimo_codmov))
+    
+    # Gerar registro do pacote de tratamento na tabela Entrada
+    entrada = Entrada()
+    entrada.codmovimento = novo_codmov
+    entrada.codpaciente = codpac_sisac
+    entrada.codconvenio = codconvenio
+    entrada.matricula = matricula
+    entrada.tipo = '4'
+    entrada.datahoraent = datetime.now()
+    entrada.hist = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
+    entrada.codmedico = codmedico
+    entrada.local = '112'
+    entrada.recep = 'API'
+    entrada.total = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+    entrada.fechado = 'P'
+    entrada.codamb = codamb
+    entrada.datasist = datetime.now()
+    entrada.plano = plano
+    entrada.tabhm = CadConvenio.objects.get(codconvenio=codconvenio).hm
+    entrada.datahoraint = datetime.now()
+    entrada.localini = '112'
+    novocodigo_natendimento = incrementa_natendimento()
+    entrada.natendimento = novocodigo_natendimento
+    entrada.datamarcada = datetime.now()
+    entrada.save()
+
+    # Gerar registro do pacote de tratamento na tabela Fatura
+    fatura = Fatura()
+    fatura.codpaciente = novo_codmov
+    fatura.grupo = '1'
+    fatura.codtaxa = codamb
+    fatura.descr = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
+    fatura.data = datetime.now()
+    fatura.valor = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+    fatura.quant = '1'
+    fatura.filme = '0'
+    fatura.codmedico = codmedico
+    fatura.datasist = datetime.now()
+    fatura.usuario = 'API'
+    fatura.codamb = codamb
+    fatura.ch = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+    fatura.local = '112'
+    fatura.honor = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+    fatura.vpprof = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+    fatura.obs = f'Tab.Honor {CadConvenio.objects.get(codconvenio=codconvenio).hm} {CadConvenio.objects.get(codconvenio=CadConvenio.objects.get(codconvenio=codconvenio).hm).descr}'
+    fatura.localac = '112'
+    fatura.save()
+
+    # Gerar registro do pacote de tratamento na tabela Exame
+    exame = Exame()
+    exame.codpaciente = novo_codmov
+    exame.codamb = codamb
+    exame.local = '112'
+    exame.descr = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
+    exame.quant = '1'
+    exame.codmedico = codmedico
+    exame.usuario = 'API'
+    exame.datasist = datetime.now()
+    exame.chave = novo_codmov
+    exame.valor = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+    exame.tipo = 'R'
+    exame.dataproc = datetime.now()
+    exame.codpacref = codpac_sisac
+    novocodigo_exame = incrementa_codigoexame()
+    exame.codigo = novocodigo_exame
+    exame.save()

@@ -41,6 +41,7 @@ ALLOWED_HOSTS.extend(
 INSTALLED_APPS = [
     'core',
     'mosaiq_app',
+    'config',
     'django_celery_results',
     'django_celery_beat',
     'rest_framework',
@@ -118,6 +119,20 @@ DATABASES = {
         'PASSWORD': config('DB_MOSAIQ_PASSWORD'),
         'HOST': config('DB_MOSAIQ_HOST'),
         'PORT': config('DB_MOSAIQ_PORT'),
+        'HOST_IS_SERVER': True,
+
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+            'ssl': False
+            },
+    },
+    'config': {
+        'ENGINE': 'sql_server.pyodbc',
+        'NAME': config('DB_CONFIG_NAME'),
+        'USER': config('DB_CONFIG_USER'),
+        'PASSWORD': config('DB_CONFIG_PASSWORD'),
+        'HOST': config('DB_CONFIG_HOST'),
+        'PORT': config('DB_CONFIG_PORT'),
         'HOST_IS_SERVER': True,
 
         'OPTIONS': {
