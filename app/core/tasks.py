@@ -208,7 +208,7 @@ def atualizaagenda():
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Gerando registros na tabela EntradaRadio...')
 
 
-                campostratados = Dose_Hst.objects.filter(id_paciente=obj.id_paciente).filter(datahora__year=date.today().year,datahora__month=date.today().month, datahora__day=date.today().day)
+                campostratados = Dose_Hst.objects.filter(id_paciente=obj.id_paciente).filter(datahora__year=date.today().year,datahora__month=date.today().month, datahora__day=date.today().day).filter(dose_campo__gt=0)
 
 
                 # Inicia iterações sobre o resultado da consulta na tabela PlanejFisico.
@@ -216,7 +216,7 @@ def atualizaagenda():
                 # Para cada campo encontrado no planejamento, a interação irá gerar um registro na tabela EntradaRadio,
                 # Referênciando os detalhes técnicos presentes no planejamento e na prescrição médica.
                 for campo in campostratados:
-                    planej = Planejfisico.objects.get(id_mosaiq=campo.id_campo_id)
+                    planej = Planejfisico.objects.get(id_mosaiq=campo.id_campo_id)                    
                     entradaradio = Entradaradio()
                     entradaradio.codmovimento = novo_codmov
                     entradaradio.codpaciente = codpac_sisac.pk
@@ -395,7 +395,7 @@ def atualiza_planej():
     # Não significa que geraram uma nova versão do tratamento
     # Pois para pacientes novos, a data de Criação é igual à data de Aprovação
     # campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month=date.today().month, sanct_dt__day=date.today().day)
-    campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month__gte='09', sanct_dt__day__gte='01')
+    campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month='10', sanct_dt__day__gte='20')
 
    # Inicializa um dicionário para as unidades de medida da energia do tratamento
     energia_unidade_dict = {
@@ -1227,29 +1227,6 @@ def alta():
                 presc.tratado = 'SIM'
                 presc.save()
                 print(f'Flag TRATADO SIM inserida para o campo {presc}, paciente {presc.codpaciente}')
-
-
-
-def fase(pac):
-    fases = Fase.objects.filter(pcp_id=obj.id_fase.pcp_id)
-    list = []
-    nfase = 0
-    contador = 0
-    for fase in fases:
-        dict = {}
-        nfase += 1
-        dict['IDFase'] = fase
-        dict['NumeroFase'] = nfase
-        dict['QtdSessoes'] = fase.qtdsessoes
-        if contador == 0:
-            dict['InicioTrat'] = 1
-        else:
-            inicio = list[contador-1]['InicioTrat'] + list[contador-1]['QtdSessoes']
-            dict['InicioTrat'] = inicio
-        list.append(dict)
-        contador += 1
-    return list
-
 
 
 
