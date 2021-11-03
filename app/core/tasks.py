@@ -185,22 +185,22 @@ def atualizaagenda():
                 sessoesrealizadas = Agenda.objects.filter(tipo='RAD').filter(confatd='S').filter(codpaciente=codpac_sisac).count()
 
                 # Verifica número de aplicações de radioterapia para a fase 1
-                naplicfase1 = Planejfisicoc.objects.filter(numpresc=prescricao).order_by('fase').first().naplicacoes
+                naplicfase1 = Planejfisicoc.objects.filter(numpresc=prescricao.numpresc).order_by('fase').first().naplicacoes
 
                 # Se houver fase 2, define número de aplicações da fase 2
-                if Planejfisicoc.objects.filter(numpresc=prescricao).order_by('fase').last().fase > 1:
-                    naplicfase2 = Planejfisicoc.objects.filter(numpresc=prescricao).order_by('fase').last().naplicacoes
+                if Planejfisicoc.objects.filter(numpresc=prescricao.numpresc).order_by('fase').last().fase > 1:
+                    naplicfase2 = Planejfisicoc.objects.filter(numpresc=prescricao.numpresc).order_by('fase').last().naplicacoes
                 
                 # Define fase atual baseado na quantidade de sessões realizadas. 
                 # Se quantidade realizada for menor que total de aplicações da Fase 1, então Fase = 1
                 # Se quantidade realizada for maior ou igual ao total de aplicações da Fase 1, então Fase = 2
                 if sessoesrealizadas < naplicfase1:
-                    fase = Planejfisicoc.objects.filter(numpresc=prescricao).order_by('fase').first().fase        
+                    fase = Planejfisicoc.objects.filter(numpresc=prescricao.numpresc).order_by('fase').first().fase        
                 else:
-                    fase = Planejfisicoc.objects.filter(numpresc=prescricao).order_by('fase').last().fase
+                    fase = Planejfisicoc.objects.filter(numpresc=prescricao.numpresc).order_by('fase').last().fase
                 
                 # Seleciona planejamento da prescrição, filtrando pela fase.
-                planejamento = Planejfisico.objects.filter(numpresc=prescricao.pk).order_by('idplanejfisico').filter(fase=fase)
+                planejamento = Planejfisico.objects.filter(numpresc=prescricao.numpresc).order_by('idplanejfisico').filter(fase=fase)
 
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Busca concluída.')
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iniciando iteração no resultado da busca...')
@@ -220,7 +220,7 @@ def atualizaagenda():
                     entradaradio = Entradaradio()
                     entradaradio.codmovimento = novo_codmov
                     entradaradio.codpaciente = codpac_sisac.pk
-                    entradaradio.numpresc = prescricao
+                    entradaradio.numpresc = prescricao.numpresc
                     entradaradio.idplanejfisico = Planejfisico.objects.get(id_mosaiq=campo.id_campo_id).idplanejfisico
                     entradaradio.encerrado = 'S'
                     entradaradio.observacao = ''
@@ -256,8 +256,7 @@ def atualizaagenda():
 
 
                 if qtd_realizada == 1:
-                    codamb = SolicExa.objects.filter(npresc=prescricao).order_by('item').first().codamb
-                    prescricao = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last()
+                    codamb = SolicExa.objects.filter(npresc=prescricao.numpresc).order_by('item').first().codamb                    
                     print(f'Primeira sessão de radioterapia do paciente {codpac_sisac}. Iniciando lançamento do pacote do tratamento na conta do paciente...')                    
                     primeira_entrada = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').first()
                     codconvenio = primeira_entrada.codconvenio
@@ -349,7 +348,7 @@ def atualizaagenda():
                         planej.tratado = 'SIM'
                         planej.save()
 
-                    prescrradio = PrescrRadio.objects.filter(numpresc=prescricao)
+                    prescrradio = PrescrRadio.objects.filter(numpresc=prescricao.numpresc)
 
                     for presc in prescrradio:
                         presc.tratado = 'SIM'

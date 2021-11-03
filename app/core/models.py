@@ -410,7 +410,8 @@ class Entrada(models.Model):
 
 
 class Radioterapia(models.Model):
-    numpresc = models.CharField(primary_key=True, db_column='NumPresc', max_length=10)  # Field name made lowercase.
+    idradio = models.AutoField(primary_key=True, db_column='idRadio')
+    numpresc = models.CharField(db_column='NumPresc', max_length=10)  # Field name made lowercase.
     codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', max_length=11, on_delete=models.PROTECT)
     codcidp = models.CharField(db_column='CodCidP', max_length=10, blank=True, null=True)  # Field name made lowercase.
     estadio = models.CharField(db_column='Estadio', max_length=15, blank=True, null=True)  # Field name made lowercase.
@@ -421,8 +422,7 @@ class Radioterapia(models.Model):
     tipon = models.CharField(db_column='TipoN', max_length=10, blank=True, null=True)  # Field name made lowercase.
     tipom = models.CharField(db_column='TipoM', max_length=10, blank=True, null=True)  # Field name made lowercase.
     naplicacoes = models.IntegerField(db_column='NAplicacoes', blank=True, null=True)  # Field name made lowercase.
-    ntratamento = models.IntegerField(db_column='NTratamento', blank=True, null=True)  # Field name made lowercase.
-    idradio = models.IntegerField(db_column='idRadio', blank=True, null=True)  # Field name made lowercase.
+    ntratamento = models.IntegerField(db_column='NTratamento', blank=True, null=True)
     karno = models.CharField(db_column='Karno', max_length=5, blank=True, null=True)  # Field name made lowercase.
     codmed = models.CharField(db_column='CodMed', max_length=10, blank=True, null=True)
     tratado = models.CharField(db_column='Tratado', max_length=10, blank=True, null=True)
