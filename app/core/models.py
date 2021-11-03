@@ -469,7 +469,7 @@ class Planejfisicoc(models.Model):
     idplanejfisicoc = models.AutoField(primary_key=True, db_column='idPlanejFisicoC', editable=False)  # Field name made lowercase.
     codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', max_length=11, on_delete=models.PROTECT)  # Field name made lowercase.
     codmovimento = models.CharField(db_column='CodMovimento', max_length=11)  # Field name made lowercase.
-    numpresc = models.ForeignKey(Radioterapia, db_column='NumPresc', max_length=10, on_delete=models.PROTECT)  # Field name made lowercase.
+    numpresc = models.CharField(db_column='NumPresc', max_length=10)  # Field name made lowercase.
     energia = models.CharField(db_column='Energia', max_length=50, blank=True, null=True)  # Field name made lowercase.
     dtt = models.CharField(db_column='DTT', max_length=50, blank=True, null=True)  # Field name made lowercase.
     dtd = models.CharField(db_column='DTD', max_length=100, blank=True, null=True)  # Field name made lowercase.
@@ -528,7 +528,7 @@ class Planejfisico(models.Model):
     idplanejfisicoc = models.ForeignKey(Planejfisicoc, db_column='idPlanejFisicoC', on_delete=models.PROTECT)  # Field name made lowercase.
     codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', max_length=11, on_delete=models.PROTECT)  # Field name made lowercase.
     codmovimento = models.CharField(db_column='CodMovimento', max_length=11)  # Field name made lowercase.
-    numpresc = models.ForeignKey(Radioterapia, db_column='NumPresc', max_length=10, on_delete=models.PROTECT, related_name='planej_set2')  # Field name made lowercase.
+    numpresc = models.CharField(db_column='NumPresc', max_length=10)  # Field name made lowercase.
     incidencia = models.CharField(db_column='Incidencia', max_length=50, blank=True, null=True)  # Field name made lowercase.
     energia = models.CharField(db_column='Energia', max_length=10, blank=True, null=True)  # Field name made lowercase.
     tecnica = models.CharField(db_column='Tecnica', max_length=10, blank=True, null=True)  # Field name made lowercase.
@@ -595,7 +595,7 @@ class PrescrRadio(models.Model):
     datasist = models.DateTimeField(db_column='DataSist')
     grupoemp = models.CharField(db_column='GrupoEmp', max_length=2, default='01')
     filial = models.CharField(db_column='Filial', max_length=2, default='01')
-    numpresc = models.ForeignKey(Radioterapia, db_column='NumPresc', on_delete=models.PROTECT)
+    numpresc = models.CharField(db_column='NumPresc', max_length=10)
     incidencia = models.CharField(db_column='Incidencia', max_length=20)
     naplicacoes = models.IntegerField(db_column='NAplicacoes')
     portal = models.IntegerField(db_column='Portal', default=5)
