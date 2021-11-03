@@ -220,7 +220,7 @@ def atualizaagenda():
                     entradaradio = Entradaradio()
                     entradaradio.codmovimento = novo_codmov
                     entradaradio.codpaciente = codpac_sisac.pk
-                    entradaradio.numpresc = prescricao
+                    entradaradio.numpresc = prescricao.numpresc
                     entradaradio.idplanejfisico = Planejfisico.objects.get(id_mosaiq=campo.id_campo_id).idplanejfisico
                     entradaradio.encerrado = 'S'
                     entradaradio.observacao = ''

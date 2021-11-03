@@ -438,7 +438,7 @@ class Radioterapia(models.Model):
 class Entradaradio(models.Model):
     codmovimento = models.CharField(db_column='CodMovimento', max_length=10, blank=True, null=True)  # Field name made lowercase.
     codpaciente = models.CharField(db_column='CodPaciente', max_length=10, blank=True, null=True)  # Field name made lowercase.
-    numpresc = models.ForeignKey(Radioterapia, db_column='NumPresc', max_length=10, on_delete=models.PROTECT, related_name='numpresc_set')  # Field name made lowercase.
+    numpresc = models.CharField(db_column='NumPresc', max_length=10)  # Field name made lowercase.
     idplanejfisico = models.CharField(db_column='idPlanejFisico', max_length=10, blank=True, null=True)  # Field name made lowercase.
     encerrado = models.CharField(db_column='Encerrado', max_length=10, blank=True, null=True)  # Field name made lowercase.
     observacao = models.CharField(db_column='Observacao', max_length=200, blank=True, null=True)  # Field name made lowercase.
