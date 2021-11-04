@@ -625,10 +625,11 @@ def atualiza_planej():
 def cria_agenda_radio():
     # Função para gerar nova senha da agenda. Pega a última senha existente e adiciona 1
     def senhanova():
-        ultimasenha = Agenda.objects.last().senha # 0006001
-        novasenha = int(ultimasenha) + 1
-        zeros = 7 - len(str(novasenha)) 
-        senhafinal = '0' * zeros + str(novasenha)
+        ultimasenha = TAB_Parametro.objects.get(prm_nome='SENHAAGENDA') # 0006001
+        ultimasenha.prm_sequencia = ultimasenha.prm_sequencia + 1
+        ultimasenha.save()
+        zeros = 7 - len(str(ultimasenha.prm_sequencia)) 
+        senhafinal = '0' * zeros + str(ultimasenha.prm_sequencia)
 
         return senhafinal
 
