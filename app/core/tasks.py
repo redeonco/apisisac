@@ -645,18 +645,6 @@ def cria_agenda_radio():
 
         return senhafinal
 
-    novos_pacientes_versionados = []
-    agenda_mosaiq_versionada_hoje = Schedule.objects.filter(edit_dt__year=date.today().year, edit_dt__month=date.today().month, edit_dt__day=date.today().day).filter(activity='3D').filter(version__gt=0)
-    if agenda_mosaiq_versionada_hoje is not None:
-        for paciente in agenda_mosaiq_versionada_hoje:
-            if paciente.id_paciente not in novos_pacientes_versionados:
-                novos_pacientes_versionados.append(paciente.id_paciente)
-
-    for pac in novos_pacientes_versionados:
-        codpac_sisac = Cadpaciente.objects.get(cpf=pac.cpf)
-        if codpac_sisac is not None: 
-            Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(~Q(confatd='S')).delete()
-
     agenda_mosaiq_criada_hoje = Schedule.objects.filter(create_dt__year=date.today().year, create_dt__month=date.today().month, create_dt__day=date.today().day).filter(activity='3D').filter(version=0).filter(~Q(suppressed=1))
 
     novos_pacientes_agendados = []
@@ -777,6 +765,19 @@ def atualiza_datahora_agenda():
 
 @shared_task
 def atualiza_agenda_sisac():
+
+    novos_pacientes_versionados = []
+    agenda_mosaiq_versionada_hoje = Schedule.objects.filter(edit_dt__year=date.today().year, edit_dt__month=date.today().month, edit_dt__day=date.today().day).filter(activity='3D').filter(version__gt=0)
+    if agenda_mosaiq_versionada_hoje is not None:
+        for paciente in agenda_mosaiq_versionada_hoje:
+            if paciente.id_paciente not in novos_pacientes_versionados:
+                novos_pacientes_versionados.append(paciente.id_paciente)
+
+    for pac in novos_pacientes_versionados:
+        codpac_sisac = Cadpaciente.objects.get(cpf=pac.cpf)
+        if codpac_sisac is not None: 
+            Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(~Q(confatd='S')).delete()
+
     agenda_mosaiq_editada_hoje = Schedule.objects.filter(edit_dt__year=date.today().year, edit_dt__month=date.today().month, edit_dt__day=date.today().day).filter(activity='3D').filter(version=0).filter(~Q(suppressed=1)).filter(~Q(status=' C'))
 
     novos_pacientes_agendados = []
