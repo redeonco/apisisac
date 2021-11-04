@@ -398,7 +398,7 @@ def atualiza_planej():
     # Não significa que geraram uma nova versão do tratamento
     # Pois para pacientes novos, a data de Criação é igual à data de Aprovação
     # campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month=date.today().month, sanct_dt__day=date.today().day)
-    campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month=date.today().month, sanct_dt__day=date.today().day)
+    campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month__gte='09', sanct_dt__day__gte='01')
 
    # Inicializa um dicionário para as unidades de medida da energia do tratamento
     energia_unidade_dict = {
@@ -448,6 +448,7 @@ def atualiza_planej():
                     planej2.id_mosaiq = obj.id_campo
                     planej2.save()
             else:
+                Planejfisicoc.objects.filter(codpaciente=codpac_sisac).filter(ativo=1).filter(id_fase_mosaiq=obj.id_fase_id).delete()
                 print('planejamento NÃO encontrado para o paciente', codpac_sisac, 'numero do campo', obj.numero_campo)
                 print('gerando registro na tabela PlanejFisicoC')
                 print(obj)
@@ -500,6 +501,7 @@ def atualiza_planej():
                 novo_planejfisicoc.fase = obj.id_fase.numerofase
                 novo_planejfisicoc.usuario = 'API'
                 novo_planejfisicoc.id_mosaiq = obj.id_campo
+                novo_planejfisicoc.id_fase_mosaiq = obj.id_fase_id
                 novo_planejfisicoc.save()
 
             planejfisico = Planejfisico.objects.filter(codpaciente=codpac_sisac).filter(id_mosaiq=obj.id_campo).filter(ativo=1)
@@ -521,6 +523,7 @@ def atualiza_planej():
                     planej.id_mosaiq = obj.id_campo
                     planej.save()
             else:
+                Planejfisico.objects.filter(codpaciente=codpac_sisac).filter(ativo=1).filter(id_fase_mosaiq=obj.id_fase_id).delete()
                 novo_planejfisico = Planejfisico()
                 novo_planejfisico.idplanejfisicoc = Planejfisicoc.objects.filter(codpaciente=codpac_sisac).order_by('idplanejfisicoc').last()
                 novo_planejfisico.codpaciente = codpac_sisac
@@ -541,7 +544,8 @@ def atualiza_planej():
                 novo_planejfisico.dtd = obj.dose_campo
                 novo_planejfisico.nomecampo = obj.nome_campo
                 novo_planejfisico.usuario = 'API'
-                novo_planejfisico.id_mosaiq = obj.id_campo
+                novo_planejfisico.id_mosaiq = obj.id_campo 
+                novo_planejfisico.id_fase_mosaiq = obj.id_fase_id
                 novo_planejfisico.save()
 
             prescrradio = PrescrRadio.objects.filter(codpaciente=codpac_sisac).filter(numpresc=Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().numpresc).filter(tratado='NAO').filter(id_mosaiq=obj.id_campo)
@@ -562,6 +566,7 @@ def atualiza_planej():
                     presc.id_mosaiq = obj.id_campo
                     presc.save()
             else:
+                PrescrRadio.objects.filter(codpaciente=codpac_sisac).filter(numpresc=Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().numpresc).filter(tratado='NAO').filter(id_fase_mosaiq=obj.id_fase_id).delete()
                 novapresc = PrescrRadio()
                 novapresc.ncampos = obj.numero_campo
                 novapresc.idradio = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().idradio
@@ -609,6 +614,7 @@ def atualiza_planej():
                 print(f'ID Fase: {obj.id_fase}, início trat: {iniciotrat}')
                 novapresc.iniciotrat = iniciotrat
                 novapresc.id_mosaiq = obj.id_campo
+                novapresc.id_fase_mosaiq = obj.id_fase_id
                 novapresc.save()
 
             primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(planejado='N').filter(confatd='N').order_by('idagenda').first()

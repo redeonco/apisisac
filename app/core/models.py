@@ -467,7 +467,7 @@ class Planejfisicoc(models.Model):
     # Dessa forma, quem atribui um valor para a coluna, é o próprio banco, e não o Django.
     # Evitando assim o erro de inserir valor explícito em uma coluna com IDENTITY INSERT ON. =)
     idplanejfisicoc = models.AutoField(primary_key=True, db_column='idPlanejFisicoC', editable=False)  # Field name made lowercase.
-    codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', max_length=11, on_delete=models.PROTECT)  # Field name made lowercase.
+    codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', max_length=11, on_delete=models.DO_NOTHING)  # Field name made lowercase.
     codmovimento = models.CharField(db_column='CodMovimento', max_length=11)  # Field name made lowercase.
     numpresc = models.CharField(db_column='NumPresc', max_length=10)  # Field name made lowercase.
     energia = models.CharField(db_column='Energia', max_length=50, blank=True, null=True)  # Field name made lowercase.
@@ -509,6 +509,7 @@ class Planejfisicoc(models.Model):
     portal = models.CharField(db_column='Portal', max_length=5, default='0')  # Field name made lowercase.
     usuario = models.CharField(db_column='Usuario', max_length=30)
     id_mosaiq = models.IntegerField(db_column='ID_MOSAIQ')
+    id_fase_mosaiq = models.IntegerField(db_column='ID_Fase_MOSAIQ')
 
     class Meta:
         managed = False
@@ -525,8 +526,8 @@ class Planejfisicoc(models.Model):
 
 class Planejfisico(models.Model):
     idplanejfisico = models.AutoField(primary_key=True, db_column='idPlanejFisico')  # Field name made lowercase.
-    idplanejfisicoc = models.ForeignKey(Planejfisicoc, db_column='idPlanejFisicoC', on_delete=models.PROTECT)  # Field name made lowercase.
-    codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', max_length=11, on_delete=models.PROTECT)  # Field name made lowercase.
+    idplanejfisicoc = models.ForeignKey(Planejfisicoc, db_column='idPlanejFisicoC', on_delete=models.DO_NOTHING)  # Field name made lowercase.
+    codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', max_length=11, on_delete=models.DO_NOTHING)  # Field name made lowercase.
     codmovimento = models.CharField(db_column='CodMovimento', max_length=11)  # Field name made lowercase.
     numpresc = models.CharField(db_column='NumPresc', max_length=10)  # Field name made lowercase.
     incidencia = models.CharField(db_column='Incidencia', max_length=50, blank=True, null=True)  # Field name made lowercase.
@@ -576,6 +577,7 @@ class Planejfisico(models.Model):
     dtd = models.CharField(db_column='DTD', max_length=100, blank=True, null=True)   
     usuario = models.CharField(db_column='Usuario', max_length=30)
     id_mosaiq = models.IntegerField(db_column='ID_MOSAIQ')
+    id_fase_mosaiq = models.IntegerField(db_column='ID_Fase_MOSAIQ')
 
     class Meta:
         managed = False
@@ -602,7 +604,7 @@ class PrescrRadio(models.Model):
     ntratamento = models.IntegerField(db_column='NTratamento')
     tratado = models.CharField(db_column='Tratado', max_length=3, default='NAO')
     iniciotrat = models.IntegerField(db_column='InicioTrat')
-    codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', on_delete=models.PROTECT)
+    codpaciente = models.ForeignKey(Cadpaciente, db_column='CodPaciente', on_delete=models.DO_NOTHING)
     nrestudo = models.IntegerField(db_column='NReestudo', default=0)
     usuario = models.CharField(db_column='Usuario', max_length=100, default='API')
     energia = models.CharField(db_column='Energia', max_length=7)
@@ -612,6 +614,7 @@ class PrescrRadio(models.Model):
     dosetdiaria = models.IntegerField(db_column='DoseTDiaria')
     fase = models.IntegerField(db_column='Fase')
     id_mosaiq = models.IntegerField(db_column='ID_MOSAIQ')
+    id_fase_mosaiq = models.IntegerField(db_column='ID_Fase_MOSAIQ')
 
     class Meta:
         managed = False
