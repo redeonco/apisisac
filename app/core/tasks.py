@@ -440,196 +440,201 @@ def atualiza_planej():
 
         if codpac_sisac is not None:
             print('paciente encontrado')
-            planejfisicoc = Planejfisicoc.objects.filter(codpaciente=codpac_sisac).filter(id_mosaiq=obj.id_campo).filter(ativo=1)
+            prescricao = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last()
+            if prescricao is not None:
+                planejfisicoc = Planejfisicoc.objects.filter(codpaciente=codpac_sisac).filter(id_mosaiq=obj.id_campo).filter(ativo=1)
 
-            if planejfisicoc.count() > 0:
-                print('planejamento encontrado para o paciente', codpac_sisac, 'numero do campo', obj.numero_campo)
-                for planej2 in planejfisicoc.iterator():
-                    planej2.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
-                    planej2.dtt = obj.id_fase.dosetotal
-                    planej2.dtd = obj.dose_campo
-                    planej2.locanatomica = obj.id_fase.locanatomica
-                    planej2.unidade_monitora = obj.unidade_monitora
-                    planej2.ordemcampo = obj.numero_campo
-                    planej2.fase = obj.id_fase.numerofase
-                    planej2.incidencia = '3D'
-                    planej2.tpfeixe = obj.id_fase.modalidade
-                    planej2.id_mosaiq = obj.id_campo
-                    planej2.save()
-            else:
-                print('planejamento NÃO encontrado para o paciente', codpac_sisac, 'numero do campo', obj.numero_campo)
-                print('gerando registro na tabela PlanejFisicoC')
-                print(obj)
-                novo_planejfisicoc = Planejfisicoc()
-                novo_planejfisicoc.codpaciente = codpac_sisac
-                novo_planejfisicoc.codmovimento = codpac_sisac.codpaciente
-                novo_planejfisicoc.numpresc = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().numpresc
-                novo_planejfisicoc.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
-                novo_planejfisicoc.dtt = obj.id_fase.dosetotal
-                novo_planejfisicoc.dtd = obj.dose_campo
-                novo_planejfisicoc.naplicacoes = obj.id_fase.qtdsessoes
-                novo_planejfisicoc.datasist = datetime.now()
-                novo_planejfisicoc.ativo = 1
-                novo_planejfisicoc.unidade_monitora = obj.unidade_monitora
-                novo_planejfisicoc.nplanejamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
-                novo_planejfisicoc.ntratamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
-                novo_planejfisicoc.locanatomica = obj.id_fase.locanatomica
-                novo_planejfisicoc.ncampo = obj.numero_campo
-                novo_planejfisicoc.ordemcampo = obj.numero_campo
-
-                # Verifica se a fase está relacionada com outra para definir o início do tratamento
-                # Se não houver fase relacionada, inicio tratamento = 1
-                # Se houver, define início tratamento com o valor obtido da coluna Reference_Fraction, tabela Fase
-                lista_fases = []
-                if checafase(obj.id_fase) == False:
-                    fases = Fase.objects.filter(id_paciente=obj.id_paciente).filter(reference_sit_set_id__isnull=True)
-                    nfase = 0
-                    contador = 0
-                    for fase in fases:
-                        dict = {}
-                        nfase += 1
-                        dict['IDFase'] = fase
-                        dict['NumeroFase'] = nfase
-                        dict['QtdSessoes'] = fase.qtdsessoes
-                        if contador == 0:
-                            dict['InicioTrat'] = 1
-                        else:
-                            iniciotrat = lista_fases[contador-1]['InicioTrat'] + lista_fases[contador-1]['QtdSessoes']
-                            dict['InicioTrat'] = iniciotrat
-                        lista_fases.append(dict)
-                        contador += 1
-                    iniciotrat = list(filter(lambda lista_fases: lista_fases['IDFase'] == obj.id_fase, lista_fases))[0]['InicioTrat']
-                        
+                if planejfisicoc.count() > 0:
+                    print('planejamento encontrado para o paciente', codpac_sisac, 'numero do campo', obj.numero_campo)
+                    for planej2 in planejfisicoc.iterator():
+                        planej2.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
+                        planej2.dtt = obj.id_fase.dosetotal
+                        planej2.dtd = obj.dose_campo
+                        planej2.locanatomica = obj.id_fase.locanatomica
+                        planej2.unidade_monitora = obj.unidade_monitora
+                        planej2.ordemcampo = obj.numero_campo
+                        planej2.fase = obj.id_fase.numerofase
+                        planej2.incidencia = '3D'
+                        planej2.tpfeixe = obj.id_fase.modalidade
+                        planej2.id_mosaiq = obj.id_campo
+                        planej2.save()
                 else:
-                    iniciotrat = obj.id_fase.reference_fraction
+                    print('planejamento NÃO encontrado para o paciente', codpac_sisac, 'numero do campo', obj.numero_campo)
+                    print('gerando registro na tabela PlanejFisicoC')
+                    print(obj)
+                    novo_planejfisicoc = Planejfisicoc()
+                    novo_planejfisicoc.codpaciente = codpac_sisac
+                    novo_planejfisicoc.codmovimento = codpac_sisac.codpaciente
+                    novo_planejfisicoc.numpresc = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().numpresc
+                    novo_planejfisicoc.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
+                    novo_planejfisicoc.dtt = obj.id_fase.dosetotal
+                    novo_planejfisicoc.dtd = obj.dose_campo
+                    novo_planejfisicoc.naplicacoes = obj.id_fase.qtdsessoes
+                    novo_planejfisicoc.datasist = datetime.now()
+                    novo_planejfisicoc.ativo = 1
+                    novo_planejfisicoc.unidade_monitora = obj.unidade_monitora
+                    novo_planejfisicoc.nplanejamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
+                    novo_planejfisicoc.ntratamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
+                    novo_planejfisicoc.locanatomica = obj.id_fase.locanatomica
+                    novo_planejfisicoc.ncampo = obj.numero_campo
+                    novo_planejfisicoc.ordemcampo = obj.numero_campo
 
-                novo_planejfisicoc.iniciotrat = iniciotrat
-                novo_planejfisicoc.incidencia = '3D'
-                novo_planejfisicoc.tpfeixe = obj.id_fase.modalidade
-                novo_planejfisicoc.fase = obj.id_fase.numerofase
-                novo_planejfisicoc.usuario = 'API'
-                novo_planejfisicoc.id_mosaiq = obj.id_campo
-                novo_planejfisicoc.id_fase_mosaiq = obj.id_fase_id
-                novo_planejfisicoc.save()
+                    # Verifica se a fase está relacionada com outra para definir o início do tratamento
+                    # Se não houver fase relacionada, inicio tratamento = 1
+                    # Se houver, define início tratamento com o valor obtido da coluna Reference_Fraction, tabela Fase
+                    lista_fases = []
+                    if checafase(obj.id_fase) == False:
+                        fases = Fase.objects.filter(id_paciente=obj.id_paciente).filter(reference_sit_set_id__isnull=True)
+                        nfase = 0
+                        contador = 0
+                        for fase in fases:
+                            dict = {}
+                            nfase += 1
+                            dict['IDFase'] = fase
+                            dict['NumeroFase'] = nfase
+                            dict['QtdSessoes'] = fase.qtdsessoes
+                            if contador == 0:
+                                dict['InicioTrat'] = 1
+                            else:
+                                iniciotrat = lista_fases[contador-1]['InicioTrat'] + lista_fases[contador-1]['QtdSessoes']
+                                dict['InicioTrat'] = iniciotrat
+                            lista_fases.append(dict)
+                            contador += 1
+                        iniciotrat = list(filter(lambda lista_fases: lista_fases['IDFase'] == obj.id_fase, lista_fases))[0]['InicioTrat']
+                            
+                    else:
+                        iniciotrat = obj.id_fase.reference_fraction
 
-            planejfisico = Planejfisico.objects.filter(codpaciente=codpac_sisac).filter(id_mosaiq=obj.id_campo).filter(ativo=1)
+                    novo_planejfisicoc.iniciotrat = iniciotrat
+                    novo_planejfisicoc.incidencia = '3D'
+                    novo_planejfisicoc.tpfeixe = obj.id_fase.modalidade
+                    novo_planejfisicoc.fase = obj.id_fase.numerofase
+                    novo_planejfisicoc.usuario = 'API'
+                    novo_planejfisicoc.id_mosaiq = obj.id_campo
+                    novo_planejfisicoc.id_fase_mosaiq = obj.id_fase_id
+                    novo_planejfisicoc.save()
 
-            if planejfisico.count() > 0:
-                for planej in planejfisico:
-                    planej.incidencia = '3D'
-                    planej.nomecampo = obj.nome_campo
-                    planej.ncampo = obj.numero_campo
-                    planej.dtt = obj.id_fase.dosetotal
-                    planej.dtd = obj.dose_campo
-                    planej.fase = obj.id_fase.numerofase
-                    planej.unidade_monitora = obj.unidade_monitora
-                    planej.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
-                    planej.tecnica = obj.id_fase.tecnica
-                    planej.angulacao = 'G-' + str(obj.txfieldpoint_set.first().gantry) + ';M-' + str(obj.txfieldpoint_set.first().mesa) + ';C-' + str(obj.txfieldpoint_set.first().colimador)
-                    planej.datasist = datetime.now()
-                    planej.usuario = 'API'
-                    planej.id_mosaiq = obj.id_campo
-                    planej.save()
-            else:            
-                novo_planejfisico = Planejfisico()
-                novo_planejfisico.idplanejfisicoc = Planejfisicoc.objects.filter(codpaciente=codpac_sisac).order_by('idplanejfisicoc').last()
-                novo_planejfisico.codpaciente = codpac_sisac
-                novo_planejfisico.codmovimento = codpac_sisac.codpaciente
-                novo_planejfisico.numpresc = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().numpresc
-                novo_planejfisico.incidencia = '3D'
-                novo_planejfisico.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
-                novo_planejfisico.tecnica = obj.id_fase.tecnica
-                novo_planejfisico.unidade_monitora = obj.unidade_monitora
-                novo_planejfisico.angulacao = 'G-' + str(obj.txfieldpoint_set.first().gantry) + ';M-' + str(obj.txfieldpoint_set.first().mesa) + ';C-' + str(obj.txfieldpoint_set.first().colimador)
-                novo_planejfisico.nplanejamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
-                novo_planejfisico.ntratamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
-                novo_planejfisico.ncampo = obj.numero_campo
-                novo_planejfisico.fase = obj.id_fase.numerofase
-                novo_planejfisico.ativo = 1
-                novo_planejfisico.datasist = datetime.now()
-                novo_planejfisico.dtt = obj.id_fase.dosetotal
-                novo_planejfisico.dtd = obj.dose_campo
-                novo_planejfisico.nomecampo = obj.nome_campo
-                novo_planejfisico.usuario = 'API'
-                novo_planejfisico.id_mosaiq = obj.id_campo 
-                novo_planejfisico.id_fase_mosaiq = obj.id_fase_id
-                novo_planejfisico.save()
+                planejfisico = Planejfisico.objects.filter(codpaciente=codpac_sisac).filter(id_mosaiq=obj.id_campo).filter(ativo=1)
 
-            prescrradio = PrescrRadio.objects.filter(codpaciente=codpac_sisac).filter(numpresc=Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().numpresc).filter(tratado='NAO').filter(id_mosaiq=obj.id_campo)
+                if planejfisico.count() > 0:
+                    for planej in planejfisico:
+                        planej.incidencia = '3D'
+                        planej.nomecampo = obj.nome_campo
+                        planej.ncampo = obj.numero_campo
+                        planej.dtt = obj.id_fase.dosetotal
+                        planej.dtd = obj.dose_campo
+                        planej.fase = obj.id_fase.numerofase
+                        planej.unidade_monitora = obj.unidade_monitora
+                        planej.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
+                        planej.tecnica = obj.id_fase.tecnica
+                        planej.angulacao = 'G-' + str(obj.txfieldpoint_set.first().gantry) + ';M-' + str(obj.txfieldpoint_set.first().mesa) + ';C-' + str(obj.txfieldpoint_set.first().colimador)
+                        planej.datasist = datetime.now()
+                        planej.usuario = 'API'
+                        planej.id_mosaiq = obj.id_campo
+                        planej.save()
+                else:            
+                    novo_planejfisico = Planejfisico()
+                    novo_planejfisico.idplanejfisicoc = Planejfisicoc.objects.filter(codpaciente=codpac_sisac).order_by('idplanejfisicoc').last()
+                    novo_planejfisico.codpaciente = codpac_sisac
+                    novo_planejfisico.codmovimento = codpac_sisac.codpaciente
+                    novo_planejfisico.numpresc = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().numpresc
+                    novo_planejfisico.incidencia = '3D'
+                    novo_planejfisico.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
+                    novo_planejfisico.tecnica = obj.id_fase.tecnica
+                    novo_planejfisico.unidade_monitora = obj.unidade_monitora
+                    novo_planejfisico.angulacao = 'G-' + str(obj.txfieldpoint_set.first().gantry) + ';M-' + str(obj.txfieldpoint_set.first().mesa) + ';C-' + str(obj.txfieldpoint_set.first().colimador)
+                    novo_planejfisico.nplanejamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
+                    novo_planejfisico.ntratamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
+                    novo_planejfisico.ncampo = obj.numero_campo
+                    novo_planejfisico.fase = obj.id_fase.numerofase
+                    novo_planejfisico.ativo = 1
+                    novo_planejfisico.datasist = datetime.now()
+                    novo_planejfisico.dtt = obj.id_fase.dosetotal
+                    novo_planejfisico.dtd = obj.dose_campo
+                    novo_planejfisico.nomecampo = obj.nome_campo
+                    novo_planejfisico.usuario = 'API'
+                    novo_planejfisico.id_mosaiq = obj.id_campo 
+                    novo_planejfisico.id_fase_mosaiq = obj.id_fase_id
+                    novo_planejfisico.save()
 
-            if prescrradio.count() > 0:
-                for presc in prescrradio:
-                    presc.ncampos = obj.numero_campo
-                    presc.locanatomica = obj.id_fase.locanatomica
-                    presc.datasist = datetime.now()
-                    presc.incidencia = '3D'
-                    presc.naplicacoes = obj.id_fase.qtdsessoes
-                    presc.tecnica = obj.id_fase.tecnica
-                    presc.tpfeixe = obj.id_fase.modalidade
-                    presc.dosettotal = obj.id_fase.dosetotal
-                    presc.dosetdiaria = obj.dose_campo
-                    presc.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
-                    presc.usuario = 'API'
-                    presc.id_mosaiq = obj.id_campo
-                    presc.save()
-            else:
-                novapresc = PrescrRadio()
-                novapresc.ncampos = obj.numero_campo
-                novapresc.idradio = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().idradio
-                novapresc.codmovimento = codpac_sisac.codpaciente
-                novapresc.locanatomica = obj.id_fase.locanatomica
-                novapresc.datasist = datetime.now()
-                novapresc.numpresc = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().numpresc
-                novapresc.incidencia = '3D'
-                novapresc.naplicacoes = obj.id_fase.qtdsessoes
-                novapresc.ntratamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
-                novapresc.codpaciente = codpac_sisac
-                novapresc.usuario = 'API'
-                novapresc.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
-                novapresc.tecnica = obj.id_fase.tecnica
-                novapresc.tpfeixe = obj.id_fase.modalidade
-                novapresc.dosettotal = obj.id_fase.dosetotal
-                novapresc.dosetdiaria = obj.dose_campo
-                novapresc.fase = obj.id_fase.numerofase
+                prescrradio = PrescrRadio.objects.filter(codpaciente=codpac_sisac).filter(numpresc=Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().numpresc).filter(tratado='NAO').filter(id_mosaiq=obj.id_campo)
 
-                # Verifica se a fase está relacionada com outra para definir o início do tratamento
-                # Se não houver fase relacionada, inicio tratamento = 1
-                # Se houver, define início tratamento com o valor obtido da coluna Reference_Fraction, tabela Fase
-                lista_fases = []
-                if checafase(obj.id_fase) == False:
-                    fases = Fase.objects.filter(id_paciente=obj.id_paciente).filter(reference_sit_set_id__isnull=True)
-                    nfase = 0
-                    contador = 0
-                    for fase in fases:
-                        dict = {}
-                        nfase += 1
-                        dict['IDFase'] = fase
-                        dict['NumeroFase'] = nfase
-                        dict['QtdSessoes'] = fase.qtdsessoes
-                        if contador == 0:
-                            dict['InicioTrat'] = 1
-                        else:
-                            iniciotrat = lista_fases[contador-1]['InicioTrat'] + lista_fases[contador-1]['QtdSessoes']
-                            dict['InicioTrat'] = iniciotrat
-                        lista_fases.append(dict)
-                        contador += 1
-                    iniciotrat = list(filter(lambda lista_fases: lista_fases['IDFase'] == obj.id_fase, lista_fases))[0]['InicioTrat']
-
+                if prescrradio.count() > 0:
+                    for presc in prescrradio:
+                        presc.ncampos = obj.numero_campo
+                        presc.locanatomica = obj.id_fase.locanatomica
+                        presc.datasist = datetime.now()
+                        presc.incidencia = '3D'
+                        presc.naplicacoes = obj.id_fase.qtdsessoes
+                        presc.tecnica = obj.id_fase.tecnica
+                        presc.tpfeixe = obj.id_fase.modalidade
+                        presc.dosettotal = obj.id_fase.dosetotal
+                        presc.dosetdiaria = obj.dose_campo
+                        presc.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
+                        presc.usuario = 'API'
+                        presc.id_mosaiq = obj.id_campo
+                        presc.save()
                 else:
-                    iniciotrat = obj.id_fase.reference_fraction
-                print(f'ID Fase: {obj.id_fase}, início trat: {iniciotrat}')
-                novapresc.iniciotrat = iniciotrat
-                novapresc.id_mosaiq = obj.id_campo
-                novapresc.id_fase_mosaiq = obj.id_fase_id
-                novapresc.save()
+                    novapresc = PrescrRadio()
+                    novapresc.ncampos = obj.numero_campo
+                    novapresc.idradio = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().idradio
+                    novapresc.codmovimento = codpac_sisac.codpaciente
+                    novapresc.locanatomica = obj.id_fase.locanatomica
+                    novapresc.datasist = datetime.now()
+                    novapresc.numpresc = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().numpresc
+                    novapresc.incidencia = '3D'
+                    novapresc.naplicacoes = obj.id_fase.qtdsessoes
+                    novapresc.ntratamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
+                    novapresc.codpaciente = codpac_sisac
+                    novapresc.usuario = 'API'
+                    novapresc.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
+                    novapresc.tecnica = obj.id_fase.tecnica
+                    novapresc.tpfeixe = obj.id_fase.modalidade
+                    novapresc.dosettotal = obj.id_fase.dosetotal
+                    novapresc.dosetdiaria = obj.dose_campo
+                    novapresc.fase = obj.id_fase.numerofase
 
-            primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(planejado='N').filter(confatd='N').order_by('idagenda').first()
-            if primeira_agenda is not None:
-                primeira_agenda.planejado = 'S'            
-                primeira_agenda.save() 
-                print(f'Alterado a agenda do paciente {codpac_sisac}, dia {primeira_agenda.datahora} com status Planejado OK.')
-            else:
-                pass
+                    # Verifica se a fase está relacionada com outra para definir o início do tratamento
+                    # Se não houver fase relacionada, inicio tratamento = 1
+                    # Se houver, define início tratamento com o valor obtido da coluna Reference_Fraction, tabela Fase
+                    lista_fases = []
+                    if checafase(obj.id_fase) == False:
+                        fases = Fase.objects.filter(id_paciente=obj.id_paciente).filter(reference_sit_set_id__isnull=True)
+                        nfase = 0
+                        contador = 0
+                        for fase in fases:
+                            dict = {}
+                            nfase += 1
+                            dict['IDFase'] = fase
+                            dict['NumeroFase'] = nfase
+                            dict['QtdSessoes'] = fase.qtdsessoes
+                            if contador == 0:
+                                dict['InicioTrat'] = 1
+                            else:
+                                iniciotrat = lista_fases[contador-1]['InicioTrat'] + lista_fases[contador-1]['QtdSessoes']
+                                dict['InicioTrat'] = iniciotrat
+                            lista_fases.append(dict)
+                            contador += 1
+                        iniciotrat = list(filter(lambda lista_fases: lista_fases['IDFase'] == obj.id_fase, lista_fases))[0]['InicioTrat']
+
+                    else:
+                        iniciotrat = obj.id_fase.reference_fraction
+                    print(f'ID Fase: {obj.id_fase}, início trat: {iniciotrat}')
+                    novapresc.iniciotrat = iniciotrat
+                    novapresc.id_mosaiq = obj.id_campo
+                    novapresc.id_fase_mosaiq = obj.id_fase_id
+                    novapresc.save()
+
+                primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(planejado='N').filter(confatd='N').order_by('idagenda').first()
+                if primeira_agenda is not None:
+                    primeira_agenda.planejado = 'S'            
+                    primeira_agenda.save() 
+                    print(f'Alterado a agenda do paciente {codpac_sisac}, dia {primeira_agenda.datahora} com status Planejado OK.')
+                else:
+                    pass
+
+        else:
+            print(f'Paciente {codpac_sisac} sem prescrição médica no SISAC')
                                     
 
 
@@ -1077,7 +1082,7 @@ def inserepacote(pac):
 
     prescricao = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last()
     print(f'Primeira sessão de radioterapia do paciente {codpac_sisac}. Iniciando lançamento do pacote do tratamento na conta do paciente...')
-    codamb = SolicExa.objects.filter(npresc=prescricao).order_by('item').first().codamb
+    codamb = SolicExa.objects.filter(npresc=prescricao.numpresc).order_by('item').first().codamb
     primeira_entrada = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').first()
     codconvenio = primeira_entrada.codconvenio
     matricula = primeira_entrada.matricula
@@ -1151,3 +1156,80 @@ def inserepacote(pac):
     novocodigo_exame = incrementa_codigoexame()
     exame.codigo = novocodigo_exame
     exame.save()
+
+
+
+def entrada():
+
+
+    def addcodmovimento(codmovimento):
+        cut = codmovimento.split('.')
+        seqadd = int(cut[1]) + 1
+        if seqadd < 10:
+            seqadd = '0' + str(seqadd)
+        codfinal = cut[0] + '.' + str(seqadd)
+        return codfinal
+
+    def incrementa_natendimento():
+        prm_exame = TAB_Parametro.objects.get(prm_nome='TAB_ATENDIMENTO')
+        novo_codigo = prm_exame.prm_sequencia + 1
+        prm_exame.prm_sequencia = novo_codigo
+        prm_exame.save()
+
+        return novo_codigo
+
+    list = [
+        '000011',
+        '000012',
+        '000013',
+        '000015',
+        '000017',
+        '000018',
+        '000019',
+        '000024',
+        '000025',
+        '000026',
+        '000028',
+        '000030',
+        '000035',
+        '000038',
+        '000039',
+        '000040',
+        '000042',
+        '000049',
+        '000052',
+        '000053',
+        '000055',
+        '000056',
+        '000057',
+        '000063',
+        '000064',
+        '000076',
+        '000081',
+        '000094'
+    ]
+
+    for pac in list:        
+        codpac_sisac = Cadpaciente.objects.get(codpaciente=pac)
+        ultimo_codmov = Entrada.objects.filter(codpaciente=codpac_sisac.pk).order_by('datahoraent').last()
+        novo_codmov = addcodmovimento(str(ultimo_codmov))
+
+        entrada = Entrada()
+        entrada.codpaciente = codpac_sisac
+        entrada.codmovimento = novo_codmov
+        entrada.tipo = '4'
+        entrada.fechado = 'E'
+        entrada.datahoraent = datetime.now()
+        entrada.datasist = datetime.now()
+        entrada.local = ''
+        entrada.usuario = 'API'
+        entrada.codconvenio = ultimo_codmov.codconvenio
+        entrada.plano = ''
+        entrada.codmedico = ultimo_codmov.codmedico
+        entrada.hist = 'Sessão de Radioterapia'
+        entrada.total = 0
+        entrada.grupoemp = '01'
+        entrada.filial = '01'
+        novocodigo_natendimento = incrementa_natendimento()
+        entrada.natendimento = novocodigo_natendimento
+        entrada.save()
