@@ -92,8 +92,7 @@ def atualizaagenda():
         seqadd = int(cut[1]) + 1
         if seqadd < 10:
             seqadd = '0' + str(seqadd)
-        codfinal = cut[0] + '.' + str(seqadd)  
-
+        codfinal = cut[0] + '.' + str(seqadd)
         return codfinal
     
     def incrementa_codigoexame():
@@ -173,6 +172,8 @@ def atualizaagenda():
                 entrada.total = 0
                 entrada.grupoemp = '01'
                 entrada.filial = '01'
+                novocodigo_natendimento = incrementa_natendimento()
+                entrada.natendimento = novocodigo_natendimento
                 entrada.save()
                 print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Registro gerado na tabela entrada.')
 
