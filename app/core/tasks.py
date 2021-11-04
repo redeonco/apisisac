@@ -422,6 +422,13 @@ def atualiza_planej():
         except ObjectDoesNotExist:
             return False
 
+    campos_antigos = TxField.objects.filter(version__gt=0)
+    if campos_antigos is not None:
+        for campo in campos_antigos:
+            Planejfisico.objects.filter(id_mosaiq=campo.id_campo).delete()
+            Planejfisicoc.objects.filter(id_mosaiq=campo.id_campo).delete()
+            PrescrRadio.objects.filter(id_mosaiq=campo.id_campo).delete()
+
     i = 0
     for obj in campos.iterator():
         i += 1
@@ -429,13 +436,7 @@ def atualiza_planej():
 
         codpac_sisac = Cadpaciente.objects.exclude(cpf='').filter(cpf=obj.id_paciente.cpf).order_by('datasist').last()
 
-        campos_antigos = TxField.objects.filter(id_paciente=obj.id_paciente).filter(version__gt=0)
-        if campos_antigos is not None:
-            for campo in campos_antigos:
-                print(f'Excluindo campos versionados para o paciente{codpac_sisac}, campo {campo}')
-                Planejfisico.objects.filter(codpaciente=codpac_sisac).filter(ativo=1).filter(id_mosaiq=campo.id_campo).delete()
-                Planejfisicoc.objects.filter(codpaciente=codpac_sisac).filter(ativo=1).filter(id_mosaiq=campo.id_campo).delete()
-                PrescrRadio.objects.filter(codpaciente=codpac_sisac).filter(id_mosaiq=campo.id_campo).delete()
+        
 
         if codpac_sisac is not None:
             print('paciente encontrado')
