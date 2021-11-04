@@ -422,7 +422,7 @@ def atualiza_planej():
         except ObjectDoesNotExist:
             return False
 
-    campos_antigos = TxField.objects.filter(version__gt=0)
+    campos_antigos = TxField.objects.filter(version__gt=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month=date.today().month, sanct_dt__day=date.today().day)
     if campos_antigos is not None:
         for campo in campos_antigos:
             Planejfisico.objects.filter(id_mosaiq=campo.id_campo).delete()
