@@ -397,8 +397,8 @@ def atualiza_planej():
     # Localiza planejamentos no MOSAIQ que aprovados na data de hoje.
     # Não significa que geraram uma nova versão do tratamento
     # Pois para pacientes novos, a data de Criação é igual à data de Aprovação
-    # campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month=date.today().month, sanct_dt__day=date.today().day)
-    campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month__gte='09', sanct_dt__day__gte='01')
+    campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month=date.today().month, sanct_dt__day=date.today().day)
+    # campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month__gte='09', sanct_dt__day__gte='01')
 
    # Inicializa um dicionário para as unidades de medida da energia do tratamento
     energia_unidade_dict = {
