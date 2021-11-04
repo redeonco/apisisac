@@ -435,7 +435,7 @@ def atualiza_planej():
                 print(f'Excluindo campos versionados para o paciente{codpac_sisac}, campo {campo}')
                 Planejfisico.objects.filter(codpaciente=codpac_sisac).filter(ativo=1).filter(id_mosaiq=campo.id_campo).delete()
                 Planejfisicoc.objects.filter(codpaciente=codpac_sisac).filter(ativo=1).filter(id_mosaiq=campo.id_campo).delete()
-                PrescrRadio.objects.filter(codpaciente=codpac_sisac).filter(ativo=1).filter(id_mosaiq=campo.id_campo).delete()
+                PrescrRadio.objects.filter(codpaciente=codpac_sisac).filter(id_mosaiq=campo.id_campo).delete()
 
         if codpac_sisac is not None:
             print('paciente encontrado')
