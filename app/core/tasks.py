@@ -429,6 +429,14 @@ def atualiza_planej():
 
         codpac_sisac = Cadpaciente.objects.exclude(cpf='').filter(cpf=obj.id_paciente.cpf).order_by('datasist').last()
 
+        campos_antigos = TxField.objects.filter(id_paciente=obj.id_paciente).filter(version__gt=0)
+        if campos_antigos is not None:
+            for campo in campos_antigos:
+                print(f'Excluindo campos versionados para o paciente{codpac_sisac}, campo {campo}')
+                Planejfisico.objects.filter(codpaciente=codpac_sisac).filter(ativo=1).filter(id_campo=campo.id_campo).delete()
+                Planejfisicoc.objects.filter(codpaciente=codpac_sisac).filter(ativo=1).filter(id_campo=campo.id_campo).delete()
+                PrescrRadio.objects.filter(codpaciente=codpac_sisac).filter(ativo=1).filter(id_campo=campo.id_campo).delete()
+
         if codpac_sisac is not None:
             print('paciente encontrado')
             planejfisicoc = Planejfisicoc.objects.filter(codpaciente=codpac_sisac).filter(id_mosaiq=obj.id_campo).filter(ativo=1)
@@ -448,7 +456,6 @@ def atualiza_planej():
                     planej2.id_mosaiq = obj.id_campo
                     planej2.save()
             else:
-                Planejfisicoc.objects.filter(codpaciente=codpac_sisac).filter(ativo=1).filter(id_fase_mosaiq=obj.id_fase_id).delete()
                 print('planejamento NÃO encontrado para o paciente', codpac_sisac, 'numero do campo', obj.numero_campo)
                 print('gerando registro na tabela PlanejFisicoC')
                 print(obj)
@@ -522,8 +529,7 @@ def atualiza_planej():
                     planej.usuario = 'API'
                     planej.id_mosaiq = obj.id_campo
                     planej.save()
-            else:
-                Planejfisico.objects.filter(codpaciente=codpac_sisac).filter(ativo=1).filter(id_fase_mosaiq=obj.id_fase_id).delete()
+            else:            
                 novo_planejfisico = Planejfisico()
                 novo_planejfisico.idplanejfisicoc = Planejfisicoc.objects.filter(codpaciente=codpac_sisac).order_by('idplanejfisicoc').last()
                 novo_planejfisico.codpaciente = codpac_sisac
@@ -566,7 +572,6 @@ def atualiza_planej():
                     presc.id_mosaiq = obj.id_campo
                     presc.save()
             else:
-                PrescrRadio.objects.filter(codpaciente=codpac_sisac).filter(numpresc=Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().numpresc).filter(tratado='NAO').filter(id_fase_mosaiq=obj.id_fase_id).delete()
                 novapresc = PrescrRadio()
                 novapresc.ncampos = obj.numero_campo
                 novapresc.idradio = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().idradio
