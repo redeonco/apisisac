@@ -663,7 +663,7 @@ def cria_agenda_radio():
         codpac_sisac = Cadpaciente.objects.get(cpf=pac.cpf)
         if codpac_sisac is not None:            
             primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(planejado='S')
-            if primeira_agenda.count() <= 1:
+            if primeira_agenda.count() >= 0:
                 altera_primeira_agenda = primeira_agenda.first()
                 if altera_primeira_agenda is not None:
                     altera_primeira_agenda.tipo = ''
@@ -771,17 +771,17 @@ def atualiza_datahora_agenda():
 @shared_task
 def atualiza_agenda_sisac():
 
-    novos_pacientes_versionados = []
-    agenda_mosaiq_versionada_hoje = Schedule.objects.filter(edit_dt__year=date.today().year, edit_dt__month=date.today().month, edit_dt__day=date.today().day).filter(activity='3D').filter(version__gt=0)
-    if agenda_mosaiq_versionada_hoje is not None:
-        for paciente in agenda_mosaiq_versionada_hoje:
-            if paciente.id_paciente not in novos_pacientes_versionados:
-                novos_pacientes_versionados.append(paciente.id_paciente)
+    # novos_pacientes_versionados = []
+    # agenda_mosaiq_versionada_hoje = Schedule.objects.filter(edit_dt__year=date.today().year, edit_dt__month=date.today().month, edit_dt__day=date.today().day).filter(activity='3D').filter(version__gt=0)
+    # if agenda_mosaiq_versionada_hoje is not None:
+    #     for paciente in agenda_mosaiq_versionada_hoje:
+    #         if paciente.id_paciente not in novos_pacientes_versionados:
+    #             novos_pacientes_versionados.append(paciente.id_paciente)
 
-    for pac in novos_pacientes_versionados:
-        codpac_sisac = Cadpaciente.objects.get(cpf=pac.cpf)
-        if codpac_sisac is not None: 
-            Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(~Q(confatd='S')).delete()
+    # for pac in novos_pacientes_versionados:
+    #     codpac_sisac = Cadpaciente.objects.get(cpf=pac.cpf)
+    #     if codpac_sisac is not None: 
+    #         Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(~Q(confatd='S')).delete()
 
     agenda_mosaiq_editada_hoje = Schedule.objects.filter(edit_dt__year=date.today().year, edit_dt__month=date.today().month, edit_dt__day=date.today().day).filter(activity='3D').filter(version=0).filter(~Q(suppressed=1)).filter(~Q(status=' C'))
 
@@ -792,6 +792,7 @@ def atualiza_agenda_sisac():
             novos_pacientes_agendados.append(paciente.id_paciente)
 
     for pac in novos_pacientes_agendados:
+        print(f'Paciente {pac}, CPF {pac.cpf}')
         codpac_sisac = Cadpaciente.objects.get(cpf=pac.cpf)
         if codpac_sisac is not None:
             agenda_mosaiq = Schedule.objects.filter(dataagenda__gte=date.today()).order_by('dataagenda').filter(id_paciente=pac.id_paciente).filter(activity='3D').filter(~Q(suppressed=1)).filter(~Q(status=' C'))
@@ -1158,78 +1159,78 @@ def inserepacote(pac):
     exame.save()
 
 
+def cria_agenda_radio2(pac):
+    # Função para gerar nova senha da agenda. Pega a última senha existente e adiciona 1
+    def senhanova():
+        ultimasenha = TAB_Parametro.objects.get(prm_nome='SENHAAGENDA') # 0006001
+        ultimasenha.prm_sequencia = ultimasenha.prm_sequencia + 1
+        ultimasenha.save()
+        zeros = 7 - len(str(ultimasenha.prm_sequencia)) 
+        senhafinal = '0' * zeros + str(ultimasenha.prm_sequencia)
 
-def entrada():
+        return senhafinal
+
+    agenda_mosaiq_criada_hoje = Schedule.objects.filter(id_paciente=pac).filter(version=0).filter(dataagenda__gte=date.today()).filter(~Q(suppressed=1))
+
+    novos_pacientes_agendados = []
+    agendamento_existente = []
+
+    for paciente in agenda_mosaiq_criada_hoje:
+        if paciente.id_paciente not in novos_pacientes_agendados:
+            novos_pacientes_agendados.append(paciente.id_paciente)
+
+    for pac in novos_pacientes_agendados:
+        codpac_sisac = Cadpaciente.objects.get(cpf=pac.cpf)
+        if codpac_sisac is not None:            
+            primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(planejado='S')
+            if primeira_agenda.count() >= 1:
+                altera_primeira_agenda = primeira_agenda.first()
+                if altera_primeira_agenda is not None:
+                    altera_primeira_agenda.tipo = ''
+                    altera_primeira_agenda.tipooriginal = ''
+                    altera_primeira_agenda.save()
+                agenda_mosaiq = Schedule.objects.filter(id_paciente=pac.id_paciente).filter(activity='3D').filter(dataagenda__gte=date.today()).filter(~Q(suppressed=1))
+                for agd in agenda_mosaiq:
+                    print(f'Iniciando iterações para paciente {codpac_sisac}...')
+                    checa_agenda = Agenda.objects.filter(datahora=agd.dataagenda).filter(tipo='RAD')
+                    if checa_agenda.count() > 0:
+                        print(f'Já existe agendamento no dia {agd.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")}.')
+                        dict = {}
+                        dict['IDAgenda_SISAC'] = checa_agenda.first().idagenda
+                        dict['Paciente'] = str(checa_agenda.first().codpaciente.codpaciente) + ' - ' + str(checa_agenda.first().codpaciente.paciente)
+                        dict['DataHora_Existente'] = checa_agenda.first().datahora.strftime("%d/%m/%Y - %H:%M:%S")
+                        dict['Tentou_Encaixar'] = str(codpac_sisac.codpaciente) + ' - ' + str(codpac_sisac.paciente)
+                        agendamento_existente.append(dict)
+                    else:
+                        print(f'Criando agenda para paciente {codpac_sisac}, dia {agd.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")}')
+                        agenda = Agenda()
+                        agenda.codmedico = '103'
+                        agenda.datahora = agd.dataagenda
+                        agenda.nome = codpac_sisac.paciente
+                        agenda.codconvenio = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last().codconvenio
+                        agenda.codpaciente = codpac_sisac
+                        agenda.obs = 'Sessão de Radioterapia'
+                        agenda.usuario = 'API'
+                        agenda.descr = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last().codconvenio.descr
+                        agenda.datasist = datetime.now()
+                        agenda.confatd = 'N'
+                        agenda.tipo = 'RAD'
+                        agenda.plano = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last().plano
+                        agenda.telefone = codpac_sisac.telefone2
+                        senha = senhanova()
+                        agenda.senha = senha
+                        agenda.ntratradio = Radioterapia.objects.filter(codpaciente=codpac_sisac).last().ntratamento
+                        agenda.planejado = 'S'
+                        agenda.whatsapp = codpac_sisac.whatsapp
+                        agenda.tipooriginal = 'RAD'
+                        agenda.save()
+
+            else:
+                print(f'Nada a fazer para o paciente {codpac_sisac}...')
+
+    if len(agendamento_existente) > 0:
+        msg = f'A tarefa de criação de agenda automática do SISAC reportou existência de agendamentos existentes. \nViolação de integridade foi evitada para o(s) seguinte(s) agendamento(s):{agendamento_existente}'
+        sendmail_cria_agenda('Cria Agenda Radio SISAC', msg)
+    print(f'Tarefa concluída.')
 
 
-    def addcodmovimento(codmovimento):
-        cut = codmovimento.split('.')
-        seqadd = int(cut[1]) + 1
-        if seqadd < 10:
-            seqadd = '0' + str(seqadd)
-        codfinal = cut[0] + '.' + str(seqadd)
-        return codfinal
-
-    def incrementa_natendimento():
-        prm_exame = TAB_Parametro.objects.get(prm_nome='TAB_ATENDIMENTO')
-        novo_codigo = prm_exame.prm_sequencia + 1
-        prm_exame.prm_sequencia = novo_codigo
-        prm_exame.save()
-
-        return novo_codigo
-
-    list = [
-        '000011',
-        '000012',
-        '000013',
-        '000015',
-        '000017',
-        '000018',
-        '000019',
-        '000024',
-        '000025',
-        '000026',
-        '000028',
-        '000030',
-        '000035',
-        '000038',
-        '000039',
-        '000040',
-        '000042',
-        '000049',
-        '000052',
-        '000053',
-        '000055',
-        '000056',
-        '000057',
-        '000063',
-        '000064',
-        '000076',
-        '000081',
-        '000094'
-    ]
-
-    for pac in list:        
-        codpac_sisac = Cadpaciente.objects.get(codpaciente=pac)
-        ultimo_codmov = Entrada.objects.filter(codpaciente=codpac_sisac.pk).order_by('datahoraent').last()
-        novo_codmov = addcodmovimento(str(ultimo_codmov))
-
-        entrada = Entrada()
-        entrada.codpaciente = codpac_sisac
-        entrada.codmovimento = novo_codmov
-        entrada.tipo = '4'
-        entrada.fechado = 'E'
-        entrada.datahoraent = datetime.now()
-        entrada.datasist = datetime.now()
-        entrada.local = ''
-        entrada.usuario = 'API'
-        entrada.codconvenio = ultimo_codmov.codconvenio
-        entrada.plano = ''
-        entrada.codmedico = ultimo_codmov.codmedico
-        entrada.hist = 'Sessão de Radioterapia'
-        entrada.total = 0
-        entrada.grupoemp = '01'
-        entrada.filial = '01'
-        novocodigo_natendimento = incrementa_natendimento()
-        entrada.natendimento = novocodigo_natendimento
-        entrada.save()
