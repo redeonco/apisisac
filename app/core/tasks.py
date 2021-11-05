@@ -662,7 +662,7 @@ def cria_agenda_radio():
     for pac in novos_pacientes_agendados:
         codpac_sisac = Cadpaciente.objects.get(cpf=pac.cpf)
         if codpac_sisac is not None:            
-            primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(planejado='S')
+            primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(obs__icontains='Sessão de Radioterapia').filter(planejado='S')
             if primeira_agenda.count() >= 0:
                 altera_primeira_agenda = primeira_agenda.first()
                 if altera_primeira_agenda is not None:
@@ -672,7 +672,7 @@ def cria_agenda_radio():
                 agenda_mosaiq = Schedule.objects.filter(id_paciente=pac.id_paciente).filter(activity='3D').filter(~Q(suppressed=1))
                 for agd in agenda_mosaiq:
                     print(f'Iniciando iterações para paciente {codpac_sisac}...')
-                    checa_agenda = Agenda.objects.filter(datahora=agd.dataagenda).filter(tipo='RAD')
+                    checa_agenda = Agenda.objects.filter(datahora=agd.dataagenda).filter(obs__icontains='Sessão de Radioterapia')
                     if checa_agenda.count() > 0:
                         print(f'Já existe agendamento no dia {agd.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")}.')
                         dict = {}
