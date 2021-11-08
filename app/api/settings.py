@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'core',
     'mosaiq_app',
     'config',
+    'control',
     'django_celery_results',
     'django_celery_beat',
     'rest_framework',

@@ -1,16 +1,32 @@
 from django.db import models
 
 
+# class Patient(models.Model):
+#     id_paciente = models.CharField(primary_key=True, db_column='Pat_ID1', max_length=250)
+#     firstname = models.CharField(db_column='First_Name', blank=True, null=True, max_length=250)
+#     lastname = models.CharField(db_column='Last_Name', blank=True, null=True, max_length=250)
+#     cpf = models.CharField(db_column='SS_Number', blank=True, null=True, max_length=11)
+#     datanasc = models.DateTimeField(db_column='Birth_DtTm', blank=True, null=True)
+
+#     class Meta:
+#         managed = False
+#         db_table = 'Patient'
+    
+#     def __str__(self):
+#         return self.firstname   
+
+
 class Patient(models.Model):
     id_paciente = models.CharField(primary_key=True, db_column='Pat_ID1', max_length=250)
     firstname = models.CharField(db_column='First_Name', blank=True, null=True, max_length=250)
     lastname = models.CharField(db_column='Last_Name', blank=True, null=True, max_length=250)
     cpf = models.CharField(db_column='SS_Number', blank=True, null=True, max_length=11)
     datanasc = models.DateTimeField(db_column='Birth_DtTm', blank=True, null=True)
+    codpac_sisac = models.CharField(db_column='IDA', max_length=10, blank=True, null=True)
 
     class Meta:
         managed = False
-        db_table = 'Patient'
+        db_table = 'vw_PatBro_Demographics'
     
     def __str__(self):
         return self.firstname   
@@ -131,3 +147,4 @@ class Dose_Hst(models.Model):
     
     def __str__(self):
         return str(self.id_campo)
+

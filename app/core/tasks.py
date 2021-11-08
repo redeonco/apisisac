@@ -1,5 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.db import IntegrityError
+from core.functions import *
 from celery import shared_task
 from config.models import TAB_Parametro
 from core.models import CadConvenio, Exame, Fatura, TabAmb
@@ -82,35 +82,6 @@ def sendmail_alta_paciente(pac):
 # Confirmando na agenda de radioterapia do SISAC os pacientes tratados no MOSAIQ
 @shared_task
 def atualizaagenda():
-    # Função que realiza incremento da sequencial no código de movimento do paciente.
-    # Código de movimento é o registro de atividade do paciente dentro do SISAC
-    # Onde os 6 primeiros dígitos compõem o número do prontuário,
-    # E o final, separado por um ponto(.), é a sequência do registro.
-    # Exemplo: Se a função receber o parâmetro '006049.10', retornará '006049.11'.
-    def addcodmovimento(codmovimento):
-        cut = codmovimento.split('.')
-        seqadd = int(cut[1]) + 1
-        if seqadd < 10:
-            seqadd = '0' + str(seqadd)
-        codfinal = cut[0] + '.' + str(seqadd)
-        return codfinal
-    
-    def incrementa_codigoexame():
-        prm_exame = TAB_Parametro.objects.get(prm_nome='TAB_EXAME')
-        novo_codigo = prm_exame.prm_sequencia + 1
-        prm_exame.prm_sequencia = novo_codigo
-        prm_exame.save()
-
-        return novo_codigo
-
-    def incrementa_natendimento():
-        prm_exame = TAB_Parametro.objects.get(prm_nome='TAB_ATENDIMENTO')
-        novo_codigo = prm_exame.prm_sequencia + 1
-        prm_exame.prm_sequencia = novo_codigo
-        prm_exame.save()
-
-        return novo_codigo
-    
     # Marca a hora de início da tarefa
     horainicial = datetime.now()
 
@@ -132,11 +103,13 @@ def atualizaagenda():
         cpf_paciente = obj.id_paciente.cpf
         dataagenda_mosaiq = obj.dataagenda
 
-        # Busca um paciente no cadastro do SISAC que contenha o mesmo CPF do cadastro no MOSAIQ
-        codpac_sisac = Cadpaciente.objects.filter(cpf=cpf_paciente).first()
+        # Realiza chamada na função relaciona_paciente(), passando como parâmetro um objeto da classe Patient MOSAIQ
+        # Se encontrar um paciente relacionado no SISAC, a função vai retornar o objeto Cadpaciente
+        # Se não encontrar paciente, a função vai retornar False.
+        codpac_sisac = relaciona_paciente(obj.id_paciente)
         
         # Verifica se o resultado da busca pelo CPF é válido. Se válido, inicia próxima etapa.
-        if codpac_sisac is not None:     
+        if codpac_sisac:     
             # Verifica qual último código de movimento do paciente na tabela Entrada do SISAC,
             # Em seguida chama a função addcodmovimento para incrementar a sequência.
             # O resultado do incremento é utilizado posteriormente para gerar novos registros nas tabelas do SISAC.    
@@ -182,185 +155,192 @@ def atualizaagenda():
                 # Seleciona Última Prescrição do Paciente
                 prescricao = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last()
 
-                # Verifica quantidade de sessões de radioterapia realizadas
-                sessoesrealizadas = Agenda.objects.filter(tipo='RAD').filter(confatd='S').filter(codpaciente=codpac_sisac).count()
+                if prescricao is not None:
 
-                # Verifica número de aplicações de radioterapia para a fase 1
-                naplicfase1 = Planejfisicoc.objects.filter(numpresc=prescricao.numpresc).order_by('fase').first().naplicacoes
+                    # Verifica quantidade de sessões de radioterapia realizadas
+                    sessoesrealizadas = Agenda.objects.filter(tipo='RAD').filter(confatd='S').filter(codpaciente=codpac_sisac).count()
+                    
+                    # Verifica número de aplicações de radioterapia para a fase 1
+                    planejamentoc = Planejfisicoc.objects.filter(numpresc=prescricao.numpresc).order_by('fase').first()
+                    if planejamentoc is not None: 
+                        naplicfase1 = planejamentoc.naplicacoes
 
-                # Se houver fase 2, define número de aplicações da fase 2
-                if Planejfisicoc.objects.filter(numpresc=prescricao.numpresc).order_by('fase').last().fase > 1:
-                    naplicfase2 = Planejfisicoc.objects.filter(numpresc=prescricao.numpresc).order_by('fase').last().naplicacoes
-                
-                # Define fase atual baseado na quantidade de sessões realizadas. 
-                # Se quantidade realizada for menor que total de aplicações da Fase 1, então Fase = 1
-                # Se quantidade realizada for maior ou igual ao total de aplicações da Fase 1, então Fase = 2
-                if sessoesrealizadas < naplicfase1:
-                    fase = Planejfisicoc.objects.filter(numpresc=prescricao.numpresc).order_by('fase').first().fase        
+                        # Se houver fase 2, define número de aplicações da fase 2
+                        if Planejfisicoc.objects.filter(numpresc=prescricao.numpresc).order_by('fase').last().fase > 1:
+                            naplicfase2 = Planejfisicoc.objects.filter(numpresc=prescricao.numpresc).order_by('fase').last().naplicacoes
+                        
+                        # Define fase atual baseado na quantidade de sessões realizadas. 
+                        # Se quantidade realizada for menor que total de aplicações da Fase 1, então Fase = 1
+                        # Se quantidade realizada for maior ou igual ao total de aplicações da Fase 1, então Fase = 2
+                        if sessoesrealizadas < naplicfase1:
+                            fase = Planejfisicoc.objects.filter(numpresc=prescricao.numpresc).order_by('fase').first().fase        
+                        else:
+                            fase = Planejfisicoc.objects.filter(numpresc=prescricao.numpresc).order_by('fase').last().fase
+                        
+                        # Seleciona planejamento da prescrição, filtrando pela fase.
+                        planejamento = Planejfisico.objects.filter(numpresc=prescricao.numpresc).order_by('idplanejfisico').filter(fase=fase)
+
+                        print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Busca concluída.')
+                        print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iniciando iteração no resultado da busca...')
+                        n = 0
+                        print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Gerando registros na tabela EntradaRadio...')
+
+
+                        campostratados = Dose_Hst.objects.filter(id_paciente=obj.id_paciente).filter(datahora__year=date.today().year,datahora__month=date.today().month, datahora__day=date.today().day).filter(dose_campo__gt=0)
+
+
+                        # Inicia iterações sobre o resultado da consulta na tabela PlanejFisico.
+                        # O planejamento contém detalhes técnicos de cada um dos campos que paciente irá realizar.
+                        # Para cada campo encontrado no planejamento, a interação irá gerar um registro na tabela EntradaRadio,
+                        # Referênciando os detalhes técnicos presentes no planejamento e na prescrição médica.
+                        for campo in campostratados:
+                            try:                        
+                                planej = Planejfisico.objects.get(id_mosaiq=campo.id_campo_id)              
+                                entradaradio = Entradaradio()
+                                entradaradio.codmovimento = novo_codmov
+                                entradaradio.codpaciente = codpac_sisac.pk
+                                entradaradio.numpresc = prescricao.numpresc
+                                entradaradio.idplanejfisico = Planejfisico.objects.get(id_mosaiq=campo.id_campo_id).idplanejfisico
+                                entradaradio.encerrado = 'S'
+                                entradaradio.observacao = ''
+                                entradaradio.usuario = 'API'
+                                entradaradio.datahora = dataagenda_mosaiq
+                                entradaradio.datasist = datetime.now()
+                                entradaradio.nplanejamento = planej.nplanejamento
+                                entradaradio.nomecampo = planej.nomecampo
+                                entradaradio.incidencia = planej.incidencia
+                                entradaradio.ntratamento = planej.ntratamento
+                                entradaradio.ncampo = planej.ncampo
+                                entradaradio.grupoemp = '01'
+                                entradaradio.filial = '01'
+                                entradaradio.save()
+                                n += 1
+                            except ObjectDoesNotExist:
+                                pass
+                        print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', n, 'registro(s) gerado(s) na tabela EntradaRadio.')
+
+                        print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Confirmando paciente na tabela Agenda Radioterapia...')
+
+                        # Todas as etapas acima realizadas, finalmente acessa o agendamento de radioterapia localizada no início da tarefa,
+                        # Marca como confirmado, atribuindo 'S' na coluna ConfAtd e inserindo o código de movimento gerado pela função addcodmovimento,
+                        # Que faz referência o histórico gerado para o paciente nas etapas anteriores.
+                        agenda_sisac.confatd = 'S'
+                        agenda_sisac.usuario = 'API'
+                        agenda_sisac.codmovimento = novo_codmov
+                        agenda_sisac.datasist = datetime.now()
+                        agenda_sisac.save()
+                        print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Paciente confirmado.')
+                        print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iteração concluída para o paciente', codpac_sisac)
+
+                        # Verifica a quantidade de sessões realizadas.
+                        qtd_realizada = Agenda.objects.filter(tipo='RAD').filter(confatd='S').filter(codpaciente=codpac_sisac).count()
+
+
+                        if qtd_realizada == 1:
+                            codamb = SolicExa.objects.filter(npresc=prescricao.numpresc).order_by('item').first().codamb                    
+                            print(f'Primeira sessão de radioterapia do paciente {codpac_sisac}. Iniciando lançamento do pacote do tratamento na conta do paciente...')                    
+                            primeira_entrada = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').first()
+                            codconvenio = primeira_entrada.codconvenio
+                            matricula = primeira_entrada.matricula
+                            codmedico = primeira_entrada.codmedico
+                            plano = primeira_entrada.plano
+                            ultimo_codmov = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last()
+                            novo_codmov = addcodmovimento(str(ultimo_codmov))
+                            
+                            # Gerar registro do pacote de tratamento na tabela Entrada
+                            
+                            if Entrada.objects.filter(codpaciente=codpac_sisac).filter(codamb=codamb).count() == 0:
+                                entrada = Entrada()
+                                entrada.codmovimento = novo_codmov
+                                entrada.codpaciente = codpac_sisac
+                                entrada.codconvenio = codconvenio
+                                entrada.matricula = matricula
+                                entrada.tipo = '4'
+                                entrada.datahoraent = datetime.now()
+                                entrada.hist = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
+                                entrada.codmedico = codmedico
+                                entrada.local = '112'
+                                entrada.recep = 'API'
+                                entrada.total = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+                                entrada.fechado = 'P'
+                                entrada.codamb = codamb
+                                entrada.datasist = datetime.now()
+                                entrada.plano = plano
+                                entrada.tabhm = CadConvenio.objects.get(codconvenio=codconvenio).hm
+                                entrada.datahoraint = datetime.now()
+                                entrada.localini = '112'
+                                novocodigo_natendimento = incrementa_natendimento()
+                                entrada.natendimento = novocodigo_natendimento
+                                entrada.datamarcada = datetime.now()
+                                entrada.save()
+
+                            # Gerar registro do pacote de tratamento na tabela Fatura
+                            if Fatura.objects.filter(codpaciente__icontains=codpac_sisac.codpaciente).filter(codamb=codamb).count() == 0:
+                                fatura = Fatura()
+                                fatura.codpaciente = novo_codmov
+                                fatura.grupo = '1'
+                                fatura.codtaxa = codamb
+                                fatura.descr = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
+                                fatura.data = datetime.now()
+                                fatura.valor = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+                                fatura.quant = '1'
+                                fatura.filme = '0'
+                                fatura.codmedico = codmedico
+                                fatura.datasist = datetime.now()
+                                fatura.usuario = 'API'
+                                fatura.codamb = codamb
+                                fatura.ch = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+                                fatura.local = '112'
+                                fatura.honor = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+                                fatura.vpprof = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+                                fatura.obs = f'Tab.Honor {CadConvenio.objects.get(codconvenio=codconvenio).hm} {CadConvenio.objects.get(codconvenio=CadConvenio.objects.get(codconvenio=codconvenio).hm).descr}'
+                                fatura.localac = '112'
+                                fatura.save()
+
+                            # Gerar registro do pacote de tratamento na tabela Exame
+                            if Exame.objects.filter(codpaciente__icontains=codpac_sisac.codpaciente).filter(codamb=codamb).count() == 0:
+                                exame = Exame()
+                                exame.codpaciente = novo_codmov
+                                exame.codamb = codamb
+                                exame.local = '112'
+                                exame.descr = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
+                                exame.quant = '1'
+                                exame.codmedico = codmedico
+                                exame.usuario = 'API'
+                                exame.datasist = datetime.now()
+                                exame.chave = novo_codmov
+                                exame.valor = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
+                                exame.tipo = 'R'
+                                exame.dataproc = datetime.now()
+                                exame.codpacref = codpac_sisac
+                                novocodigo_exame = incrementa_codigoexame()
+                                exame.codigo = novocodigo_exame
+                                exame.save()
+
+                        
+                        # Se qtd realizada = quantidade prescrita, significa que paciente teve alta
+                        # Então insere flag TRATADO = 'SIM' na prescrição e no planejamento do paciente.
+                        # Paciente recebeu alta e um email é enviado informando.
+                        if prescricao.naplicacoes == qtd_realizada:
+                            prescricao.tratado = 'SIM'
+                            prescricao.save()
+
+                            for planej in planejamento:
+                                planej.tratado = 'SIM'
+                                planej.save()
+
+                            prescrradio = PrescrRadio.objects.filter(numpresc=prescricao.numpresc)
+
+                            for presc in prescrradio:
+                                presc.tratado = 'SIM'
+                                presc.save()
+                            
+                            print(f'Última sessão do paciente{codpac_sisac}. {qtd_realizada} sessões realizadas. Inserida flag TRATADO=SIM para o tratamento do paciente.')
+                            sendmail_alta_paciente(codpac_sisac)
+                    else:
+                        print(f'Paciente {codpac_sisac} sem planejamento')
                 else:
-                    fase = Planejfisicoc.objects.filter(numpresc=prescricao.numpresc).order_by('fase').last().fase
-                
-                # Seleciona planejamento da prescrição, filtrando pela fase.
-                planejamento = Planejfisico.objects.filter(numpresc=prescricao.numpresc).order_by('idplanejfisico').filter(fase=fase)
-
-                print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Busca concluída.')
-                print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iniciando iteração no resultado da busca...')
-                n = 0
-                print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Gerando registros na tabela EntradaRadio...')
-
-
-                campostratados = Dose_Hst.objects.filter(id_paciente=obj.id_paciente).filter(datahora__year=date.today().year,datahora__month=date.today().month, datahora__day=date.today().day).filter(dose_campo__gt=0)
-
-
-                # Inicia iterações sobre o resultado da consulta na tabela PlanejFisico.
-                # O planejamento contém detalhes técnicos de cada um dos campos que paciente irá realizar.
-                # Para cada campo encontrado no planejamento, a interação irá gerar um registro na tabela EntradaRadio,
-                # Referênciando os detalhes técnicos presentes no planejamento e na prescrição médica.
-                for campo in campostratados:
-                    try:                        
-                        planej = Planejfisico.objects.get(id_mosaiq=campo.id_campo_id)              
-                        entradaradio = Entradaradio()
-                        entradaradio.codmovimento = novo_codmov
-                        entradaradio.codpaciente = codpac_sisac.pk
-                        entradaradio.numpresc = prescricao.numpresc
-                        entradaradio.idplanejfisico = Planejfisico.objects.get(id_mosaiq=campo.id_campo_id).idplanejfisico
-                        entradaradio.encerrado = 'S'
-                        entradaradio.observacao = ''
-                        entradaradio.usuario = 'API'
-                        entradaradio.datahora = dataagenda_mosaiq
-                        entradaradio.datasist = datetime.now()
-                        entradaradio.nplanejamento = planej.nplanejamento
-                        entradaradio.nomecampo = planej.nomecampo
-                        entradaradio.incidencia = planej.incidencia
-                        entradaradio.ntratamento = planej.ntratamento
-                        entradaradio.ncampo = planej.ncampo
-                        entradaradio.grupoemp = '01'
-                        entradaradio.filial = '01'
-                        entradaradio.save()
-                        n += 1
-                    except ObjectDoesNotExist:
-                        pass
-                print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', n, 'registro(s) gerado(s) na tabela EntradaRadio.')
-
-                print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Confirmando paciente na tabela Agenda Radioterapia...')
-
-                # Todas as etapas acima realizadas, finalmente acessa o agendamento de radioterapia localizada no início da tarefa,
-                # Marca como confirmado, atribuindo 'S' na coluna ConfAtd e inserindo o código de movimento gerado pela função addcodmovimento,
-                # Que faz referência o histórico gerado para o paciente nas etapas anteriores.
-                agenda_sisac.confatd = 'S'
-                agenda_sisac.usuario = 'API'
-                agenda_sisac.codmovimento = novo_codmov
-                agenda_sisac.datasist = datetime.now()
-                agenda_sisac.save()
-                print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Paciente confirmado.')
-                print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Iteração concluída para o paciente', codpac_sisac)
-
-                # Verifica a quantidade de sessões realizadas.
-                qtd_realizada = Agenda.objects.filter(tipo='RAD').filter(confatd='S').filter(codpaciente=codpac_sisac).count()
-
-
-                if qtd_realizada == 1:
-                    codamb = SolicExa.objects.filter(npresc=prescricao.numpresc).order_by('item').first().codamb                    
-                    print(f'Primeira sessão de radioterapia do paciente {codpac_sisac}. Iniciando lançamento do pacote do tratamento na conta do paciente...')                    
-                    primeira_entrada = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').first()
-                    codconvenio = primeira_entrada.codconvenio
-                    matricula = primeira_entrada.matricula
-                    codmedico = primeira_entrada.codmedico
-                    plano = primeira_entrada.plano
-                    ultimo_codmov = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last()
-                    novo_codmov = addcodmovimento(str(ultimo_codmov))
-                    
-                    # Gerar registro do pacote de tratamento na tabela Entrada
-                    
-                    if Entrada.objects.filter(codpaciente=codpac_sisac).filter(codamb=codamb).count() == 0:
-                        entrada = Entrada()
-                        entrada.codmovimento = novo_codmov
-                        entrada.codpaciente = codpac_sisac
-                        entrada.codconvenio = codconvenio
-                        entrada.matricula = matricula
-                        entrada.tipo = '4'
-                        entrada.datahoraent = datetime.now()
-                        entrada.hist = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
-                        entrada.codmedico = codmedico
-                        entrada.local = '112'
-                        entrada.recep = 'API'
-                        entrada.total = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
-                        entrada.fechado = 'P'
-                        entrada.codamb = codamb
-                        entrada.datasist = datetime.now()
-                        entrada.plano = plano
-                        entrada.tabhm = CadConvenio.objects.get(codconvenio=codconvenio).hm
-                        entrada.datahoraint = datetime.now()
-                        entrada.localini = '112'
-                        novocodigo_natendimento = incrementa_natendimento()
-                        entrada.natendimento = novocodigo_natendimento
-                        entrada.datamarcada = datetime.now()
-                        entrada.save()
-
-                    # Gerar registro do pacote de tratamento na tabela Fatura
-                    if Fatura.objects.filter(codpaciente__icontains=codpac_sisac.codpaciente).filter(codamb=codamb).count() == 0:
-                        fatura = Fatura()
-                        fatura.codpaciente = novo_codmov
-                        fatura.grupo = '1'
-                        fatura.codtaxa = codamb
-                        fatura.descr = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
-                        fatura.data = datetime.now()
-                        fatura.valor = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
-                        fatura.quant = '1'
-                        fatura.filme = '0'
-                        fatura.codmedico = codmedico
-                        fatura.datasist = datetime.now()
-                        fatura.usuario = 'API'
-                        fatura.codamb = codamb
-                        fatura.ch = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
-                        fatura.local = '112'
-                        fatura.honor = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
-                        fatura.vpprof = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
-                        fatura.obs = f'Tab.Honor {CadConvenio.objects.get(codconvenio=codconvenio).hm} {CadConvenio.objects.get(codconvenio=CadConvenio.objects.get(codconvenio=codconvenio).hm).descr}'
-                        fatura.localac = '112'
-                        fatura.save()
-
-                    # Gerar registro do pacote de tratamento na tabela Exame
-                    if Exame.objects.filter(codpaciente__icontains=codpac_sisac.codpaciente).filter(codamb=codamb).count() == 0:
-                        exame = Exame()
-                        exame.codpaciente = novo_codmov
-                        exame.codamb = codamb
-                        exame.local = '112'
-                        exame.descr = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
-                        exame.quant = '1'
-                        exame.codmedico = codmedico
-                        exame.usuario = 'API'
-                        exame.datasist = datetime.now()
-                        exame.chave = novo_codmov
-                        exame.valor = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
-                        exame.tipo = 'R'
-                        exame.dataproc = datetime.now()
-                        exame.codpacref = codpac_sisac
-                        novocodigo_exame = incrementa_codigoexame()
-                        exame.codigo = novocodigo_exame
-                        exame.save()
-
-                
-                # Se qtd realizada = quantidade prescrita, significa que paciente teve alta
-                # Então insere flag TRATADO = 'SIM' na prescrição e no planejamento do paciente.
-                # Paciente recebeu alta e um email é enviado informando.
-                if prescricao.naplicacoes == qtd_realizada:
-                    prescricao.tratado = 'SIM'
-                    prescricao.save()
-
-                    for planej in planejamento:
-                        planej.tratado = 'SIM'
-                        planej.save()
-
-                    prescrradio = PrescrRadio.objects.filter(numpresc=prescricao.numpresc)
-
-                    for presc in prescrradio:
-                        presc.tratado = 'SIM'
-                        presc.save()
-                    
-                    print(f'Última sessão do paciente{codpac_sisac}. {qtd_realizada} sessões realizadas. Inserida flag TRATADO=SIM para o tratamento do paciente.')
-                    sendmail_alta_paciente(codpac_sisac)
-
+                    print(f'Paciente {codpac_sisac} sem prescrição no SISAC.')
                 i += 1
     print('---------------------------------------------')
     print('['+ datetime.now().strftime("%d/%m/%Y - %H:%M:%S") + ']', 'Atualização da agenda concluída com sucesso.', i, 'pacientes foram confirmados na agenda de tratamento de radioterapia SISAC.')
@@ -407,20 +387,6 @@ def atualiza_planej():
         '2': 'MV',
         '3': 'MeV'
         }
-
-    # Função para verificar se a fase inicia ao mesmo tempo que outra
-    # A função verifica se existe um objeto relacionado na tabela fase
-    # Na coluna reference_sit_set_id. Este coluna aponta para ID de outra fase
-    # Indicando que as duas estão relacionadas.
-    # Se este for o caso, a coluna Reference_Fraction determina o número da sessão de início desta fase, relacionada à outra
-    # E a função retornará o ID da fase relacionada
-    # Se ocorrer a exceção ObjectDoesNotExist, a função retornará False
-    def checafase(fase):
-        try:
-            fase.reference_sit_set_id
-            return fase.reference_sit_set_id
-        except ObjectDoesNotExist:
-            return False
 
     campos_antigos = TxField.objects.filter(version__gt=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month=date.today().month, sanct_dt__day=date.today().day)
     if campos_antigos is not None:
@@ -479,31 +445,9 @@ def atualiza_planej():
                     novo_planejfisicoc.ncampo = obj.numero_campo
                     novo_planejfisicoc.ordemcampo = obj.numero_campo
 
-                    # Verifica se a fase está relacionada com outra para definir o início do tratamento
-                    # Se não houver fase relacionada, inicio tratamento = 1
-                    # Se houver, define início tratamento com o valor obtido da coluna Reference_Fraction, tabela Fase
-                    lista_fases = []
-                    if checafase(obj.id_fase) == False:
-                        fases = Fase.objects.filter(id_paciente=obj.id_paciente).filter(reference_sit_set_id__isnull=True)
-                        nfase = 0
-                        contador = 0
-                        for fase in fases:
-                            dict = {}
-                            nfase += 1
-                            dict['IDFase'] = fase
-                            dict['NumeroFase'] = nfase
-                            dict['QtdSessoes'] = fase.qtdsessoes
-                            if contador == 0:
-                                dict['InicioTrat'] = 1
-                            else:
-                                iniciotrat = lista_fases[contador-1]['InicioTrat'] + lista_fases[contador-1]['QtdSessoes']
-                                dict['InicioTrat'] = iniciotrat
-                            lista_fases.append(dict)
-                            contador += 1
-                        iniciotrat = list(filter(lambda lista_fases: lista_fases['IDFase'] == obj.id_fase, lista_fases))[0]['InicioTrat']
-                            
-                    else:
-                        iniciotrat = obj.id_fase.reference_fraction
+                    # Realizada chamada na função inicio_tratamento(), passando como parâmetro o obj iterado no loop anterior
+                    # Realiza a verificação para definir o início do tratamento.
+                    iniciotrat = inicio_tratamento(obj)
 
                     novo_planejfisicoc.iniciotrat = iniciotrat
                     novo_planejfisicoc.incidencia = '3D'
@@ -594,31 +538,10 @@ def atualiza_planej():
                     novapresc.dosetdiaria = obj.dose_campo
                     novapresc.fase = obj.id_fase.numerofase
 
-                    # Verifica se a fase está relacionada com outra para definir o início do tratamento
-                    # Se não houver fase relacionada, inicio tratamento = 1
-                    # Se houver, define início tratamento com o valor obtido da coluna Reference_Fraction, tabela Fase
-                    lista_fases = []
-                    if checafase(obj.id_fase) == False:
-                        fases = Fase.objects.filter(id_paciente=obj.id_paciente).filter(reference_sit_set_id__isnull=True)
-                        nfase = 0
-                        contador = 0
-                        for fase in fases:
-                            dict = {}
-                            nfase += 1
-                            dict['IDFase'] = fase
-                            dict['NumeroFase'] = nfase
-                            dict['QtdSessoes'] = fase.qtdsessoes
-                            if contador == 0:
-                                dict['InicioTrat'] = 1
-                            else:
-                                iniciotrat = lista_fases[contador-1]['InicioTrat'] + lista_fases[contador-1]['QtdSessoes']
-                                dict['InicioTrat'] = iniciotrat
-                            lista_fases.append(dict)
-                            contador += 1
-                        iniciotrat = list(filter(lambda lista_fases: lista_fases['IDFase'] == obj.id_fase, lista_fases))[0]['InicioTrat']
+                    # Realizada chamada na função inicio_tratamento(), passando como parâmetro o obj iterado no loop anterior
+                    # Realiza a verificação para definir o início do tratamento.
+                    iniciotrat = inicio_tratamento(obj)
 
-                    else:
-                        iniciotrat = obj.id_fase.reference_fraction
                     print(f'ID Fase: {obj.id_fase}, início trat: {iniciotrat}')
                     novapresc.iniciotrat = iniciotrat
                     novapresc.id_mosaiq = obj.id_campo
@@ -635,20 +558,10 @@ def atualiza_planej():
 
         else:
             print(f'Paciente {codpac_sisac} sem prescrição médica no SISAC')
-                                    
 
 
 @shared_task
 def cria_agenda_radio():
-    # Função para gerar nova senha da agenda. Pega a última senha existente e adiciona 1
-    def senhanova():
-        ultimasenha = TAB_Parametro.objects.get(prm_nome='SENHAAGENDA') # 0006001
-        ultimasenha.prm_sequencia = ultimasenha.prm_sequencia + 1
-        ultimasenha.save()
-        zeros = 7 - len(str(ultimasenha.prm_sequencia)) 
-        senhafinal = '0' * zeros + str(ultimasenha.prm_sequencia)
-
-        return senhafinal
 
     agenda_mosaiq_criada_hoje = Schedule.objects.filter(create_dt__year=date.today().year, create_dt__month=date.today().month, create_dt__day=date.today().day).filter(activity='3D').filter(version=0).filter(~Q(suppressed=1))
 
@@ -660,10 +573,10 @@ def cria_agenda_radio():
             novos_pacientes_agendados.append(paciente.id_paciente)
 
     for pac in novos_pacientes_agendados:
-        codpac_sisac = Cadpaciente.objects.get(cpf=pac.cpf)
-        if codpac_sisac is not None:            
+        codpac_sisac = relaciona_paciente(pac)
+        if codpac_sisac:            
             primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(obs__icontains='Sessão de Radioterapia').filter(planejado='S')
-            if primeira_agenda.count() >= 0:
+            if primeira_agenda.count() <= 1:
                 altera_primeira_agenda = primeira_agenda.first()
                 if altera_primeira_agenda is not None:
                     altera_primeira_agenda.tipo = ''
@@ -713,60 +626,6 @@ def cria_agenda_radio():
         sendmail_cria_agenda('Cria Agenda Radio SISAC', msg)
     print(f'Tarefa concluída.')
 
-#Função cagada
-def atualiza_datahora_agenda():
-    violacao = []
-    sem_agenda_sisac = []
-    atualizados = []
-    agenda_mosaiq = Schedule.objects.filter(dataagenda__gte=date.today()).order_by('dataagenda').filter(activity='3D').filter(~Q(status=' C')).filter(version=0).filter(~Q(suppressed=1))
-    for pac in agenda_mosaiq:
-        print(f'Encontrado agenda MOSAIQ para o paciente {pac.id_paciente} dia {pac.dataagenda}')
-        codpac_sisac = Cadpaciente.objects.get(cpf=pac.id_paciente.cpf)
-        if codpac_sisac is not None:
-            print(f'Encontrado relacinamento para o paciente {codpac_sisac} no SISAC.')
-            agenda_sisac = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(confatd='N').filter(datahora__year=pac.dataagenda.year, datahora__month=pac.dataagenda.month, datahora__day=pac.dataagenda.day).first()
-            if agenda_sisac is not None:
-                print(f'Encontrado agenda para o paciente {codpac_sisac}, dia {agenda_sisac.datahora}')
-                if agenda_sisac.datahora == pac.dataagenda:
-                    print(f'Agendamento no SISAC é igual ao agendamento no MOSAIQ... Nada a fazer.')
-                    print('---------------------------------------------------')
-                else:
-                    agenda_dia = Agenda.objects.filter(tipo='RAD').filter(datahora=pac.dataagenda)
-                    if agenda_dia.count() > 0:
-                        print(f'Paciente {agenda_dia.first().codpaciente} ocupando o horário {pac.dataagenda}. A alteração forçada provocaria violação de integridade.')
-                        print('---------------------------------------------------')
-                        dict = {}
-                        dict['CodPaciente'] = str(codpac_sisac.codpaciente) + ' - ' + str(codpac_sisac.paciente)
-                        dict['DataHora_Atual'] = agenda_sisac.datahora.strftime("%d/%m/%Y - %H:%M:%S")
-                        dict['DataHora_MOSAIQ'] = pac.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")
-                        dict['Ocupado_Por'] = str(agenda_dia.first().codpaciente.codpaciente) + ' - ' + str(agenda_dia.first().codpaciente.paciente)
-                        violacao.append(dict)
-                    else:
-                        agenda_sisac.datahora = pac.dataagenda
-                        agenda_sisac.save()
-                        print(f'Agendamento ID {agenda_sisac.idagenda} SISAC Atualizada. Data/hora antiga: {agenda_sisac.datahora}. Data/Hora nova: {pac.dataagenda}')
-                        print('---------------------------------------------------')
-                        dict = {}
-                        dict['CodPaciente'] = str(codpac_sisac.codpaciente) + ' - ' + str(codpac_sisac.paciente)
-                        dict['IDAgenda_SISAC'] = agenda_sisac.idagenda
-                        dict['DataHora_Atualizada'] = pac.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")
-                        atualizados.append(dict)
-            else:
-                print(f'Nenhum agendamento no SISAC encontrado para o paciente {codpac_sisac} no dia {pac.dataagenda}')
-                print('---------------------------------------------------')
-                dict = {}
-                dict['CodPaciente'] = str(codpac_sisac.codpaciente) + ' - ' + str(codpac_sisac.paciente)
-                dict['DataHora_MOSAIQ'] = pac.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")
-                sem_agenda_sisac.append(dict)
-    print('---------------------------------------------------')
-    print('Procedimento concluído')
-    print(f'Segue lista de violações de integridade encontradas: {violacao}')
-    print(f'Segue lista de agendamentos sem referência no SISAC: {sem_agenda_sisac}')
-    print(f'Segue lista de agendamentos atualizados no SISAC: {atualizados}')
-
-    msg = f'Segue lista de violações de integridade encontradas: {violacao}. \n\nSegue lista de agendamentos sem referência no SISAC: {sem_agenda_sisac}. \n\nSegue lista de agendamentos atualizados no SISAC: {atualizados}'
-    sendmail_cria_agenda('Atualiza Agenda Radio SISAC', msg)
-
 
 @shared_task
 def atualiza_agenda_sisac():
@@ -793,8 +652,8 @@ def atualiza_agenda_sisac():
 
     for pac in novos_pacientes_agendados:
         print(f'Paciente {pac}, CPF {pac.cpf}')
-        codpac_sisac = Cadpaciente.objects.get(cpf=pac.cpf)
-        if codpac_sisac is not None:
+        codpac_sisac = relaciona_paciente(pac)
+        if codpac_sisac:
             agenda_mosaiq = Schedule.objects.filter(dataagenda__gte=date.today()).order_by('dataagenda').filter(id_paciente=pac.id_paciente).filter(activity='3D').filter(~Q(suppressed=1)).filter(~Q(status=' C'))
             for agd in agenda_mosaiq:
                 agenda = Agenda.objects.filter(datahora=agd.dataagenda).filter(tipo='RAD').filter(planejado='S').first()
@@ -1051,7 +910,6 @@ def alta():
                 print(f'Flag TRATADO SIM inserida para o campo {presc}, paciente {presc.codpaciente}')
 
 
-
 def inserepacote(pac):
     codpac_sisac = Cadpaciente.objects.get(codpaciente=pac)
 
@@ -1160,17 +1018,8 @@ def inserepacote(pac):
 
 
 def cria_agenda_radio2(pac):
-    # Função para gerar nova senha da agenda. Pega a última senha existente e adiciona 1
-    def senhanova():
-        ultimasenha = TAB_Parametro.objects.get(prm_nome='SENHAAGENDA') # 0006001
-        ultimasenha.prm_sequencia = ultimasenha.prm_sequencia + 1
-        ultimasenha.save()
-        zeros = 7 - len(str(ultimasenha.prm_sequencia)) 
-        senhafinal = '0' * zeros + str(ultimasenha.prm_sequencia)
 
-        return senhafinal
-
-    agenda_mosaiq_criada_hoje = Schedule.objects.filter(id_paciente=pac).filter(version=0).filter(dataagenda__gte=date.today()).filter(~Q(suppressed=1))
+    agenda_mosaiq_criada_hoje = Schedule.objects.filter(id_paciente=pac).filter(version=0).filter(~Q(suppressed=1))
 
     novos_pacientes_agendados = []
     agendamento_existente = []
@@ -1180,16 +1029,16 @@ def cria_agenda_radio2(pac):
             novos_pacientes_agendados.append(paciente.id_paciente)
 
     for pac in novos_pacientes_agendados:
-        codpac_sisac = Cadpaciente.objects.get(cpf=pac.cpf)
-        if codpac_sisac is not None:            
+        codpac_sisac = relaciona_paciente(pac)
+        if codpac_sisac:            
             primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(planejado='S')
-            if primeira_agenda.count() >= 1:
+            if primeira_agenda.count() <= 1:
                 altera_primeira_agenda = primeira_agenda.first()
                 if altera_primeira_agenda is not None:
                     altera_primeira_agenda.tipo = ''
                     altera_primeira_agenda.tipooriginal = ''
                     altera_primeira_agenda.save()
-                agenda_mosaiq = Schedule.objects.filter(id_paciente=pac.id_paciente).filter(activity='3D').filter(dataagenda__gte=date.today()).filter(~Q(suppressed=1))
+                agenda_mosaiq = Schedule.objects.filter(id_paciente=pac.id_paciente).filter(activity='3D').filter(~Q(suppressed=1))
                 for agd in agenda_mosaiq:
                     print(f'Iniciando iterações para paciente {codpac_sisac}...')
                     checa_agenda = Agenda.objects.filter(datahora=agd.dataagenda).filter(tipo='RAD')
@@ -1232,5 +1081,4 @@ def cria_agenda_radio2(pac):
         msg = f'A tarefa de criação de agenda automática do SISAC reportou existência de agendamentos existentes. \nViolação de integridade foi evitada para o(s) seguinte(s) agendamento(s):{agendamento_existente}'
         sendmail_cria_agenda('Cria Agenda Radio SISAC', msg)
     print(f'Tarefa concluída.')
-
 
