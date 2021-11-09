@@ -577,11 +577,11 @@ def cria_agenda_radio():
         if codpac_sisac:            
             primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(obs__icontains='Sessão de Radioterapia').filter(planejado='S')
             if primeira_agenda.count() <= 1:
-                altera_primeira_agenda = primeira_agenda.first()
-                if altera_primeira_agenda is not None:
-                    altera_primeira_agenda.tipo = ''
-                    altera_primeira_agenda.tipooriginal = ''
-                    altera_primeira_agenda.save()
+                # altera_primeira_agenda = primeira_agenda.first()
+                # if altera_primeira_agenda is not None:
+                #     altera_primeira_agenda.tipo = ''
+                #     altera_primeira_agenda.tipooriginal = ''
+                #     altera_primeira_agenda.save()
                 agenda_mosaiq = Schedule.objects.filter(id_paciente=pac.id_paciente).filter(activity='3D').filter(~Q(suppressed=1))
                 for agd in agenda_mosaiq:
                     print(f'Iniciando iterações para paciente {codpac_sisac}...')
@@ -1033,11 +1033,11 @@ def cria_agenda_radio2(pac):
         if codpac_sisac:            
             primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(planejado='S')
             if primeira_agenda.count() <= 1:
-                altera_primeira_agenda = primeira_agenda.first()
-                if altera_primeira_agenda is not None:
-                    altera_primeira_agenda.tipo = ''
-                    altera_primeira_agenda.tipooriginal = ''
-                    altera_primeira_agenda.save()
+                # altera_primeira_agenda = primeira_agenda.first()
+                # if altera_primeira_agenda is not None:
+                #     altera_primeira_agenda.tipo = ''
+                #     altera_primeira_agenda.tipooriginal = ''
+                #     altera_primeira_agenda.save()
                 agenda_mosaiq = Schedule.objects.filter(id_paciente=pac.id_paciente).filter(activity='3D').filter(~Q(suppressed=1))
                 for agd in agenda_mosaiq:
                     print(f'Iniciando iterações para paciente {codpac_sisac}...')
