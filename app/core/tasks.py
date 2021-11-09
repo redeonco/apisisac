@@ -335,8 +335,8 @@ def atualizaagenda():
                                 presc.tratado = 'SIM'
                                 presc.save()
                             
-                            print(f'Última sessão do paciente{codpac_sisac}. {qtd_realizada} sessões realizadas. Inserida flag TRATADO=SIM para o tratamento do paciente.')
-                            sendmail_alta_paciente(codpac_sisac)
+                            print(f'Última sessão do paciente{str(codpac_sisac)}. {qtd_realizada} sessões realizadas. Inserida flag TRATADO=SIM para o tratamento do paciente.')
+                            sendmail_alta_paciente(str(codpac_sisac.paciente))
                     else:
                         print(f'Paciente {codpac_sisac} sem planejamento')
                 else:
