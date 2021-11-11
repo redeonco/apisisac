@@ -211,9 +211,10 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'America/Sao_Paulo'
 DJANGO_CELERY_BEAT_TZ_AWARE = False
 
-EMAIL_HOST = 'smtp-cluster.idc2.mandic.com.br'
-EMAIL_PORT = '587'
-EMAIL_HOST_USER = 'chamado@oncoradium.com.br'
-EMAIL_HOST_PASSWORD = '@Onc0r4d1um@'
+# EMAIL_HOST = 'smtp-cluster.idc2.mandic.com.br'
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = False
+EMAIL_HOST = 'smtp-cluster.idc2.mandic.com.br'
+EMAIL_HOST_USER = 'chamado@oncoradium.com.br'
+EMAIL_HOST_PASSWORD = '@Onc0r4d1um@'
+EMAIL_PORT = '587'

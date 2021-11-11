@@ -1,4 +1,5 @@
 from django.core.exceptions import ObjectDoesNotExist
+from smtplib import SMTPAuthenticationError
 from core.functions import *
 from celery import shared_task
 from config.models import TAB_Parametro
@@ -22,58 +23,73 @@ from django.core.mail import send_mail
 
 @shared_task
 def sendmail(qtdconfirmado, data):
-    send_mail(
-        'Núcleo de Sistemas - Relatório API - SISAC',
-        'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa Atualiza Agenda, em ' + data.strftime("%d/%m/%Y às %H:%M:%S") +
-        '. \nQuantidade de pacientes confirmados na agenda do SISAC: ' + str(qtdconfirmado) + '.',
-        'chamado@oncoradium.com.br',
-        ['tony.carvalho@oncoradium.com.br'],
-        fail_silently=False,
-    )
+    try:
+        send_mail(
+            'Núcleo de Sistemas - Relatório API - SISAC',
+            'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa Atualiza Agenda, em ' + data.strftime("%d/%m/%Y às %H:%M:%S") +
+            '. \nQuantidade de pacientes confirmados na agenda do SISAC: ' + str(qtdconfirmado) + '.',
+            'chamado@oncoradium.com.br',
+            ['tony.carvalho@oncoradium.com.br'],
+            fail_silently=False,
+        )
+    except SMTPAuthenticationError:
+        print(f'Falha de autenticação com o servidor SMTP :(')
 
 @shared_task
 def sendmail_lista(lista, qtdconfirmado, data):
-    send_mail(
-        'Núcleo de Sistemas - Relatório API - SISAC',
-        'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa Atualiza Agenda, em ' + data.strftime("%d/%m/%Y às %H:%M:%S") +
-        '. \nQuantidade de pacientes confirmados na agenda do SISAC: ' + str(qtdconfirmado) + 
-        '. \nPacientes não confirmados: ' + str(lista) + 
-        '. \nVerificar se os pacientes realizaram tratamento na máquina.',
-        'chamado@oncoradium.com.br',
-        ['tony.carvalho@oncoradium.com.br'],
-        fail_silently=False,
-    )
+    try:
+        send_mail(
+            'Núcleo de Sistemas - Relatório API - SISAC',
+            'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa Atualiza Agenda, em ' + data.strftime("%d/%m/%Y às %H:%M:%S") +
+            '. \nQuantidade de pacientes confirmados na agenda do SISAC: ' + str(qtdconfirmado) + 
+            '. \nPacientes não confirmados: ' + str(lista) + 
+            '. \nVerificar se os pacientes realizaram tratamento na máquina.',
+            'chamado@oncoradium.com.br',
+            ['tony.carvalho@oncoradium.com.br'],
+            fail_silently=False,
+        )
+    except SMTPAuthenticationError:
+        print(f'Falha de autenticação com o servidor SMTP :(')
 
 @shared_task
 def mailtest():
-    send_mail(
-        'Núcleo de Sistemas - Relatório API - SISAC',
-        'Teste',
-        'chamado@oncoradium.com.br',
-        ['tony.carvalho@oncoradium.com.br'],
-        fail_silently=False,
-    )
+    try:
+        send_mail(
+            'Núcleo de Sistemas - Relatório API - SISAC',
+            'Teste',
+            'chamado@oncoradium.com.br',
+            ['tony.carvalho@oncoradium.com.br'],
+            fail_silently=False,
+        )
+    except SMTPAuthenticationError:
+        print(f'Falha de autenticação com o servidor SMTP :(')
 
 @shared_task
 def sendmail_cria_agenda(tarefa, msg):
-    send_mail(
-        'Núcleo de Sistemas - Relatório API - SISAC',
-        'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa ' + tarefa + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S") +
-        '. \nA tarefa retornou a seguinte resposta: ' + msg + '.',
-        'chamado@oncoradium.com.br',
-        ['tony.carvalho@oncoradium.com.br'],
-        fail_silently=False,
-    )
+    try:
+        send_mail(
+            'Núcleo de Sistemas - Relatório API - SISAC',
+            'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa ' + tarefa + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S") +
+            '. \nA tarefa retornou a seguinte resposta: ' + msg + '.',
+            'chamado@oncoradium.com.br',
+            ['tony.carvalho@oncoradium.com.br'],
+            fail_silently=False,
+        )
+    except SMTPAuthenticationError:
+        print(f'Falha de autenticação com o servidor SMTP :(')
 
 @shared_task
 def sendmail_alta_paciente(pac):
-    send_mail(
-        'Relatório API - SISAC - Alta de Paciente',
-        'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Última sessão de radioterapia realizada para o paciente' + pac + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S"),
-        'chamado@oncoradium.com.br',
-        ['tony.carvalho@oncoradium.com.br', 'iara.souza@oncoradium.com.br'],
-        fail_silently=False,
-    )
+    try:
+        send_mail(
+            'Relatório API - SISAC - Alta de Paciente',
+            'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Última sessão de radioterapia realizada para o paciente' + pac + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S"),
+            'chamado@oncoradium.com.br',
+            ['tony.carvalho@oncoradium.com.br', 'iara.souza@oncoradium.com.br'],
+            fail_silently=False,
+        )
+    except SMTPAuthenticationError:
+        print(f'Falha de autenticação com o servidor SMTP :(')
 
 # Tarefa para atualizar a agenda de tratamento da radioterapia do SISAC comparando com a agenda de tratamento do MOSAIQ
 # A tarefa olha para a agenda do MOSAIQ quais pacientes estão marcados como Completed
