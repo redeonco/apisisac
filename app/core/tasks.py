@@ -57,7 +57,7 @@ def mailtest():
         send_mail(
             'Núcleo de Sistemas - Relatório API - SISAC',
             'Teste',
-            'chamado@oncoradium.com.br',
+            'arleia.mozer@oncoradium.com.br',
             ['tony.carvalho@oncoradium.com.br'],
             fail_silently=False,
         )
@@ -129,7 +129,7 @@ def atualizaagenda():
             # Verifica qual último código de movimento do paciente na tabela Entrada do SISAC,
             # Em seguida chama a função addcodmovimento para incrementar a sequência.
             # O resultado do incremento é utilizado posteriormente para gerar novos registros nas tabelas do SISAC.    
-            ultimo_codmov = Entrada.objects.filter(codpaciente=codpac_sisac.pk).order_by('datahoraent').last()
+            ultimo_codmov = Entrada.objects.filter(codpaciente=codpac_sisac.pk).filter(filial='01').order_by('natendimento').last()
             print(ultimo_codmov)
             print(codpac_sisac)
             novo_codmov = addcodmovimento(str(ultimo_codmov))
@@ -762,28 +762,8 @@ def atualiza_planej_pac(pac):
                 # Verifica se a fase está relacionada com outra para definir o início do tratamento
                 # Se não houver fase relacionada, inicio tratamento = 1
                 # Se houver, define início tratamento com o valor obtido da coluna Reference_Fraction, tabela Fase
-                lista_fases = []
-                if checafase(obj.id_fase) == False:
-                    fases = Fase.objects.filter(id_paciente=obj.id_paciente).filter(version=0)                        
-                    nfase = 0
-                    contador = 0
-                    for fase in fases:
-                        dict = {}
-                        nfase += 1
-                        dict['IDFase'] = fase
-                        dict['NumeroFase'] = nfase
-                        dict['QtdSessoes'] = fase.qtdsessoes
-                        if contador == 0:
-                            dict['InicioTrat'] = 1
-                        else:
-                            iniciotrat = lista_fases[contador-1]['InicioTrat'] + lista_fases[contador-1]['QtdSessoes']
-                            dict['InicioTrat'] = iniciotrat
-                        lista_fases.append(dict)
-                        contador += 1
-                    iniciotrat = list(filter(lambda lista_fases: lista_fases['IDFase'] == obj.id_fase, lista_fases))[0]['InicioTrat']
-                        
-                else:
-                    iniciotrat = obj.id_fase.reference_fraction
+                iniciotrat = inicio_tratamento(obj)
+
                 print(obj.id_fase, iniciotrat)
                 novo_planejfisicoc.iniciotrat = iniciotrat
                 novo_planejfisicoc.incidencia = '3D'
@@ -873,28 +853,7 @@ def atualiza_planej_pac(pac):
                 # Verifica se a fase está relacionada com outra para definir o início do tratamento
                 # Se não houver fase relacionada, inicio tratamento = 1
                 # Se houver, define início tratamento com o valor obtido da coluna Reference_Fraction, tabela Fase
-                lista_fases = []
-                if checafase(obj.id_fase) == False:
-                    fases = Fase.objects.filter(id_paciente=obj.id_paciente).filter(version=0)                       
-                    nfase = 0
-                    contador = 0
-                    for fase in fases:
-                        dict = {}
-                        nfase += 1
-                        dict['IDFase'] = fase
-                        dict['NumeroFase'] = nfase
-                        dict['QtdSessoes'] = fase.qtdsessoes
-                        if contador == 0:
-                            dict['InicioTrat'] = 1
-                        else:
-                            iniciotrat = lista_fases[contador-1]['InicioTrat'] + lista_fases[contador-1]['QtdSessoes']
-                            dict['InicioTrat'] = iniciotrat
-                        lista_fases.append(dict)
-                        contador += 1
-                    iniciotrat = list(filter(lambda lista_fases: lista_fases['IDFase'] == obj.id_fase, lista_fases))[0]['InicioTrat']
-                        
-                else:
-                    iniciotrat = obj.id_fase.reference_fraction
+                iniciotrat = inicio_tratamento(obj)
 
                 novapresc.iniciotrat = iniciotrat
                 novapresc.id_mosaiq = obj.id_campo
@@ -1097,4 +1056,55 @@ def cria_agenda_radio2(pac):
         msg = f'A tarefa de criação de agenda automática do SISAC reportou existência de agendamentos existentes. \nViolação de integridade foi evitada para o(s) seguinte(s) agendamento(s):{agendamento_existente}'
         sendmail_cria_agenda('Cria Agenda Radio SISAC', msg)
     print(f'Tarefa concluída.')
+
+
+
+def entrada(pac):
+    codpac_sisac = Cadpaciente.objects.get(codpaciente=pac)
+
+    def addcodmovimento(codmovimento):
+        cut = codmovimento.split('.')
+        seqadd = int(cut[1]) + 1
+        if seqadd < 10:
+            seqadd = '0' + str(seqadd)
+        codfinal = cut[0] + '.' + str(seqadd)  
+
+        return codfinal
+    
+    def incrementa_natendimento():
+        prm_exame = TAB_Parametro.objects.get(prm_nome='TAB_ATENDIMENTO')
+        novo_codigo = prm_exame.prm_sequencia + 1
+        prm_exame.prm_sequencia = novo_codigo
+        prm_exame.save()
+
+        return novo_codigo
+
+
+    ultimo_codmov = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last()
+    novo_codmov = addcodmovimento(str(ultimo_codmov))
+    
+    # Gerar registro do pacote de tratamento na tabela Entrada
+    entrada = Entrada()
+    entrada.codmovimento = novo_codmov
+    entrada.codpaciente = codpac_sisac
+    entrada.codconvenio = CadConvenio.objects.first()
+    entrada.matricula = ''
+    entrada.tipo = '4'
+    entrada.datahoraent = datetime.now()
+    entrada.hist = ''
+    entrada.codmedico = '001'
+    entrada.local = '112'
+    entrada.recep = 'API'
+    entrada.total = 0
+    entrada.fechado = 'P'
+    entrada.codamb = ''
+    entrada.datasist = datetime.now()
+    entrada.plano = ''
+    entrada.tabhm = '001'
+    entrada.datahoraint = datetime.now()
+    entrada.localini = '112'
+    novocodigo_natendimento = incrementa_natendimento()
+    entrada.natendimento = novocodigo_natendimento
+    entrada.datamarcada = datetime.now()
+    entrada.save()
 
