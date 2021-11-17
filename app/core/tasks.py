@@ -57,7 +57,7 @@ def mailtest():
         send_mail(
             'Núcleo de Sistemas - Relatório API - SISAC',
             'Teste',
-            'arleia.mozer@oncoradium.com.br',
+            'chamado@oncoradium.com.br',
             ['tony.carvalho@oncoradium.com.br'],
             fail_silently=False,
         )
