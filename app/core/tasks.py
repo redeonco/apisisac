@@ -255,12 +255,12 @@ def atualizaagenda():
                         if qtd_realizada == 1:
                             codamb = SolicExa.objects.filter(npresc=prescricao.numpresc).order_by('item').first().codamb                    
                             print(f'Primeira sessão de radioterapia do paciente {codpac_sisac}. Iniciando lançamento do pacote do tratamento na conta do paciente...')                    
-                            primeira_entrada = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').first()
+                            primeira_entrada = Entrada.objects.filter(codpaciente=codpac_sisac).filter(filial='01').order_by('datahoraent').first()
                             codconvenio = primeira_entrada.codconvenio
                             matricula = primeira_entrada.matricula
                             codmedico = primeira_entrada.codmedico
                             plano = primeira_entrada.plano
-                            ultimo_codmov = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last()
+                            ultimo_codmov = Entrada.objects.filter(codpaciente=codpac_sisac).filter(filial='01').order_by('datahoraent').last()
                             novo_codmov = addcodmovimento(str(ultimo_codmov))
                             
                             # Gerar registro do pacote de tratamento na tabela Entrada
