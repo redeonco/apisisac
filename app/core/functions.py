@@ -106,7 +106,7 @@ def relaciona_paciente(id_paciente):
         except ObjectDoesNotExist:
             try:
                 codpac_sisac = Cadpaciente.objects.exclude(cpf='').get(codpaciente=id_paciente.codpac_sisac)
-                if codpac_sisac.cpf == id_paciente.cpf:
+                if codpac_sisac.cpf == id_paciente.cpf.replace('.', '').replace('-', '').strip():
                     control_paciente = ControlPacientes()
                     control_paciente.id_paciente_mosaiq = id_paciente.pk
                     control_paciente.codpac_sisac = codpac_sisac.codpaciente
@@ -120,7 +120,7 @@ def relaciona_paciente(id_paciente):
 
             except ObjectDoesNotExist:
                 try:
-                    codpac_sisac = Cadpaciente.objects.exclude(cpf='').get(cpf=id_paciente.cpf)
+                    codpac_sisac = Cadpaciente.objects.exclude(cpf='').get(cpf=id_paciente.cpf.replace('.', '').replace('-', '').strip())
                     msg = f'Paciente {id_paciente} com número de prontuário digergente. \nProntuário MOSAIQ {id_paciente.codpac_sisac}. Prontuário SISAC {codpac_sisac.codpaciente}'
                     sendmail('Relaciona paciente', msg)
                     return codpac_sisac
