@@ -5,8 +5,9 @@ from telegram.ext import CallbackContext
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, Filters
 from core.tasks import *
+from decouple import config
 
-token = '2107998266:AAE7Ds76df31VRk4If2cKRczhBtcAhJCHuA'
+token = config('TELEGRAM_BOT_TOKEN')
 
 bot = telegram.Bot(token=token)
 
