@@ -35,6 +35,7 @@ services:
       - DB_CONFIG_PASSWORD=${DB_CONFIG_PASSWORD}
       - DB_CONFIG_HOST=${DB_CONFIG_HOST}
       - DB_CONFIG_PORT=${DB_CONFIG_PORT}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
     depends_on:
       - db
   

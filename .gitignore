@@ -12,3 +12,6 @@ media
 *.pid
 *.dir
 postgresdata/
+retornos/
+Ficha.RTF
+.vscode/
