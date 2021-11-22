@@ -12,6 +12,15 @@ class Cadpaciente(models.Model):
     cpf = models.CharField(db_column='CPF', max_length=15, blank=True, null=True)  # Field name made lowercase.
     telefone2 = models.CharField(db_column='Telefone2', max_length=15, blank=True, null=True)  # Field name made lowercase.
     whatsapp = models.CharField(db_column='WhatsApp', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    profissao = models.CharField(db_column='Profissao', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    ec = models.CharField(db_column='EC', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    peso = models.CharField(db_column='Peso', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    altura = models.CharField(db_column='Altura', max_length=15, blank=True, null=True)  # Field name made lowercase.
+    endereco = models.CharField(db_column='Endereco', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    bairro = models.CharField(db_column='Bairro', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    cep = models.CharField(db_column='Cep', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    matricula = models.CharField(db_column='Matricula', max_length=200, blank=True, null=True)  # Field name made lowercase.
+    cidade = models.CharField(db_column='Cidade', max_length=200, blank=True, null=True)  # Field name made lowercase.
     datasist = models.DateTimeField(db_column='DataSist')
 
     class Meta:

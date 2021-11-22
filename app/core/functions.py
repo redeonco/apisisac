@@ -83,20 +83,22 @@ def senhanova():
 
 
 def relaciona_paciente(id_paciente):
-    try:
-        # id_paciente = Patient.objects.get(id_paciente=pat_id1)
+    """
+    id_paciente = Patient.objects.get(id_paciente=pat_id1)
 
-        # Busca registro do paciente MOSAIQ no banco Controle para encontrar correspondência no SISAC
-        # Se não encontrar nenhum registro na tabela ControlPacientes com o ID MOSAIQ,
-        # A função irá iniciar o procedimento de relacionamento do paciente.
-        # Vai buscar no banco de dados do SISAC um paciente com o mesmo número de prontuário informado no MOSAIQ
-        # Se encontrar com o mesmo prontuário, verifica se o CPF é igual.
-        # Se o CPF corresponder, a função vai instanciar um objeto ControlPacientes e gravar o relacionamento
-        # 
-        # Se encontrar registro na tabela ControlPacientes com o ID MOSAIQ, significa que já houve relacionamento anterior
-        # A função irá retornar um objeto da classe CadPaciente SISAC.
-        #
-        # Se a função não encontrar nenhum relacionamento, irá sempre retornar False
+    Busca registro do paciente MOSAIQ no banco Controle para encontrar correspondência no SISAC
+    Se não encontrar nenhum registro na tabela ControlPacientes com o ID MOSAIQ,
+    A função irá iniciar o procedimento de relacionamento do paciente.
+    Vai buscar no banco de dados do SISAC um paciente com o mesmo número de prontuário informado no MOSAIQ
+    Se encontrar com o mesmo prontuário, verifica se o CPF é igual.
+    Se o CPF corresponder, a função vai instanciar um objeto ControlPacientes e gravar o relacionamento
+
+    Se encontrar registro na tabela ControlPacientes com o ID MOSAIQ, significa que já houve relacionamento anterior
+    A função irá retornar um objeto da classe CadPaciente SISAC.    
+    Se a função não encontrar nenhum relacionamento, irá sempre retornar False
+    """
+    try:
+        
         try:
             busca = ControlPacientes.objects.get(id_paciente_mosaiq=id_paciente.pk)
             codpac_sisac = Cadpaciente.objects.get(codpaciente=busca.codpac_sisac)

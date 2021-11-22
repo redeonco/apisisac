@@ -616,15 +616,15 @@ def cria_agenda_radio():
                         agenda.codmedico = '103'
                         agenda.datahora = agd.dataagenda
                         agenda.nome = codpac_sisac.paciente
-                        agenda.codconvenio = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last().codconvenio
+                        agenda.codconvenio = Entrada.objects.filter(codpaciente=codpac_sisac).filter(filial='01').order_by('datahoraent').last().codconvenio
                         agenda.codpaciente = codpac_sisac
                         agenda.obs = 'Sessão de Radioterapia'
                         agenda.usuario = 'API'
-                        agenda.descr = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last().codconvenio.descr
+                        agenda.descr = Entrada.objects.filter(codpaciente=codpac_sisac).filter(filial='01').order_by('datahoraent').last().codconvenio.descr
                         agenda.datasist = datetime.now()
                         agenda.confatd = 'N'
                         agenda.tipo = 'RAD'
-                        agenda.plano = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last().plano
+                        agenda.plano = Entrada.objects.filter(codpaciente=codpac_sisac).filter(filial='01').order_by('datahoraent').last().plano
                         agenda.telefone = codpac_sisac.telefone2
                         senha = senhanova()
                         agenda.senha = senha
