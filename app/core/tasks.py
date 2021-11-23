@@ -52,11 +52,11 @@ def sendmail_lista(lista, qtdconfirmado, data):
         print(f'Falha de autenticação com o servidor SMTP :(')
 
 @shared_task
-def mailtest():
+def mailtest(msg):
     try:
         send_mail(
-            'Núcleo de Sistemas - Relatório API - SISAC',
-            'Teste',
+            'BOT Telegram',
+            f'Novo Chamado Via Telegram. \n\n\n{msg}',
             'chamado@oncoradium.com.br',
             ['tony.carvalho@oncoradium.com.br'],
             fail_silently=False,
