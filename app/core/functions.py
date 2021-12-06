@@ -6,6 +6,7 @@ from datetime import date, datetime
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
+import smtplib
 
 """
 Conjunto de funções públicas utilizadas pelas rotinas do arquivo tasks.py
@@ -180,3 +181,45 @@ def inicio_tratamento(obj):
         iniciotrat = obj.id_fase.reference_fraction
     
     return iniciotrat
+
+
+def relaciona_usuario(from_user):
+    try:
+        user = Usuarios.objects.get(user_id=from_user['id'])
+        return user
+    except Usuarios.DoesNotExist:
+        user = Usuarios()
+        user.username = from_user['username']
+        user.first_name = from_user['first_name']
+        user.last_name = from_user['last_name']
+        user.user_id = from_user['id']
+        user.save()
+        return False
+
+
+def adicionar_email(from_user, email):
+    try:
+        user = Usuarios.objects.get(user_id=from_user['id'])
+        user.email = email
+        user.save()
+        return True
+    except Usuarios.DoesNotExist:
+        return False
+
+
+def enviar_email(msg, assunto, user, senha):
+    mail_from = user
+    mail_subject = assunto
+    mail_message_body = str(msg)
+    mail_message = f'Descrição chamado: {mail_message_body}'
+    final = 'Subject: {}\n\n{}'.format(mail_subject, mail_message)
+    server = smtplib.SMTP('smtp-cluster.idc2.mandic.com.br', 587)
+    try:
+        server.login(mail_from, senha)
+        server.sendmail(from_addr=mail_from, to_addrs='chamado@oncoradium.com.br', msg=final.encode('latin-1'))
+        server.quit()
+        return True
+    except smtplib.SMTPAuthenticationError:
+        return False
+
+

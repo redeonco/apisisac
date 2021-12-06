@@ -36,6 +36,12 @@ RUN apt-get update \
       && apt-get install -y redis-server
 EXPOSE 6379
 
+RUN apt-get install -y zabbix-agent
+
+COPY ./zabbix_agentd.conf /etc/zabbix
+
+RUN service zabbix-agent restart
+
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
     apt-get install -y unixodbc && \
