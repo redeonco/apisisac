@@ -1,0 +1,1991 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "Rede Onco - API",
+        "description": "Documenta\u00e7\u00e3o da API de integra\u00e7\u00e3o para o SISAC Oncoradium",
+        "termsOfService": "",
+        "contact": {
+            "email": "ti@oncoradium.com.br"
+        },
+        "license": {
+            "name": "BSD License"
+        },
+        "version": "v1"
+    },
+    "basePath": "/api",
+    "consumes": [
+        "application/json"
+    ],
+    "produces": [
+        "application/json"
+    ],
+    "securityDefinitions": {
+        "Basic": {
+            "type": "basic"
+        }
+    },
+    "security": [
+        {
+            "Basic": []
+        }
+    ],
+    "paths": {
+        "/aplicmmpresceletiva/": {
+            "get": {
+                "operationId": "aplicmmpresceletiva_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Retorna aplicações realizadas pela enfermagem para prescrições eletivas.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/ApiAplicMM_PrescEletiva"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "aplicmmpresceletiva"
+                ]
+            },
+            "parameters": []
+        },
+        "/aplicmmpresceletiva/{id}/": {
+            "get": {
+                "operationId": "aplicmmpresceletiva_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/ApiAplicMM_PrescEletiva"
+                        }
+                    }
+                },
+                "tags": [
+                    "aplicmmpresceletiva"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/aplicmmprescqt/": {
+            "get": {
+                "operationId": "aplicmmprescqt_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/ApiAplicMM_PrescQT"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "aplicmmprescqt"
+                ]
+            },
+            "parameters": []
+        },
+        "/aplicmmprescqt/{id}/": {
+            "get": {
+                "operationId": "aplicmmprescqt_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/ApiAplicMM_PrescQT"
+                        }
+                    }
+                },
+                "tags": [
+                    "aplicmmprescqt"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/consulta/": {
+            "get": {
+                "operationId": "consulta_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/ApiConsulta"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "consulta"
+                ]
+            },
+            "parameters": []
+        },
+        "/consulta/{id}/": {
+            "get": {
+                "operationId": "consulta_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/ApiConsulta"
+                        }
+                    }
+                },
+                "tags": [
+                    "consulta"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/enfevoluc/": {
+            "get": {
+                "operationId": "enfevoluc_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/ApiEnfEvoluC"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "enfevoluc"
+                ]
+            },
+            "parameters": []
+        },
+        "/enfevoluc/{id}/": {
+            "get": {
+                "operationId": "enfevoluc_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/ApiEnfEvoluC"
+                        }
+                    }
+                },
+                "tags": [
+                    "enfevoluc"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/entrada/": {
+            "get": {
+                "operationId": "entrada_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/ApiEntrada"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "entrada"
+                ]
+            },
+            "parameters": []
+        },
+        "/entrada/{id}/": {
+            "get": {
+                "operationId": "entrada_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/ApiEntrada"
+                        }
+                    }
+                },
+                "tags": [
+                    "entrada"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/entradaradio/": {
+            "get": {
+                "operationId": "entradaradio_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/ApiEntradaradio"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "entradaradio"
+                ]
+            },
+            "parameters": []
+        },
+        "/entradaradio/{id}/": {
+            "get": {
+                "operationId": "entradaradio_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/ApiEntradaradio"
+                        }
+                    }
+                },
+                "tags": [
+                    "entradaradio"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/pacientes/": {
+            "get": {
+                "operationId": "pacientes_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/Cadpaciente"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "pacientes"
+                ]
+            },
+            "parameters": []
+        },
+        "/pacientes/{codpaciente}/": {
+            "get": {
+                "operationId": "pacientes_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/Cadpaciente"
+                        }
+                    }
+                },
+                "tags": [
+                    "pacientes"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "codpaciente",
+                    "in": "path",
+                    "description": "A unique value identifying this cadpaciente.",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/planejfisicoc/": {
+            "get": {
+                "operationId": "planejfisicoc_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/ApiPlanejfisicoc"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "planejfisicoc"
+                ]
+            },
+            "parameters": []
+        },
+        "/planejfisicoc/{id}/": {
+            "get": {
+                "operationId": "planejfisicoc_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/ApiPlanejfisicoc"
+                        }
+                    }
+                },
+                "tags": [
+                    "planejfisicoc"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/prescreve/": {
+            "get": {
+                "operationId": "prescreve_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/ApiPrescreve"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "prescreve"
+                ]
+            },
+            "parameters": []
+        },
+        "/prescreve/{id}/": {
+            "get": {
+                "operationId": "prescreve_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/ApiPrescreve"
+                        }
+                    }
+                },
+                "tags": [
+                    "prescreve"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/prescreveqt/": {
+            "get": {
+                "operationId": "prescreveqt_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/ApiPrescreveqt"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "prescreveqt"
+                ]
+            },
+            "parameters": []
+        },
+        "/prescreveqt/{id}/": {
+            "get": {
+                "operationId": "prescreveqt_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/ApiPrescreveqt"
+                        }
+                    }
+                },
+                "tags": [
+                    "prescreveqt"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/radioterapia/": {
+            "get": {
+                "operationId": "radioterapia_list",
+                "description": "",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "required": false,
+                        "type": "integer"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "required": [
+                                "count",
+                                "results"
+                            ],
+                            "type": "object",
+                            "properties": {
+                                "count": {
+                                    "type": "integer"
+                                },
+                                "next": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "previous": {
+                                    "type": "string",
+                                    "format": "uri",
+                                    "x-nullable": true
+                                },
+                                "results": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/ApiRadioterapia"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": [
+                    "radioterapia"
+                ]
+            },
+            "parameters": []
+        },
+        "/radioterapia/{id}/": {
+            "get": {
+                "operationId": "radioterapia_read",
+                "description": "",
+                "parameters": [],
+                "responses": {
+                    "200": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/ApiRadioterapia"
+                        }
+                    }
+                },
+                "tags": [
+                    "radioterapia"
+                ]
+            },
+            "parameters": [
+                {
+                    "name": "id",
+                    "in": "path",
+                    "required": true,
+                    "type": "string"
+                }
+            ]
+        },
+        "/token/": {
+            "post": {
+                "operationId": "token_create",
+                "description": "Takes a set of user credentials and returns an access and refresh JSON web\ntoken pair to prove the authentication of those credentials.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/TokenObtainPair"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/TokenObtainPair"
+                        }
+                    }
+                },
+                "tags": [
+                    "token"
+                ]
+            },
+            "parameters": []
+        },
+        "/token/refresh/": {
+            "post": {
+                "operationId": "token_refresh_create",
+                "description": "Takes a refresh type JSON web token and returns an access type JSON web\ntoken if the refresh token is valid.",
+                "parameters": [
+                    {
+                        "name": "data",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/TokenRefresh"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/TokenRefresh"
+                        }
+                    }
+                },
+                "tags": [
+                    "token"
+                ]
+            },
+            "parameters": []
+        }
+    },
+    "definitions": {
+        "ApiAplicMM_PrescEletiva": {
+            "required": [
+                "idaplic"
+            ],
+            "type": "object",
+            "properties": {
+                "idaplic": {
+                    "title": "Idaplic",
+                    "type": "integer",
+                    "maximum": 2147483647,
+                    "minimum": -2147483648
+                },
+                "ndoc": {
+                    "title": "Ndoc",
+                    "type": "string",
+                    "maxLength": 11,
+                    "x-nullable": true
+                },
+                "grupop": {
+                    "title": "Grupop",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "npresc": {
+                    "title": "Npresc",
+                    "type": "string",
+                    "maxLength": 11,
+                    "x-nullable": true
+                },
+                "codpaciente": {
+                    "title": "Codpaciente",
+                    "type": "string",
+                    "maxLength": 12,
+                    "x-nullable": true
+                },
+                "paciente": {
+                    "title": "Paciente",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "hora": {
+                    "title": "Hora",
+                    "type": "string",
+                    "maxLength": 5,
+                    "x-nullable": true
+                },
+                "codproduto": {
+                    "title": "Codproduto",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "brasindice": {
+                    "title": "Brasindice",
+                    "type": "string",
+                    "maxLength": 20,
+                    "x-nullable": true
+                },
+                "simpro": {
+                    "title": "Simpro",
+                    "type": "string",
+                    "maxLength": 20,
+                    "x-nullable": true
+                },
+                "descr": {
+                    "title": "Descr",
+                    "type": "string",
+                    "maxLength": 150,
+                    "x-nullable": true
+                },
+                "un": {
+                    "title": "Un",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "quant": {
+                    "title": "Quant",
+                    "type": "string",
+                    "format": "decimal",
+                    "x-nullable": true
+                },
+                "codenf": {
+                    "title": "Codenf",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "enfermeiro": {
+                    "title": "Enfermeiro",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "datahora": {
+                    "title": "Datahora",
+                    "type": "string",
+                    "format": "date-time",
+                    "x-nullable": true
+                },
+                "aplicado": {
+                    "title": "Aplicado",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                }
+            }
+        },
+        "ApiAplicMM_PrescQT": {
+            "required": [
+                "idaplic",
+                "npresc"
+            ],
+            "type": "object",
+            "properties": {
+                "idaplic": {
+                    "title": "Idaplic",
+                    "type": "integer",
+                    "maximum": 2147483647,
+                    "minimum": -2147483648
+                },
+                "ndoc": {
+                    "title": "Ndoc",
+                    "type": "string",
+                    "maxLength": 11,
+                    "x-nullable": true
+                },
+                "npresc": {
+                    "title": "Npresc",
+                    "type": "string"
+                },
+                "codpaciente": {
+                    "title": "Codpaciente",
+                    "type": "string",
+                    "maxLength": 12,
+                    "x-nullable": true
+                },
+                "paciente": {
+                    "title": "Paciente",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "hora": {
+                    "title": "Hora",
+                    "type": "string",
+                    "maxLength": 5,
+                    "x-nullable": true
+                },
+                "codproduto": {
+                    "title": "Codproduto",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "brasindice": {
+                    "title": "Brasindice",
+                    "type": "string",
+                    "maxLength": 20,
+                    "x-nullable": true
+                },
+                "simpro": {
+                    "title": "Simpro",
+                    "type": "string",
+                    "maxLength": 20,
+                    "x-nullable": true
+                },
+                "descr": {
+                    "title": "Descr",
+                    "type": "string",
+                    "maxLength": 150,
+                    "x-nullable": true
+                },
+                "un": {
+                    "title": "Un",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "quant": {
+                    "title": "Quant",
+                    "type": "number",
+                    "x-nullable": true
+                },
+                "codenf": {
+                    "title": "Codenf",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "enfermeiro": {
+                    "title": "Enfermeiro",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "datahora": {
+                    "title": "Datahora",
+                    "type": "string",
+                    "format": "date-time",
+                    "x-nullable": true
+                },
+                "aplicado": {
+                    "title": "Aplicado",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "grupop": {
+                    "title": "Grupop",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "diaquimioterapia": {
+                    "title": "Diaquimioterapia",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                }
+            }
+        },
+        "ApiConsulta": {
+            "required": [
+                "codmovimento"
+            ],
+            "type": "object",
+            "properties": {
+                "codpaciente": {
+                    "title": "Codpaciente",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "paciente": {
+                    "title": "Paciente",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "codmovimento": {
+                    "title": "Codmovimento",
+                    "type": "string"
+                },
+                "tipo": {
+                    "title": "Tipo",
+                    "type": "string",
+                    "maxLength": 50,
+                    "x-nullable": true
+                },
+                "codconvenio": {
+                    "title": "Codconvenio",
+                    "type": "string",
+                    "maxLength": 6,
+                    "x-nullable": true
+                },
+                "convenio": {
+                    "title": "Convenio",
+                    "type": "string",
+                    "maxLength": 100,
+                    "x-nullable": true
+                },
+                "historico": {
+                    "title": "Historico",
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "data": {
+                    "title": "Data",
+                    "type": "string",
+                    "format": "date-time",
+                    "x-nullable": true
+                },
+                "nome": {
+                    "title": "Nome",
+                    "type": "string",
+                    "maxLength": 100,
+                    "x-nullable": true
+                },
+                "obs": {
+                    "title": "Obs",
+                    "type": "string",
+                    "maxLength": 100,
+                    "x-nullable": true
+                },
+                "numpresc": {
+                    "title": "Numpresc",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "codmedico": {
+                    "title": "Codmedico",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "medico": {
+                    "title": "Medico",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                }
+            }
+        },
+        "ApiEnfEvoluC": {
+            "required": [
+                "ndoc",
+                "codpaciente"
+            ],
+            "type": "object",
+            "properties": {
+                "ndoc": {
+                    "title": "Ndoc",
+                    "type": "string",
+                    "maxLength": 11,
+                    "minLength": 1
+                },
+                "codpaciente": {
+                    "title": "Codpaciente",
+                    "type": "string"
+                },
+                "paciente": {
+                    "title": "Paciente",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "acomod": {
+                    "title": "Acomod",
+                    "type": "string",
+                    "maxLength": 50,
+                    "x-nullable": true
+                },
+                "datahoraf": {
+                    "title": "Datahoraf",
+                    "type": "string",
+                    "format": "date-time",
+                    "x-nullable": true
+                },
+                "codmedico": {
+                    "title": "Codmedico",
+                    "type": "string",
+                    "maxLength": 11,
+                    "x-nullable": true
+                },
+                "enfermeiro": {
+                    "title": "Enfermeiro",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "texto3": {
+                    "title": "Texto3",
+                    "type": "string",
+                    "x-nullable": true
+                }
+            }
+        },
+        "ApiPrescreveqt": {
+            "required": [
+                "numero",
+                "codpaciente"
+            ],
+            "type": "object",
+            "properties": {
+                "numero": {
+                    "title": "Numero",
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 1
+                },
+                "data": {
+                    "title": "Data",
+                    "type": "string",
+                    "format": "date-time",
+                    "x-nullable": true
+                },
+                "codpaciente": {
+                    "title": "Codpaciente",
+                    "type": "string"
+                },
+                "codpacref": {
+                    "title": "Codpacref",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "paciente": {
+                    "title": "Paciente",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "codmedico": {
+                    "title": "Codmedico",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "medico": {
+                    "title": "Medico",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "texto": {
+                    "title": "Texto",
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "obs": {
+                    "title": "Obs",
+                    "type": "string",
+                    "maxLength": 150,
+                    "x-nullable": true
+                },
+                "peso": {
+                    "title": "Peso",
+                    "type": "number",
+                    "x-nullable": true
+                },
+                "supcorp": {
+                    "title": "Supcorp",
+                    "type": "number",
+                    "x-nullable": true
+                },
+                "protocolo": {
+                    "title": "Protocolo",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "nciclo": {
+                    "title": "Nciclo",
+                    "type": "string",
+                    "maxLength": 5,
+                    "x-nullable": true
+                },
+                "aplicado": {
+                    "title": "Aplicado",
+                    "type": "string",
+                    "maxLength": 1,
+                    "x-nullable": true
+                },
+                "gasto": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ApiAplicMM_PrescQT"
+                    },
+                    "readOnly": true
+                }
+            }
+        },
+        "ApiEntrada": {
+            "required": [
+                "codmovimento"
+            ],
+            "type": "object",
+            "properties": {
+                "codpaciente": {
+                    "title": "Codpaciente",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "paciente": {
+                    "title": "Paciente",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "codmovimento": {
+                    "title": "Codmovimento",
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 1
+                },
+                "matricula": {
+                    "title": "Matricula",
+                    "type": "string",
+                    "maxLength": 30,
+                    "x-nullable": true
+                },
+                "tipoatd": {
+                    "title": "Tipoatd",
+                    "type": "string",
+                    "maxLength": 25,
+                    "x-nullable": true
+                },
+                "situacao": {
+                    "title": "Situacao",
+                    "type": "string",
+                    "maxLength": 20,
+                    "x-nullable": true
+                },
+                "datahoraent": {
+                    "title": "Datahoraent",
+                    "type": "string",
+                    "format": "date-time",
+                    "x-nullable": true
+                },
+                "datahorasai": {
+                    "title": "Datahorasai",
+                    "type": "string",
+                    "format": "date-time",
+                    "x-nullable": true
+                },
+                "codconvenio": {
+                    "title": "Codconvenio",
+                    "type": "string",
+                    "maxLength": 6,
+                    "x-nullable": true
+                },
+                "convenio": {
+                    "title": "Convenio",
+                    "type": "string",
+                    "maxLength": 100,
+                    "x-nullable": true
+                },
+                "plano": {
+                    "title": "Plano",
+                    "type": "string",
+                    "maxLength": 100,
+                    "x-nullable": true
+                },
+                "codmedico": {
+                    "title": "Codmedico",
+                    "type": "string",
+                    "maxLength": 6,
+                    "x-nullable": true
+                },
+                "medico": {
+                    "title": "Medico",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "codamb": {
+                    "title": "Codamb",
+                    "type": "string",
+                    "maxLength": 20,
+                    "x-nullable": true
+                },
+                "procedimento": {
+                    "title": "Procedimento",
+                    "type": "string",
+                    "maxLength": 500,
+                    "x-nullable": true
+                },
+                "hist": {
+                    "title": "Hist",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "total": {
+                    "title": "Total",
+                    "type": "number",
+                    "x-nullable": true
+                },
+                "consultorio": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ApiConsulta"
+                    },
+                    "readOnly": true
+                },
+                "prescqt": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ApiPrescreveqt"
+                    },
+                    "readOnly": true
+                },
+                "evolucoes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ApiEnfEvoluC"
+                    },
+                    "readOnly": true
+                }
+            }
+        },
+        "ApiEntradaradio": {
+            "required": [
+                "identradaradio",
+                "numpresc"
+            ],
+            "type": "object",
+            "properties": {
+                "identradaradio": {
+                    "title": "Identradaradio",
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 1
+                },
+                "codmovimento": {
+                    "title": "Codmovimento",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "codpaciente": {
+                    "title": "Codpaciente",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "paciente": {
+                    "title": "Paciente",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "numpresc": {
+                    "title": "Numpresc",
+                    "type": "string"
+                },
+                "idplanejfisico": {
+                    "title": "Idplanejfisico",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "encerrado": {
+                    "title": "Encerrado",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "observacao": {
+                    "title": "Observacao",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "usuario": {
+                    "title": "Usuario",
+                    "type": "string",
+                    "maxLength": 20,
+                    "x-nullable": true
+                },
+                "datahora": {
+                    "title": "Datahora",
+                    "type": "string",
+                    "format": "date-time",
+                    "x-nullable": true
+                },
+                "nplanejamento": {
+                    "title": "Nplanejamento",
+                    "type": "integer",
+                    "maximum": 2147483647,
+                    "minimum": -2147483648,
+                    "x-nullable": true
+                },
+                "nomecampo": {
+                    "title": "Nomecampo",
+                    "type": "string",
+                    "maxLength": 100,
+                    "x-nullable": true
+                },
+                "incidencia": {
+                    "title": "Incidencia",
+                    "type": "string",
+                    "maxLength": 50,
+                    "x-nullable": true
+                },
+                "ncampo": {
+                    "title": "Ncampo",
+                    "type": "integer",
+                    "maximum": 2147483647,
+                    "minimum": -2147483648,
+                    "x-nullable": true
+                }
+            }
+        },
+        "Cadpaciente": {
+            "required": [
+                "codpaciente",
+                "cpf"
+            ],
+            "type": "object",
+            "properties": {
+                "codpaciente": {
+                    "title": "Codpaciente",
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 1
+                },
+                "paciente": {
+                    "title": "Paciente",
+                    "type": "string",
+                    "maxLength": 100,
+                    "x-nullable": true
+                },
+                "sexo": {
+                    "title": "Sexo",
+                    "type": "string",
+                    "maxLength": 1,
+                    "x-nullable": true
+                },
+                "datanasc": {
+                    "title": "Datanasc",
+                    "type": "string",
+                    "format": "date-time",
+                    "x-nullable": true
+                },
+                "idade": {
+                    "title": "Idade",
+                    "type": "string",
+                    "maxLength": 5,
+                    "x-nullable": true
+                },
+                "rg": {
+                    "title": "Rg",
+                    "type": "string",
+                    "maxLength": 20,
+                    "x-nullable": true
+                },
+                "cpf": {
+                    "title": "Cpf",
+                    "type": "string",
+                    "maxLength": 15,
+                    "x-nullable": true
+                }
+            }
+        },
+        "ApiPlanejfisicoc": {
+            "required": [
+                "idplanejfisicoc",
+                "numpresc"
+            ],
+            "type": "object",
+            "properties": {
+                "idplanejfisicoc": {
+                    "title": "Idplanejfisicoc",
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 1
+                },
+                "codpaciente": {
+                    "title": "Codpaciente",
+                    "type": "string",
+                    "maxLength": 11,
+                    "x-nullable": true
+                },
+                "paciente": {
+                    "title": "Paciente",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "numpresc": {
+                    "title": "Numpresc",
+                    "type": "string"
+                },
+                "energia": {
+                    "title": "Energia",
+                    "type": "string",
+                    "maxLength": 50,
+                    "x-nullable": true
+                },
+                "dosetotal": {
+                    "title": "Dosetotal",
+                    "type": "string",
+                    "maxLength": 20,
+                    "x-nullable": true
+                },
+                "dosediaria": {
+                    "title": "Dosediaria",
+                    "type": "string",
+                    "maxLength": 20,
+                    "x-nullable": true
+                },
+                "naplicacoes": {
+                    "title": "Naplicacoes",
+                    "type": "integer",
+                    "maximum": 2147483647,
+                    "minimum": -2147483648,
+                    "x-nullable": true
+                },
+                "locanatomica": {
+                    "title": "Locanatomica",
+                    "type": "string",
+                    "maxLength": 50,
+                    "x-nullable": true
+                },
+                "incidencia": {
+                    "title": "Incidencia",
+                    "type": "string",
+                    "maxLength": 50,
+                    "x-nullable": true
+                },
+                "ncampo": {
+                    "title": "Ncampo",
+                    "type": "integer",
+                    "maximum": 2147483647,
+                    "minimum": -2147483648,
+                    "x-nullable": true
+                },
+                "portal": {
+                    "title": "Portal",
+                    "type": "integer",
+                    "maximum": 2147483647,
+                    "minimum": -2147483648,
+                    "x-nullable": true
+                },
+                "tpfeixe": {
+                    "title": "Tpfeixe",
+                    "type": "string",
+                    "maxLength": 20,
+                    "x-nullable": true
+                },
+                "fase": {
+                    "title": "Fase",
+                    "type": "integer",
+                    "maximum": 2147483647,
+                    "minimum": -2147483648,
+                    "x-nullable": true
+                }
+            }
+        },
+        "ApiPrescreve": {
+            "required": [
+                "numero"
+            ],
+            "type": "object",
+            "properties": {
+                "codpaciente": {
+                    "title": "Codpaciente",
+                    "type": "string",
+                    "maxLength": 11,
+                    "x-nullable": true
+                },
+                "codpacref": {
+                    "title": "Codpacref",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "paciente": {
+                    "title": "Paciente",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "codmedico": {
+                    "title": "Codmedico",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "medico": {
+                    "title": "Medico",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "data": {
+                    "title": "Data",
+                    "type": "string",
+                    "format": "date-time",
+                    "x-nullable": true
+                },
+                "numero": {
+                    "title": "Numero",
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 1
+                },
+                "texto": {
+                    "title": "Texto",
+                    "type": "string",
+                    "x-nullable": true
+                },
+                "obs": {
+                    "title": "Obs",
+                    "type": "string",
+                    "maxLength": 150,
+                    "x-nullable": true
+                },
+                "aplicado": {
+                    "title": "Aplicado",
+                    "type": "string",
+                    "maxLength": 1,
+                    "x-nullable": true
+                }
+            }
+        },
+        "ApiRadioterapia": {
+            "required": [
+                "numpresc"
+            ],
+            "type": "object",
+            "properties": {
+                "numpresc": {
+                    "title": "Numpresc",
+                    "type": "string",
+                    "maxLength": 10,
+                    "minLength": 1
+                },
+                "codpaciente": {
+                    "title": "Codpaciente",
+                    "type": "string",
+                    "maxLength": 11,
+                    "x-nullable": true
+                },
+                "paciente": {
+                    "title": "Paciente",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "codcidp": {
+                    "title": "Codcidp",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "estadio": {
+                    "title": "Estadio",
+                    "type": "string",
+                    "maxLength": 15,
+                    "x-nullable": true
+                },
+                "finalidade": {
+                    "title": "Finalidade",
+                    "type": "string",
+                    "maxLength": 20,
+                    "x-nullable": true
+                },
+                "intencaoradical": {
+                    "title": "Intencaoradical",
+                    "type": "boolean",
+                    "x-nullable": true
+                },
+                "intencaopaliativa": {
+                    "title": "Intencaopaliativa",
+                    "type": "boolean",
+                    "x-nullable": true
+                },
+                "tipot": {
+                    "title": "Tipot",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "tipon": {
+                    "title": "Tipon",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "tipom": {
+                    "title": "Tipom",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "naplicacoes": {
+                    "title": "Naplicacoes",
+                    "type": "integer",
+                    "maximum": 2147483647,
+                    "minimum": -2147483648,
+                    "x-nullable": true
+                },
+                "karno": {
+                    "title": "Karno",
+                    "type": "string",
+                    "maxLength": 5,
+                    "x-nullable": true
+                },
+                "codmed": {
+                    "title": "Codmed",
+                    "type": "string",
+                    "maxLength": 10,
+                    "x-nullable": true
+                },
+                "medico": {
+                    "title": "Medico",
+                    "type": "string",
+                    "maxLength": 200,
+                    "x-nullable": true
+                },
+                "planejamento": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ApiPlanejfisicoc"
+                    },
+                    "readOnly": true
+                },
+                "sessoes": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ApiEntradaradio"
+                    },
+                    "readOnly": true
+                }
+            }
+        },
+        "TokenObtainPair": {
+            "required": [
+                "username",
+                "password"
+            ],
+            "type": "object",
+            "properties": {
+                "username": {
+                    "title": "Username",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "password": {
+                    "title": "Password",
+                    "type": "string",
+                    "minLength": 1
+                }
+            }
+        },
+        "TokenRefresh": {
+            "required": [
+                "refresh"
+            ],
+            "type": "object",
+            "properties": {
+                "refresh": {
+                    "title": "Refresh",
+                    "type": "string",
+                    "minLength": 1
+                },
+                "access": {
+                    "title": "Access",
+                    "type": "string",
+                    "readOnly": true
+                }
+            }
+        }
+    }
+}

@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'drf_yasg'
 ]
 
 MIDDLEWARE = [
@@ -81,12 +82,17 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'libraries': {
+                'staticfiles': 'django.templatetags.static',
+            }
         },
     },
 ]
 
 WSGI_APPLICATION = 'api.wsgi.application'
 
+LOGIN_URL = 'rest_framework:login'
+LOGOUT_URL = 'rest_framework:logout'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -111,7 +117,7 @@ DATABASES = {
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
             'ssl': False
-            },
+        },
     },
     'mosaiq': {
         'ENGINE': 'sql_server.pyodbc',
@@ -125,7 +131,7 @@ DATABASES = {
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
             'ssl': False
-            },
+        },
     },
     'config': {
         'ENGINE': 'sql_server.pyodbc',
@@ -139,7 +145,7 @@ DATABASES = {
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
             'ssl': False
-            },
+        },
     },
 }
 
@@ -152,9 +158,13 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
 }
 
+SWAGGER_SETTINGS = {
+    'DEFAULT_INFO': 'api.urls.api_info',
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -200,7 +210,7 @@ MEDIA_URL = '/media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-DATABASE_ROUTERS = ['api.DBRoutes.DBRoutes'] 
+DATABASE_ROUTERS = ['api.DBRoutes.DBRoutes']
 
 
 CELERY_BROKER_URL = 'redis://127.0.0.1:6379'

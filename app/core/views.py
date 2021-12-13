@@ -1,13 +1,14 @@
+from drf_yasg.utils import swagger_auto_schema
 from django.shortcuts import render
 
 from .models import (
     ApiAplicMM_PrescEletiva,
     ApiAplicMM_PrescQT,
-    ApiConsulta, 
+    ApiConsulta,
     ApiEnfevoluc,
     ApiPrescreveqt,
-    ApiRadioterapia, 
-    Cadpaciente, 
+    ApiRadioterapia,
+    Cadpaciente,
     ApiEntrada,
     ApiEntradaradio,
     ApiPlanejfisicoc,
@@ -21,14 +22,15 @@ from .serializers import (
     ApiAplicMM_PrescQTSerializer,
     ApiEnfEvoluCSerializer,
     ApiPrescreveqtSerializer,
-    ApiRadioterapiaSerializer, 
-    CadpacienteSerializer, 
+    ApiRadioterapiaSerializer,
+    CadpacienteSerializer,
     ApiEntradaSerializer,
     ApiConsultaSerializer,
     ApiEntradaradioSerializer,
     ApiPlanejfisicocSerializer,
     ApiPrescreveSerializer,
 )
+from drf_yasg import openapi
 
 
 class CadPacienteSerializerViewSet(viewsets.ModelViewSet):
@@ -44,7 +46,7 @@ class ApiEntradaSerializerViewSet(viewsets.ModelViewSet):
     # authentication_classes = (TokenAuthentication,)
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ['get', 'head']
-    filterset_fields = {'datahoraent':['gte', 'lte', 'exact', 'gt', 'lt']}
+    filterset_fields = {'datahoraent': ['gte', 'lte', 'exact', 'gt', 'lt']}
 
     def get_queryset(self):
         queryset = ApiEntrada.objects.all().order_by('datahoraent')

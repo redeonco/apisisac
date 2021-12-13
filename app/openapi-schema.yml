@@ -1,0 +1,1792 @@
+openapi: 3.0.2
+info:
+  title: ""
+  version: ""
+paths:
+  /api/pacientes/:
+    get:
+      operationId: listCadpacientes
+      description: ""
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: Retorna lista de todos os pacientes cadastrados.
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=4
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=2
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Cadpaciente"
+          description: ""
+      tags:
+        - api
+  /api/pacientes/{codpaciente}/:
+    get:
+      operationId: retrieveCadpaciente
+      description: ""
+      parameters:
+        - name: codpaciente
+          in: path
+          required: true
+          description: A unique value identifying this cadpaciente.
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cadpaciente"
+          description: ""
+      tags:
+        - api
+  /api/entrada/:
+    get:
+      operationId: listApiEntradas
+      description: ""
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=4
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=2
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ApiEntrada"
+          description: ""
+      tags:
+        - api
+  /api/entrada/{id}/:
+    get:
+      operationId: retrieveApiEntrada
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEntrada"
+          description: ""
+      tags:
+        - api
+  /api/consulta/:
+    get:
+      operationId: listApiConsultas
+      description: ""
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=4
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=2
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ApiConsulta"
+          description: ""
+      tags:
+        - api
+  /api/consulta/{id}/:
+    get:
+      operationId: retrieveApiConsulta
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiConsulta"
+          description: ""
+      tags:
+        - api
+  /api/enfevoluc/:
+    get:
+      operationId: listApiEnfEvoluCs
+      description: ""
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=4
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=2
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ApiEnfEvoluC"
+          description: ""
+      tags:
+        - api
+  /api/enfevoluc/{id}/:
+    get:
+      operationId: retrieveApiEnfEvoluC
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEnfEvoluC"
+          description: ""
+      tags:
+        - api
+  /api/entradaradio/:
+    get:
+      operationId: listApiEntradaradios
+      description: ""
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=4
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=2
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ApiEntradaradio"
+          description: ""
+      tags:
+        - api
+  /api/entradaradio/{id}/:
+    get:
+      operationId: retrieveApiEntradaradio
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiEntradaradio"
+          description: ""
+      tags:
+        - api
+  /api/planejfisicoc/:
+    get:
+      operationId: listApiPlanejfisicocs
+      description: ""
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=4
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=2
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ApiPlanejfisicoc"
+          description: ""
+      tags:
+        - api
+  /api/planejfisicoc/{id}/:
+    get:
+      operationId: retrieveApiPlanejfisicoc
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiPlanejfisicoc"
+          description: ""
+      tags:
+        - api
+  /api/prescreve/:
+    get:
+      operationId: listApiPrescreves
+      description: ""
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=4
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=2
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ApiPrescreve"
+          description: ""
+      tags:
+        - api
+  /api/prescreve/{id}/:
+    get:
+      operationId: retrieveApiPrescreve
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiPrescreve"
+          description: ""
+      tags:
+        - api
+  /api/prescreveqt/:
+    get:
+      operationId: listApiPrescreveqts
+      description: ""
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=4
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=2
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ApiPrescreveqt"
+          description: ""
+      tags:
+        - api
+  /api/prescreveqt/{id}/:
+    get:
+      operationId: retrieveApiPrescreveqt
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiPrescreveqt"
+          description: ""
+      tags:
+        - api
+  /api/radioterapia/:
+    get:
+      operationId: listApiRadioterapias
+      description: ""
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=4
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=2
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ApiRadioterapia"
+          description: ""
+      tags:
+        - api
+  /api/radioterapia/{id}/:
+    get:
+      operationId: retrieveApiRadioterapia
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiRadioterapia"
+          description: ""
+      tags:
+        - api
+  /api/aplicmmprescqt/:
+    get:
+      operationId: listApiAplicMM_PrescQTs
+      description: ""
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=4
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=2
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ApiAplicMM_PrescQT"
+          description: ""
+      tags:
+        - api
+  /api/aplicmmprescqt/{id}/:
+    get:
+      operationId: retrieveApiAplicMM_PrescQT
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiAplicMM_PrescQT"
+          description: ""
+      tags:
+        - api
+  /api/aplicmmpresceletiva/:
+    get:
+      operationId: listApiAplicMM_PrescEletivas
+      description: ""
+      parameters:
+        - name: page
+          required: false
+          in: query
+          description: A page number within the paginated result set.
+          schema:
+            type: integer
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    example: 123
+                  next:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=4
+                  previous:
+                    type: string
+                    nullable: true
+                    format: uri
+                    example: http://api.example.org/accounts/?page=2
+                  results:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ApiAplicMM_PrescEletiva"
+          description: ""
+      tags:
+        - api
+  /api/aplicmmpresceletiva/{id}/:
+    get:
+      operationId: retrieveApiAplicMM_PrescEletiva
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ""
+          schema:
+            type: string
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiAplicMM_PrescEletiva"
+          description: ""
+      tags:
+        - api
+  /api/token/:
+    post:
+      operationId: createTokenObtainPair
+      description:
+        "Takes a set of user credentials and returns an access and refresh
+        JSON web
+
+        token pair to prove the authentication of those credentials."
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenObtainPair"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/TokenObtainPair"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/TokenObtainPair"
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenObtainPair"
+          description: ""
+      tags:
+        - api
+  /api/token/refresh/:
+    post:
+      operationId: createTokenRefresh
+      description:
+        "Takes a refresh type JSON web token and returns an access type
+        JSON web
+
+        token if the refresh token is valid."
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TokenRefresh"
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/TokenRefresh"
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/TokenRefresh"
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenRefresh"
+          description: ""
+      tags:
+        - api
+components:
+  schemas:
+    Cadpaciente:
+      type: object
+      properties:
+        codpaciente:
+          type: string
+          maxLength: 10
+        paciente:
+          type: string
+          nullable: true
+          maxLength: 100
+        sexo:
+          type: string
+          nullable: true
+          maxLength: 1
+        datanasc:
+          type: string
+          format: date-time
+          nullable: true
+        idade:
+          type: string
+          nullable: true
+          maxLength: 5
+        rg:
+          type: string
+          nullable: true
+          maxLength: 20
+        cpf:
+          type: string
+          nullable: true
+          maxLength: 15
+      required:
+        - codpaciente
+        - cpf
+    ApiEntrada:
+      type: object
+      properties:
+        codpaciente:
+          type: string
+          nullable: true
+          maxLength: 10
+        paciente:
+          type: string
+          nullable: true
+          maxLength: 200
+        codmovimento:
+          type: string
+          maxLength: 10
+        matricula:
+          type: string
+          nullable: true
+          maxLength: 30
+        tipoatd:
+          type: string
+          nullable: true
+          maxLength: 25
+        situacao:
+          type: string
+          nullable: true
+          maxLength: 20
+        datahoraent:
+          type: string
+          format: date-time
+          nullable: true
+        datahorasai:
+          type: string
+          format: date-time
+          nullable: true
+        codconvenio:
+          type: string
+          nullable: true
+          maxLength: 6
+        convenio:
+          type: string
+          nullable: true
+          maxLength: 100
+        plano:
+          type: string
+          nullable: true
+          maxLength: 100
+        codmedico:
+          type: string
+          nullable: true
+          maxLength: 6
+        medico:
+          type: string
+          nullable: true
+          maxLength: 200
+        codamb:
+          type: string
+          nullable: true
+          maxLength: 20
+        procedimento:
+          type: string
+          nullable: true
+          maxLength: 500
+        hist:
+          type: string
+          nullable: true
+          maxLength: 200
+        total:
+          type: number
+          nullable: true
+        consultorio:
+          type: array
+          items:
+            type: object
+            properties:
+              codpaciente:
+                type: string
+                nullable: true
+                maxLength: 10
+              paciente:
+                type: string
+                nullable: true
+                maxLength: 200
+              codmovimento:
+                type: string
+              tipo:
+                type: string
+                nullable: true
+                maxLength: 50
+              codconvenio:
+                type: string
+                nullable: true
+                maxLength: 6
+              convenio:
+                type: string
+                nullable: true
+                maxLength: 100
+              historico:
+                type: string
+                nullable: true
+              data:
+                type: string
+                format: date-time
+                nullable: true
+              nome:
+                type: string
+                nullable: true
+                maxLength: 100
+              obs:
+                type: string
+                nullable: true
+                maxLength: 100
+              numpresc:
+                type: string
+                nullable: true
+                maxLength: 10
+              codmedico:
+                type: string
+                nullable: true
+                maxLength: 10
+              medico:
+                type: string
+                nullable: true
+                maxLength: 200
+            required:
+              - codmovimento
+          readOnly: true
+        prescqt:
+          type: array
+          items:
+            type: object
+            properties:
+              numero:
+                type: string
+                maxLength: 10
+              data:
+                type: string
+                format: date-time
+                nullable: true
+              codpaciente:
+                type: string
+              codpacref:
+                type: string
+                nullable: true
+                maxLength: 10
+              paciente:
+                type: string
+                nullable: true
+                maxLength: 200
+              codmedico:
+                type: string
+                nullable: true
+                maxLength: 10
+              medico:
+                type: string
+                nullable: true
+                maxLength: 200
+              texto:
+                type: string
+                nullable: true
+              obs:
+                type: string
+                nullable: true
+                maxLength: 150
+              peso:
+                type: number
+                nullable: true
+              supcorp:
+                type: number
+                nullable: true
+              protocolo:
+                type: string
+                nullable: true
+                maxLength: 10
+              nciclo:
+                type: string
+                nullable: true
+                maxLength: 5
+              aplicado:
+                type: string
+                nullable: true
+                maxLength: 1
+              gasto:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    idaplic:
+                      type: integer
+                      maximum: 2147483647
+                      minimum: -2147483648
+                    ndoc:
+                      type: string
+                      nullable: true
+                      maxLength: 11
+                    npresc:
+                      type: string
+                    codpaciente:
+                      type: string
+                      nullable: true
+                      maxLength: 12
+                    paciente:
+                      type: string
+                      nullable: true
+                      maxLength: 200
+                    hora:
+                      type: string
+                      nullable: true
+                      maxLength: 5
+                    codproduto:
+                      type: string
+                      nullable: true
+                      maxLength: 10
+                    brasindice:
+                      type: string
+                      nullable: true
+                      maxLength: 20
+                    simpro:
+                      type: string
+                      nullable: true
+                      maxLength: 20
+                    descr:
+                      type: string
+                      nullable: true
+                      maxLength: 150
+                    un:
+                      type: string
+                      nullable: true
+                      maxLength: 10
+                    quant:
+                      type: number
+                      nullable: true
+                    codenf:
+                      type: string
+                      nullable: true
+                      maxLength: 10
+                    enfermeiro:
+                      type: string
+                      nullable: true
+                      maxLength: 200
+                    datahora:
+                      type: string
+                      format: date-time
+                      nullable: true
+                    aplicado:
+                      type: string
+                      nullable: true
+                      maxLength: 10
+                    grupop:
+                      type: string
+                      nullable: true
+                      maxLength: 200
+                    diaquimioterapia:
+                      type: string
+                      nullable: true
+                      maxLength: 10
+                  required:
+                    - idaplic
+                    - npresc
+                readOnly: true
+            required:
+              - numero
+              - codpaciente
+          readOnly: true
+        evolucoes:
+          type: array
+          items:
+            type: object
+            properties:
+              ndoc:
+                type: string
+                maxLength: 11
+              codpaciente:
+                type: string
+              paciente:
+                type: string
+                nullable: true
+                maxLength: 200
+              acomod:
+                type: string
+                nullable: true
+                maxLength: 50
+              datahoraf:
+                type: string
+                format: date-time
+                nullable: true
+              codmedico:
+                type: string
+                nullable: true
+                maxLength: 11
+              enfermeiro:
+                type: string
+                nullable: true
+                maxLength: 200
+              texto3:
+                type: string
+                nullable: true
+            required:
+              - ndoc
+              - codpaciente
+          readOnly: true
+      required:
+        - codmovimento
+    ApiConsulta:
+      type: object
+      properties:
+        codpaciente:
+          type: string
+          nullable: true
+          maxLength: 10
+        paciente:
+          type: string
+          nullable: true
+          maxLength: 200
+        codmovimento:
+          type: string
+        tipo:
+          type: string
+          nullable: true
+          maxLength: 50
+        codconvenio:
+          type: string
+          nullable: true
+          maxLength: 6
+        convenio:
+          type: string
+          nullable: true
+          maxLength: 100
+        historico:
+          type: string
+          nullable: true
+        data:
+          type: string
+          format: date-time
+          nullable: true
+        nome:
+          type: string
+          nullable: true
+          maxLength: 100
+        obs:
+          type: string
+          nullable: true
+          maxLength: 100
+        numpresc:
+          type: string
+          nullable: true
+          maxLength: 10
+        codmedico:
+          type: string
+          nullable: true
+          maxLength: 10
+        medico:
+          type: string
+          nullable: true
+          maxLength: 200
+      required:
+        - codmovimento
+    ApiEnfEvoluC:
+      type: object
+      properties:
+        ndoc:
+          type: string
+          maxLength: 11
+        codpaciente:
+          type: string
+        paciente:
+          type: string
+          nullable: true
+          maxLength: 200
+        acomod:
+          type: string
+          nullable: true
+          maxLength: 50
+        datahoraf:
+          type: string
+          format: date-time
+          nullable: true
+        codmedico:
+          type: string
+          nullable: true
+          maxLength: 11
+        enfermeiro:
+          type: string
+          nullable: true
+          maxLength: 200
+        texto3:
+          type: string
+          nullable: true
+      required:
+        - ndoc
+        - codpaciente
+    ApiEntradaradio:
+      type: object
+      properties:
+        identradaradio:
+          type: string
+          maxLength: 10
+        codmovimento:
+          type: string
+          nullable: true
+          maxLength: 10
+        codpaciente:
+          type: string
+          nullable: true
+          maxLength: 10
+        paciente:
+          type: string
+          nullable: true
+          maxLength: 200
+        numpresc:
+          type: string
+        idplanejfisico:
+          type: string
+          nullable: true
+          maxLength: 10
+        encerrado:
+          type: string
+          nullable: true
+          maxLength: 10
+        observacao:
+          type: string
+          nullable: true
+          maxLength: 200
+        usuario:
+          type: string
+          nullable: true
+          maxLength: 20
+        datahora:
+          type: string
+          format: date-time
+          nullable: true
+        nplanejamento:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        nomecampo:
+          type: string
+          nullable: true
+          maxLength: 100
+        incidencia:
+          type: string
+          nullable: true
+          maxLength: 50
+        ncampo:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+      required:
+        - identradaradio
+        - numpresc
+    ApiPlanejfisicoc:
+      type: object
+      properties:
+        idplanejfisicoc:
+          type: string
+          maxLength: 10
+        codpaciente:
+          type: string
+          nullable: true
+          maxLength: 11
+        paciente:
+          type: string
+          nullable: true
+          maxLength: 200
+        numpresc:
+          type: string
+        energia:
+          type: string
+          nullable: true
+          maxLength: 50
+        dosetotal:
+          type: string
+          nullable: true
+          maxLength: 20
+        dosediaria:
+          type: string
+          nullable: true
+          maxLength: 20
+        naplicacoes:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        locanatomica:
+          type: string
+          nullable: true
+          maxLength: 50
+        incidencia:
+          type: string
+          nullable: true
+          maxLength: 50
+        ncampo:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        portal:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        tpfeixe:
+          type: string
+          nullable: true
+          maxLength: 20
+        fase:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+      required:
+        - idplanejfisicoc
+        - numpresc
+    ApiPrescreve:
+      type: object
+      properties:
+        codpaciente:
+          type: string
+          nullable: true
+          maxLength: 11
+        codpacref:
+          type: string
+          nullable: true
+          maxLength: 10
+        paciente:
+          type: string
+          nullable: true
+          maxLength: 200
+        codmedico:
+          type: string
+          nullable: true
+          maxLength: 10
+        medico:
+          type: string
+          nullable: true
+          maxLength: 200
+        data:
+          type: string
+          format: date-time
+          nullable: true
+        numero:
+          type: string
+          maxLength: 10
+        texto:
+          type: string
+          nullable: true
+        obs:
+          type: string
+          nullable: true
+          maxLength: 150
+        aplicado:
+          type: string
+          nullable: true
+          maxLength: 1
+      required:
+        - numero
+    ApiPrescreveqt:
+      type: object
+      properties:
+        numero:
+          type: string
+          maxLength: 10
+        data:
+          type: string
+          format: date-time
+          nullable: true
+        codpaciente:
+          type: string
+        codpacref:
+          type: string
+          nullable: true
+          maxLength: 10
+        paciente:
+          type: string
+          nullable: true
+          maxLength: 200
+        codmedico:
+          type: string
+          nullable: true
+          maxLength: 10
+        medico:
+          type: string
+          nullable: true
+          maxLength: 200
+        texto:
+          type: string
+          nullable: true
+        obs:
+          type: string
+          nullable: true
+          maxLength: 150
+        peso:
+          type: number
+          nullable: true
+        supcorp:
+          type: number
+          nullable: true
+        protocolo:
+          type: string
+          nullable: true
+          maxLength: 10
+        nciclo:
+          type: string
+          nullable: true
+          maxLength: 5
+        aplicado:
+          type: string
+          nullable: true
+          maxLength: 1
+        gasto:
+          type: array
+          items:
+            type: object
+            properties:
+              idaplic:
+                type: integer
+                maximum: 2147483647
+                minimum: -2147483648
+              ndoc:
+                type: string
+                nullable: true
+                maxLength: 11
+              npresc:
+                type: string
+              codpaciente:
+                type: string
+                nullable: true
+                maxLength: 12
+              paciente:
+                type: string
+                nullable: true
+                maxLength: 200
+              hora:
+                type: string
+                nullable: true
+                maxLength: 5
+              codproduto:
+                type: string
+                nullable: true
+                maxLength: 10
+              brasindice:
+                type: string
+                nullable: true
+                maxLength: 20
+              simpro:
+                type: string
+                nullable: true
+                maxLength: 20
+              descr:
+                type: string
+                nullable: true
+                maxLength: 150
+              un:
+                type: string
+                nullable: true
+                maxLength: 10
+              quant:
+                type: number
+                nullable: true
+              codenf:
+                type: string
+                nullable: true
+                maxLength: 10
+              enfermeiro:
+                type: string
+                nullable: true
+                maxLength: 200
+              datahora:
+                type: string
+                format: date-time
+                nullable: true
+              aplicado:
+                type: string
+                nullable: true
+                maxLength: 10
+              grupop:
+                type: string
+                nullable: true
+                maxLength: 200
+              diaquimioterapia:
+                type: string
+                nullable: true
+                maxLength: 10
+            required:
+              - idaplic
+              - npresc
+          readOnly: true
+      required:
+        - numero
+        - codpaciente
+    ApiRadioterapia:
+      type: object
+      properties:
+        numpresc:
+          type: string
+          maxLength: 10
+        codpaciente:
+          type: string
+          nullable: true
+          maxLength: 11
+        paciente:
+          type: string
+          nullable: true
+          maxLength: 200
+        codcidp:
+          type: string
+          nullable: true
+          maxLength: 10
+        estadio:
+          type: string
+          nullable: true
+          maxLength: 15
+        finalidade:
+          type: string
+          nullable: true
+          maxLength: 20
+        intencaoradical:
+          type: boolean
+          nullable: true
+        intencaopaliativa:
+          type: boolean
+          nullable: true
+        tipot:
+          type: string
+          nullable: true
+          maxLength: 10
+        tipon:
+          type: string
+          nullable: true
+          maxLength: 10
+        tipom:
+          type: string
+          nullable: true
+          maxLength: 10
+        naplicacoes:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          nullable: true
+        karno:
+          type: string
+          nullable: true
+          maxLength: 5
+        codmed:
+          type: string
+          nullable: true
+          maxLength: 10
+        medico:
+          type: string
+          nullable: true
+          maxLength: 200
+        planejamento:
+          type: array
+          items:
+            type: object
+            properties:
+              idplanejfisicoc:
+                type: string
+                maxLength: 10
+              codpaciente:
+                type: string
+                nullable: true
+                maxLength: 11
+              paciente:
+                type: string
+                nullable: true
+                maxLength: 200
+              numpresc:
+                type: string
+              energia:
+                type: string
+                nullable: true
+                maxLength: 50
+              dosetotal:
+                type: string
+                nullable: true
+                maxLength: 20
+              dosediaria:
+                type: string
+                nullable: true
+                maxLength: 20
+              naplicacoes:
+                type: integer
+                maximum: 2147483647
+                minimum: -2147483648
+                nullable: true
+              locanatomica:
+                type: string
+                nullable: true
+                maxLength: 50
+              incidencia:
+                type: string
+                nullable: true
+                maxLength: 50
+              ncampo:
+                type: integer
+                maximum: 2147483647
+                minimum: -2147483648
+                nullable: true
+              portal:
+                type: integer
+                maximum: 2147483647
+                minimum: -2147483648
+                nullable: true
+              tpfeixe:
+                type: string
+                nullable: true
+                maxLength: 20
+              fase:
+                type: integer
+                maximum: 2147483647
+                minimum: -2147483648
+                nullable: true
+            required:
+              - idplanejfisicoc
+              - numpresc
+          readOnly: true
+        sessoes:
+          type: array
+          items:
+            type: object
+            properties:
+              identradaradio:
+                type: string
+                maxLength: 10
+              codmovimento:
+                type: string
+                nullable: true
+                maxLength: 10
+              codpaciente:
+                type: string
+                nullable: true
+                maxLength: 10
+              paciente:
+                type: string
+                nullable: true
+                maxLength: 200
+              numpresc:
+                type: string
+              idplanejfisico:
+                type: string
+                nullable: true
+                maxLength: 10
+              encerrado:
+                type: string
+                nullable: true
+                maxLength: 10
+              observacao:
+                type: string
+                nullable: true
+                maxLength: 200
+              usuario:
+                type: string
+                nullable: true
+                maxLength: 20
+              datahora:
+                type: string
+                format: date-time
+                nullable: true
+              nplanejamento:
+                type: integer
+                maximum: 2147483647
+                minimum: -2147483648
+                nullable: true
+              nomecampo:
+                type: string
+                nullable: true
+                maxLength: 100
+              incidencia:
+                type: string
+                nullable: true
+                maxLength: 50
+              ncampo:
+                type: integer
+                maximum: 2147483647
+                minimum: -2147483648
+                nullable: true
+            required:
+              - identradaradio
+              - numpresc
+          readOnly: true
+      required:
+        - numpresc
+    ApiAplicMM_PrescQT:
+      type: object
+      properties:
+        idaplic:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        ndoc:
+          type: string
+          nullable: true
+          maxLength: 11
+        npresc:
+          type: string
+        codpaciente:
+          type: string
+          nullable: true
+          maxLength: 12
+        paciente:
+          type: string
+          nullable: true
+          maxLength: 200
+        hora:
+          type: string
+          nullable: true
+          maxLength: 5
+        codproduto:
+          type: string
+          nullable: true
+          maxLength: 10
+        brasindice:
+          type: string
+          nullable: true
+          maxLength: 20
+        simpro:
+          type: string
+          nullable: true
+          maxLength: 20
+        descr:
+          type: string
+          nullable: true
+          maxLength: 150
+        un:
+          type: string
+          nullable: true
+          maxLength: 10
+        quant:
+          type: number
+          nullable: true
+        codenf:
+          type: string
+          nullable: true
+          maxLength: 10
+        enfermeiro:
+          type: string
+          nullable: true
+          maxLength: 200
+        datahora:
+          type: string
+          format: date-time
+          nullable: true
+        aplicado:
+          type: string
+          nullable: true
+          maxLength: 10
+        grupop:
+          type: string
+          nullable: true
+          maxLength: 200
+        diaquimioterapia:
+          type: string
+          nullable: true
+          maxLength: 10
+      required:
+        - idaplic
+        - npresc
+    ApiAplicMM_PrescEletiva:
+      type: object
+      properties:
+        idaplic:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+        ndoc:
+          type: string
+          nullable: true
+          maxLength: 11
+        grupop:
+          type: string
+          nullable: true
+          maxLength: 200
+        npresc:
+          type: string
+          nullable: true
+          maxLength: 11
+        codpaciente:
+          type: string
+          nullable: true
+          maxLength: 12
+        paciente:
+          type: string
+          nullable: true
+          maxLength: 200
+        hora:
+          type: string
+          nullable: true
+          maxLength: 5
+        codproduto:
+          type: string
+          nullable: true
+          maxLength: 10
+        brasindice:
+          type: string
+          nullable: true
+          maxLength: 20
+        simpro:
+          type: string
+          nullable: true
+          maxLength: 20
+        descr:
+          type: string
+          nullable: true
+          maxLength: 150
+        un:
+          type: string
+          nullable: true
+          maxLength: 10
+        quant:
+          type: string
+          format: decimal
+          multipleOf: 0.01
+          maximum: 1000
+          minimum: -1000
+          nullable: true
+        codenf:
+          type: string
+          nullable: true
+          maxLength: 10
+        enfermeiro:
+          type: string
+          nullable: true
+          maxLength: 200
+        datahora:
+          type: string
+          format: date-time
+          nullable: true
+        aplicado:
+          type: string
+          nullable: true
+          maxLength: 10
+      required:
+        - idaplic
+    TokenObtainPair:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+          writeOnly: true
+      required:
+        - username
+        - password
+    TokenRefresh:
+      type: object
+      properties:
+        refresh:
+          type: string
+        access:
+          type: string
+          readOnly: true
+      required:
+        - refresh
