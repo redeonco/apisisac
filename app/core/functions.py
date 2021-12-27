@@ -67,13 +67,14 @@ def sendmail_cria_agenda(tarefa, msg):
     Função para enviar email caso haja alguma mensagem de retorno da tarefa cria_agenda_radio
     Recebe 2 parâmetros do tipo string.
     """
+    lista = lista_emails()
     try:
         send_mail(
             'Núcleo de Sistemas - Relatório API - SISAC',
             'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa ' + tarefa + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S") +
             '.\nA tarefa retornou a seguinte resposta: ' + msg + '.',
             'chamado@oncoradium.com.br',
-            lista_emails,
+            lista,
             fail_silently=False,
         )
     except SMTPAuthenticationError:
