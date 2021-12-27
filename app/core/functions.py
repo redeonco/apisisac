@@ -25,14 +25,14 @@ def lista_emails():
     return [obj.email for obj in EmailDestinatario.objects.all()]
 
 
-def sendmail(tarefa, msg):
+@shared_task
+def sendmail_teste():
     """
     Função para enviar email. Recebe 2 parâmetros: nome da tarefa que a executou e uma mensagem do tipo string.
     """
     send_mail(
         'Núcleo de Sistemas - Relatório API - SISAC',
-        'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa ' + tarefa + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S") +
-        '.\nA tarefa retornou a seguinte resposta: ' + msg + '.',
+        'Email de teste',
         'chamado@oncoradium.com.br',
         lista_emails(),
         fail_silently=False,
@@ -67,14 +67,13 @@ def sendmail_cria_agenda(tarefa, msg):
     Função para enviar email caso haja alguma mensagem de retorno da tarefa cria_agenda_radio
     Recebe 2 parâmetros do tipo string.
     """
-    lista = lista_emails()
     try:
         send_mail(
             'Núcleo de Sistemas - Relatório API - SISAC',
             'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa ' + tarefa + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S") +
             '.\nA tarefa retornou a seguinte resposta: ' + msg + '.',
             'chamado@oncoradium.com.br',
-            lista,
+            lista_emails(),
             fail_silently=False,
         )
     except SMTPAuthenticationError:
