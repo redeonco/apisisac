@@ -73,7 +73,7 @@ def sendmail_cria_agenda(tarefa, msg):
             'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa ' + tarefa + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S") +
             '.\nA tarefa retornou a seguinte resposta: ' + msg + '.',
             'chamado@oncoradium.com.br',
-            lista_emails(),
+            lista_emails,
             fail_silently=False,
         )
     except SMTPAuthenticationError:
