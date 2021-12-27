@@ -37,7 +37,10 @@ services:
       - DB_CONFIG_HOST=${DB_CONFIG_HOST}
       - DB_CONFIG_PORT=${DB_CONFIG_PORT}
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
-    depends_on:
+      - EMAIL_HOST=${EMAIL_HOST}
+      - EMAIL_PORT=${EMAIL_PORT}
+      - EMAIL_HOST_USER=${EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
       - db
   
   db:

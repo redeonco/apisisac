@@ -7,6 +7,9 @@ from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.mail import send_mail
 import smtplib
+from celery import shared_task
+from smtplib import SMTPAuthenticationError
+
 
 """
 Conjunto de funções públicas utilizadas pelas rotinas do arquivo tasks.py
@@ -15,72 +18,149 @@ a estética e eficiência do código.
 """
 
 
-# Função para enviar email. Recebe 2 parâmetros: nome da tarefa que a executou e uma mensagem do tipo string.
+def lista_emails():
+    """
+    Função utilizada para retornar uma lista com todos os emails cadastrados no Model EmailDestinatario
+    """
+    return [obj.email for obj in EmailDestinatario.objects.all()]
+
+
 def sendmail(tarefa, msg):
+    """
+    Função para enviar email. Recebe 2 parâmetros: nome da tarefa que a executou e uma mensagem do tipo string.
+    """
     send_mail(
         'Núcleo de Sistemas - Relatório API - SISAC',
         'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa ' + tarefa + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S") +
-        '. \nA tarefa retornou a seguinte resposta: ' + msg + '.',
+        '.\nA tarefa retornou a seguinte resposta: ' + msg + '.',
         'chamado@oncoradium.com.br',
-        ['tony.carvalho@oncoradium.com.br'],
+        lista_emails(),
         fail_silently=False,
     )
 
 
-# Função utilizada para incrementar sequencial do código movimento do paciente.
-# A função recebe um parâmetro do tipo string no formato 'XXXXXX.YY'.
-# Onde XXXXXX é o número do prontuário no SISAC, e YY é a sequência do movimento.
-# Por exemplo: se receber '006049.10', irá retornar '006049.11'
+@shared_task
+def sendmail(qtdconfirmado, data):
+    """
+    Função para enviar email com a quantidade de pacientes confirmados em determinada data.
+    Recebe 2 parâmetros: 
+    *qtdconfirmado -> tipo numérico
+    *data -> objeto datetime
+    """
+    try:
+        send_mail(
+            'Núcleo de Sistemas - Relatório API - SISAC',
+            'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa Atualiza Agenda, em ' + data.strftime("%d/%m/%Y às %H:%M:%S") +
+            '.\nQuantidade de pacientes confirmados na agenda do SISAC: ' +
+            str(qtdconfirmado) + '.',
+            'chamado@oncoradium.com.br',
+            lista_emails(),
+            fail_silently=False,
+        )
+    except SMTPAuthenticationError:
+        print(f'Falha de autenticação com o servidor SMTP :(')
+
+
+@shared_task
+def sendmail_cria_agenda(tarefa, msg):
+    """
+    Função para enviar email caso haja alguma mensagem de retorno da tarefa cria_agenda_radio
+    Recebe 2 parâmetros do tipo string.
+    """
+    try:
+        send_mail(
+            'Núcleo de Sistemas - Relatório API - SISAC',
+            'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa ' + tarefa + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S") +
+            '.\nA tarefa retornou a seguinte resposta: ' + msg + '.',
+            'chamado@oncoradium.com.br',
+            lista_emails(),
+            fail_silently=False,
+        )
+    except SMTPAuthenticationError:
+        print(f'Falha de autenticação com o servidor SMTP :(')
+
+
+@shared_task
+def sendmail_alta_paciente(pac):
+    """
+    Função para enviar email notificando alta de paciente da radioterapia.
+    Recebe um parâmetro do tipo string com o nome do paciente.
+    """
+    try:
+        send_mail(
+            'Relatório API - SISAC - Alta de Paciente',
+            'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Última sessão de radioterapia realizada para o paciente' +
+            pac + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S"),
+            'chamado@oncoradium.com.br',
+            ['ti@oncoradium.com.br', 'iara.souza@oncoradium.com.br'],
+            fail_silently=False,
+        )
+    except SMTPAuthenticationError:
+        print(f'Falha de autenticação com o servidor SMTP :(')
+
+
 def addcodmovimento(codmovimento):
-        cut = codmovimento.split('.')
-        seqadd = int(cut[1]) + 1
-        if seqadd < 10:
-            seqadd = '0' + str(seqadd)
-        codfinal = cut[0] + '.' + str(seqadd)
-        return codfinal
+    """
+    Função utilizada para incrementar sequencial do código movimento do paciente.
+    A função recebe um parâmetro do tipo string no formato 'XXXXXX.YY'.
+    Onde XXXXXX é o número do prontuário no SISAC, e YY é a sequência do movimento.
+    Por exemplo: se receber '006049.10', irá retornar '006049.11'
+    """
+    cut = codmovimento.split('.')
+    seqadd = int(cut[1]) + 1
+    if seqadd < 10:
+        seqadd = '0' + str(seqadd)
+    codfinal = cut[0] + '.' + str(seqadd)
+    return codfinal
 
 
-# Função utilizada para incremetar numeração CódigoExame, útil para a tabela Exame do SISAC
-# A função não recebe parâmetros.
-# Quando é chamada, a função faz leitura do valor na coluna PRM_Sequencia, tabela TAB_Parametro do banco CONFIG do SISAC.
-# Realiza incremento no valor obtido, atualiza o novo registro na tabela e retorna o novo valor incrementado.
-# O retorno da função é um valor do tipo inteiro.
 def incrementa_codigoexame():
-        prm_exame = TAB_Parametro.objects.get(prm_nome='TAB_EXAME')
-        novo_codigo = prm_exame.prm_sequencia + 1
-        prm_exame.prm_sequencia = novo_codigo
-        prm_exame.save()
+    """
+    # Função utilizada para incremetar numeração CódigoExame, útil para a tabela Exame do SISAC
+    # A função não recebe parâmetros.
+    # Quando é chamada, a função faz leitura do valor na coluna PRM_Sequencia, tabela TAB_Parametro do banco CONFIG do SISAC.
+    # Realiza incremento no valor obtido, atualiza o novo registro na tabela e retorna o novo valor incrementado.
+    # O retorno da função é um valor do tipo inteiro.
+    """
+    prm_exame = TAB_Parametro.objects.get(prm_nome='TAB_EXAME')
+    novo_codigo = prm_exame.prm_sequencia + 1
+    prm_exame.prm_sequencia = novo_codigo
+    prm_exame.save()
 
-        return novo_codigo
+    return novo_codigo
 
 
-# Função utilizada para incremetar numeração NúmeroAtendimento, útil para a tabela Entrada do SISAC
-# A função não recebe parâmetros.
-# Quando é chamada, a função faz leitura do valor na coluna PRM_Sequencia, tabela TAB_Parametro do banco CONFIG do SISAC.
-# Realiza incremento no valor obtido, atualiza o novo registro na tabela e retorna o novo valor incrementado.
-# O retorno da função é um valor do tipo inteiro.
 def incrementa_natendimento():
-        prm_exame = TAB_Parametro.objects.get(prm_nome='TAB_ATENDIMENTO')
-        novo_codigo = prm_exame.prm_sequencia + 1
-        prm_exame.prm_sequencia = novo_codigo
-        prm_exame.save()
+    """
+    Função utilizada para incremetar numeração NúmeroAtendimento, útil para a tabela Entrada do SISAC
+    A função não recebe parâmetros.
+    Quando é chamada, a função faz leitura do valor na coluna PRM_Sequencia, tabela TAB_Parametro do banco CONFIG do SISAC.
+    Realiza incremento no valor obtido, atualiza o novo registro na tabela e retorna o novo valor incrementado.
+    O retorno da função é um valor do tipo inteiro.
+    """
+    prm_exame = TAB_Parametro.objects.get(prm_nome='TAB_ATENDIMENTO')
+    novo_codigo = prm_exame.prm_sequencia + 1
+    prm_exame.prm_sequencia = novo_codigo
+    prm_exame.save()
 
-        return novo_codigo
+    return novo_codigo
 
 
-# Função utilizada para incremetar numeração SenhaAgenda, útil para a tabela Agenda do SISAC
-# A função não recebe parâmetros.
-# Quando é chamada, a função faz leitura do valor na coluna PRM_Sequencia, tabela TAB_Parametro do banco CONFIG do SISAC.
-# Realiza incremento no valor obtido, atualiza o novo registro na tabela e retorna o novo valor incrementado.
-# O retorno da função é um valor do tipo string.
 def senhanova():
-        ultimasenha = TAB_Parametro.objects.get(prm_nome='SENHAAGENDA') # 0006001
-        ultimasenha.prm_sequencia = ultimasenha.prm_sequencia + 1
-        ultimasenha.save()
-        zeros = 7 - len(str(ultimasenha.prm_sequencia)) 
-        senhafinal = '0' * zeros + str(ultimasenha.prm_sequencia)
+    """
+    Função utilizada para incremetar numeração SenhaAgenda, útil para a tabela Agenda do SISAC
+    A função não recebe parâmetros.
+    Quando é chamada, a função faz leitura do valor na coluna PRM_Sequencia, tabela TAB_Parametro do banco CONFIG do SISAC.
+    Realiza incremento no valor obtido, atualiza o novo registro na tabela e retorna o novo valor incrementado.
+    O retorno da função é um valor do tipo string.
+    """
+    ultimasenha = TAB_Parametro.objects.get(prm_nome='SENHAAGENDA')  # 0006001
+    ultimasenha.prm_sequencia = ultimasenha.prm_sequencia + 1
+    ultimasenha.save()
+    zeros = 7 - len(str(ultimasenha.prm_sequencia))
+    senhafinal = '0' * zeros + str(ultimasenha.prm_sequencia)
 
-        return senhafinal
+    return senhafinal
 
 
 def relaciona_paciente(id_paciente):
@@ -99,14 +179,17 @@ def relaciona_paciente(id_paciente):
     Se a função não encontrar nenhum relacionamento, irá sempre retornar False
     """
     try:
-        
+
         try:
-            busca = ControlPacientes.objects.get(id_paciente_mosaiq=id_paciente.pk)
-            codpac_sisac = Cadpaciente.objects.get(codpaciente=busca.codpac_sisac)
+            busca = ControlPacientes.objects.get(
+                id_paciente_mosaiq=id_paciente.pk)
+            codpac_sisac = Cadpaciente.objects.get(
+                codpaciente=busca.codpac_sisac)
             return codpac_sisac
         except ObjectDoesNotExist:
             try:
-                codpac_sisac = Cadpaciente.objects.exclude(cpf='').get(codpaciente=id_paciente.codpac_sisac)
+                codpac_sisac = Cadpaciente.objects.exclude(
+                    cpf='').get(codpaciente=id_paciente.codpac_sisac)
                 if codpac_sisac.cpf == id_paciente.cpf.replace('.', '').replace('-', '').strip():
                     control_paciente = ControlPacientes()
                     control_paciente.id_paciente_mosaiq = id_paciente.pk
@@ -121,7 +204,8 @@ def relaciona_paciente(id_paciente):
 
             except ObjectDoesNotExist:
                 try:
-                    codpac_sisac = Cadpaciente.objects.exclude(cpf='').get(cpf=id_paciente.cpf.replace('.', '').replace('-', '').strip())
+                    codpac_sisac = Cadpaciente.objects.exclude(cpf='').get(
+                        cpf=id_paciente.cpf.replace('.', '').replace('-', '').strip())
                     msg = f'Paciente {id_paciente} com número de prontuário digergente. \nProntuário MOSAIQ {id_paciente.codpac_sisac}. Prontuário SISAC {codpac_sisac.codpaciente}'
                     sendmail('Relaciona paciente', msg)
                     return codpac_sisac
@@ -135,14 +219,16 @@ def relaciona_paciente(id_paciente):
         return False
 
 
-# Função para verificar se a fase inicia ao mesmo tempo que outra
-# A função verifica se existe um objeto relacionado na tabela fase
-# Na coluna reference_sit_set_id. Este coluna aponta para ID de outra fase
-# Indicando que as duas estão relacionadas.
-# Se este for o caso, a coluna Reference_Fraction determina o número da sessão de início desta fase, relacionada à outra
-# E a função retornará o ID da fase relacionada
-# Se ocorrer a exceção ObjectDoesNotExist, a função retornará False
 def checafase(fase):
+    """
+    Função para verificar se a fase inicia ao mesmo tempo que outra
+    A função verifica se existe um objeto relacionado na tabela fase
+    Na coluna reference_sit_set_id. Este coluna aponta para ID de outra fase
+    Indicando que as duas estão relacionadas.
+    Se este for o caso, a coluna Reference_Fraction determina o número da sessão de início desta fase, relacionada à outra
+    E a função retornará o ID da fase relacionada
+    Se ocorrer a exceção ObjectDoesNotExist, a função retornará False
+    """
     try:
         fase.reference_sit_set_id
         return fase.reference_sit_set_id
@@ -150,16 +236,19 @@ def checafase(fase):
         return False
 
 
-# Função utilizada para definir início do tratamento.
-# Recebe como parâmetro um objeto da classe TxField do MOSAIQ.
-# A função que verifica se a fase do campo está relacionada com outra para definir o início do tratamento
-# Se não houver fase relacionada, inicio tratamento = 1
-# Se houver, define início tratamento com o valor obtido da coluna Reference_Fraction, tabela Fase
-# A função retorna um valor do tipo inteiro.
 def inicio_tratamento(obj):
+    """
+    Função utilizada para definir início do tratamento.
+    Recebe como parâmetro um objeto da classe TxField do MOSAIQ.
+    A função que verifica se a fase do campo está relacionada com outra para definir o início do tratamento
+    Se não houver fase relacionada, inicio tratamento = 1
+    Se houver, define início tratamento com o valor obtido da coluna Reference_Fraction, tabela Fase
+    A função retorna um valor do tipo inteiro.
+    """
     lista_fases = []
     if checafase(obj.id_fase) == False:
-        fases = Fase.objects.filter(id_paciente=obj.id_paciente).filter(reference_sit_set_id__isnull=True)
+        fases = Fase.objects.filter(id_paciente=obj.id_paciente).filter(
+            reference_sit_set_id__isnull=True)
         nfase = 0
         contador = 0
         for fase in fases:
@@ -171,15 +260,17 @@ def inicio_tratamento(obj):
             if contador == 0:
                 dict['InicioTrat'] = 1
             else:
-                iniciotrat = lista_fases[contador-1]['InicioTrat'] + lista_fases[contador-1]['QtdSessoes']
+                iniciotrat = lista_fases[contador-1]['InicioTrat'] + \
+                    lista_fases[contador-1]['QtdSessoes']
                 dict['InicioTrat'] = iniciotrat
             lista_fases.append(dict)
             contador += 1
-        iniciotrat = list(filter(lambda lista_fases: lista_fases['IDFase'] == obj.id_fase, lista_fases))[0]['InicioTrat']
-    
+        iniciotrat = list(filter(
+            lambda lista_fases: lista_fases['IDFase'] == obj.id_fase, lista_fases))[0]['InicioTrat']
+
     else:
         iniciotrat = obj.id_fase.reference_fraction
-    
+
     return iniciotrat
 
 
@@ -216,10 +307,9 @@ def enviar_email(msg, assunto, user, senha):
     server = smtplib.SMTP('smtp-cluster.idc2.mandic.com.br', 587)
     try:
         server.login(mail_from, senha)
-        server.sendmail(from_addr=mail_from, to_addrs='chamado@oncoradium.com.br', msg=final.encode('latin-1'))
+        server.sendmail(
+            from_addr=mail_from, to_addrs='chamado@oncoradium.com.br', msg=final.encode('latin-1'))
         server.quit()
         return True
     except smtplib.SMTPAuthenticationError:
         return False
-
-

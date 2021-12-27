@@ -1,10 +1,10 @@
 from django.core.exceptions import ObjectDoesNotExist
-from smtplib import SMTPAuthenticationError
 from core.functions import *
 from celery import shared_task
 from config.models import TAB_Parametro
 from core.models import CadConvenio, Exame, Fatura, TabAmb
 from mosaiq_app.models import *
+from control.models import *
 from core.models import (
     Agenda, 
     Cadpaciente, 
@@ -21,75 +21,6 @@ from django.db.models import Q
 from django.core.mail import send_mail
 
 
-@shared_task
-def sendmail(qtdconfirmado, data):
-    try:
-        send_mail(
-            'Núcleo de Sistemas - Relatório API - SISAC',
-            'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa Atualiza Agenda, em ' + data.strftime("%d/%m/%Y às %H:%M:%S") +
-            '. \nQuantidade de pacientes confirmados na agenda do SISAC: ' + str(qtdconfirmado) + '.',
-            'chamado@oncoradium.com.br',
-            ['tony.carvalho@oncoradium.com.br'],
-            fail_silently=False,
-        )
-    except SMTPAuthenticationError:
-        print(f'Falha de autenticação com o servidor SMTP :(')
-
-@shared_task
-def sendmail_lista(lista, qtdconfirmado, data):
-    try:
-        send_mail(
-            'Núcleo de Sistemas - Relatório API - SISAC',
-            'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa Atualiza Agenda, em ' + data.strftime("%d/%m/%Y às %H:%M:%S") +
-            '. \nQuantidade de pacientes confirmados na agenda do SISAC: ' + str(qtdconfirmado) + 
-            '. \nPacientes não confirmados: ' + str(lista) + 
-            '. \nVerificar se os pacientes realizaram tratamento na máquina.',
-            'chamado@oncoradium.com.br',
-            ['tony.carvalho@oncoradium.com.br'],
-            fail_silently=False,
-        )
-    except SMTPAuthenticationError:
-        print(f'Falha de autenticação com o servidor SMTP :(')
-
-@shared_task
-def mailtest(msg):
-    try:
-        send_mail(
-            'BOT Telegram',
-            f'Novo Chamado Via Telegram. \n\n\n{msg}',
-            'chamado@oncoradium.com.br',
-            ['tony.carvalho@oncoradium.com.br'],
-            fail_silently=False,
-        )
-    except SMTPAuthenticationError:
-        print(f'Falha de autenticação com o servidor SMTP :(')
-
-@shared_task
-def sendmail_cria_agenda(tarefa, msg):
-    try:
-        send_mail(
-            'Núcleo de Sistemas - Relatório API - SISAC',
-            'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa ' + tarefa + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S") +
-            '. \nA tarefa retornou a seguinte resposta: ' + msg + '.',
-            'chamado@oncoradium.com.br',
-            ['tony.carvalho@oncoradium.com.br'],
-            fail_silently=False,
-        )
-    except SMTPAuthenticationError:
-        print(f'Falha de autenticação com o servidor SMTP :(')
-
-@shared_task
-def sendmail_alta_paciente(pac):
-    try:
-        send_mail(
-            'Relatório API - SISAC - Alta de Paciente',
-            'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Última sessão de radioterapia realizada para o paciente' + pac + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S"),
-            'chamado@oncoradium.com.br',
-            ['tony.carvalho@oncoradium.com.br', 'iara.souza@oncoradium.com.br'],
-            fail_silently=False,
-        )
-    except SMTPAuthenticationError:
-        print(f'Falha de autenticação com o servidor SMTP :(')
 
 # Tarefa para atualizar a agenda de tratamento da radioterapia do SISAC comparando com a agenda de tratamento do MOSAIQ
 # A tarefa olha para a agenda do MOSAIQ quais pacientes estão marcados como Completed
@@ -377,15 +308,6 @@ def atualizaagenda():
         for obj in query_sisac2.iterator():
             list.append(str(obj.codpaciente_id) + ' - ' + str(obj.codpaciente))
         print(str(len(list)), 'paciente(s) não confirmado(s):', str(list), ' Verifique se houve tratamento realizado para o(s) paciente(s) informado(s) em', date.today().strftime("%d/%m/%Y") + '.')
-
-    # Se houver paciente não confirmado na agenda do SISAC, chama a função sendmail_lista,
-    # Que enviará email de relatório contendo a quantidade de pacientes tratados e a lista de pacientes não confirmados.
-    # Se todos os pacientes foram confirmados, chama a função sendmail,
-    # Que enviará email de relatório contendo a quantidade de pacientes tratados.
-    # if len(list) > 0:
-    #     sendmail_lista(list, i, datetime.now())
-    # else:
-    #    sendmail(i, datetime.now())
 
 
 @shared_task

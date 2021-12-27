@@ -19,4 +19,10 @@ class Usuarios(models.Model):
 
     def __str__(self):
         return self.username
-    
+
+
+class EmailDestinatario(models.Model):
+    email = models.EmailField(max_length=250)
+
+    def __str__(self):
+        return self.email

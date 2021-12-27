@@ -221,6 +221,7 @@ class ApiPlanejfisicocSerializerViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'head']
     filterset_fields = {'datasist': ['gte', 'lte', 'exact', 'gt', 'lt']}
 
+    @swagger_auto_schema(tags=['Radioterapia'])
     def get_queryset(self):
         queryset = ApiPlanejfisicoc.objects.all().order_by('numpresc')
         codmovimento = self.request.query_params.get('codpaciente')
@@ -329,6 +330,7 @@ class ApiRadioterapiaSerializerViewSet(viewsets.ModelViewSet):
     http_method_names = ['get', 'head']
     filterset_fields = {'datasist': ['gte', 'lte', 'exact', 'gt', 'lt']}
 
+    @swagger_auto_schema(tags=['Radioterapia'])
     def get_queryset(self):
         queryset = ApiRadioterapia.objects.all().order_by('numpresc')
         numpresc = self.request.query_params.get('numpresc')

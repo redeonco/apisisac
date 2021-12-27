@@ -15,7 +15,6 @@ class Cadpaciente(models.Model):
     # Field name made lowercase.
     datanasc = models.DateTimeField(
         db_column='DATANASC', blank=True, null=True)
-    # Field name made lowercase.
     idade = models.CharField(
         db_column='IDADE', max_length=5, blank=True, null=True)
     # Field name made lowercase.
