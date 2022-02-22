@@ -3,7 +3,8 @@ FROM python:3.8-slim-buster
 ENV PYTHONUNBUFFERED 1
 
 COPY ./requirements.txt /requirements.txt
-COPY ./app /app
+COPY ./app/requirements.txt ./app/requirements.txt
+COPY ./app/celery.sh ./app/celery.sh
 COPY ./scripts /scripts
 
 WORKDIR /app
@@ -61,5 +62,7 @@ RUN pip install uwsgi
 ENV PATH="/scripts:/py/bin:$PATH"
 
 USER app
+
+COPY ./app .
 
 CMD ["celery.sh"]

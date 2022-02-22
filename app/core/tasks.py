@@ -84,7 +84,8 @@ def atualizaagenda():
                 entrada.datahoraent = dataagenda_mosaiq
                 entrada.datasist = datetime.now()
                 entrada.local = ''
-                entrada.usuario = 'API'
+                entrada.usuario = 'AUTO'
+                entrada.recep = 'AUTO'
                 entrada.codconvenio = ultimo_codmov.codconvenio
                 entrada.plano = ''
                 entrada.codmedico = ultimo_codmov.codmedico
@@ -207,7 +208,7 @@ def atualizaagenda():
                                 entrada.hist = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
                                 entrada.codmedico = codmedico
                                 entrada.local = '112'
-                                entrada.recep = 'API'
+                                entrada.recep = 'AUTO'
                                 entrada.total = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
                                 entrada.fechado = 'P'
                                 entrada.codamb = codamb
