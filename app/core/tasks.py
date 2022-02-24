@@ -21,6 +21,8 @@ from django.db.models import Q
 from django.core.mail import send_mail
 
 
+API_USER = 'AUTO'
+
 
 # Tarefa para atualizar a agenda de tratamento da radioterapia do SISAC comparando com a agenda de tratamento do MOSAIQ
 # A tarefa olha para a agenda do MOSAIQ quais pacientes estão marcados como Completed
@@ -94,7 +96,8 @@ def atualizaagenda():
                 entrada.datahoraent = dataagenda_mosaiq
                 entrada.datasist = datetime.now()
                 entrada.local = ''
-                entrada.usuario = 'API'
+                entrada.usuario = API_USER
+                entrada.recep = API_USER
                 entrada.codconvenio = ultimo_codmov.codconvenio
                 entrada.plano = ''
                 entrada.codmedico = ultimo_codmov.codmedico
@@ -158,7 +161,7 @@ def atualizaagenda():
                         entradaradio.idplanejfisico = Planejfisico.objects.get(id_mosaiq=campo.id_campo_id).idplanejfisico
                         entradaradio.encerrado = 'S'
                         entradaradio.observacao = ''
-                        entradaradio.usuario = 'API'
+                        entradaradio.usuario = API_USER
                         entradaradio.datahora = dataagenda_mosaiq
                         entradaradio.datasist = datetime.now()
                         entradaradio.nplanejamento = planej.nplanejamento
@@ -180,7 +183,7 @@ def atualizaagenda():
                 # Marca como confirmado, atribuindo 'S' na coluna ConfAtd e inserindo o código de movimento gerado pela função addcodmovimento,
                 # Que faz referência o histórico gerado para o paciente nas etapas anteriores.
                 agenda_sisac.confatd = 'S'
-                agenda_sisac.usuario = 'API'
+                agenda_sisac.usuario = API_USER
                 agenda_sisac.codmovimento = novo_codmov
                 agenda_sisac.datasist = datetime.now()
                 agenda_sisac.save()
@@ -215,7 +218,7 @@ def atualizaagenda():
                         entrada.hist = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
                         entrada.codmedico = codmedico
                         entrada.local = '112'
-                        entrada.recep = 'API'
+                        entrada.recep = API_USER
                         entrada.total = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
                         entrada.fechado = 'P'
                         entrada.codamb = codamb
@@ -242,7 +245,7 @@ def atualizaagenda():
                         fatura.filme = '0'
                         fatura.codmedico = codmedico
                         fatura.datasist = datetime.now()
-                        fatura.usuario = 'API'
+                        fatura.usuario = API_USER
                         fatura.codamb = codamb
                         fatura.ch = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
                         fatura.local = '112'
@@ -261,7 +264,7 @@ def atualizaagenda():
                         exame.descr = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
                         exame.quant = '1'
                         exame.codmedico = codmedico
-                        exame.usuario = 'API'
+                        exame.usuario = API_USER
                         exame.datasist = datetime.now()
                         exame.chave = novo_codmov
                         exame.valor = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
@@ -397,7 +400,7 @@ def atualiza_planej():
                     novo_planejfisicoc.incidencia = '3D'
                     novo_planejfisicoc.tpfeixe = obj.id_fase.modalidade
                     novo_planejfisicoc.fase = obj.id_fase.numerofase
-                    novo_planejfisicoc.usuario = 'API'
+                    novo_planejfisicoc.usuario = API_USER
                     novo_planejfisicoc.id_mosaiq = obj.id_campo
                     novo_planejfisicoc.id_fase_mosaiq = obj.id_fase_id
                     novo_planejfisicoc.save()
@@ -417,7 +420,7 @@ def atualiza_planej():
                         planej.tecnica = obj.id_fase.tecnica
                         planej.angulacao = 'G-' + str(obj.txfieldpoint_set.first().gantry) + ';M-' + str(obj.txfieldpoint_set.first().mesa) + ';C-' + str(obj.txfieldpoint_set.first().colimador)
                         planej.datasist = datetime.now()
-                        planej.usuario = 'API'
+                        planej.usuario = API_USER
                         planej.id_mosaiq = obj.id_campo
                         planej.save()
                 else:            
@@ -440,7 +443,7 @@ def atualiza_planej():
                     novo_planejfisico.dtt = obj.id_fase.dosetotal
                     novo_planejfisico.dtd = obj.dose_campo
                     novo_planejfisico.nomecampo = obj.nome_campo
-                    novo_planejfisico.usuario = 'API'
+                    novo_planejfisico.usuario = API_USER
                     novo_planejfisico.id_mosaiq = obj.id_campo 
                     novo_planejfisico.id_fase_mosaiq = obj.id_fase_id
                     novo_planejfisico.save()
@@ -459,7 +462,7 @@ def atualiza_planej():
                         presc.dosettotal = obj.id_fase.dosetotal
                         presc.dosetdiaria = obj.dose_campo
                         presc.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
-                        presc.usuario = 'API'
+                        presc.usuario = API_USER
                         presc.id_mosaiq = obj.id_campo
                         presc.save()
                 else:
@@ -474,7 +477,7 @@ def atualiza_planej():
                     novapresc.naplicacoes = obj.id_fase.qtdsessoes
                     novapresc.ntratamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
                     novapresc.codpaciente = codpac_sisac
-                    novapresc.usuario = 'API'
+                    novapresc.usuario = API_USER
                     novapresc.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
                     novapresc.tecnica = obj.id_fase.tecnica
                     novapresc.tpfeixe = obj.id_fase.modalidade
@@ -547,7 +550,7 @@ def cria_agenda_radio():
                         agenda.codconvenio = Entrada.objects.filter(codpaciente=codpac_sisac).filter(filial='01').order_by('datahoraent').last().codconvenio
                         agenda.codpaciente = codpac_sisac
                         agenda.obs = 'Sessão de Radioterapia'
-                        agenda.usuario = 'API'
+                        agenda.usuario = API_USER
                         agenda.descr = Entrada.objects.filter(codpaciente=codpac_sisac).filter(filial='01').order_by('datahoraent').last().codconvenio.descr
                         agenda.datasist = datetime.now()
                         agenda.confatd = 'N'
@@ -697,7 +700,7 @@ def atualiza_planej_pac(pac):
                 novo_planejfisicoc.incidencia = '3D'
                 novo_planejfisicoc.tpfeixe = obj.id_fase.modalidade
                 novo_planejfisicoc.fase = obj.id_fase.numerofase
-                novo_planejfisicoc.usuario = 'API'
+                novo_planejfisicoc.usuario = API_USER
                 novo_planejfisicoc.id_mosaiq = obj.id_campo
                 novo_planejfisicoc.save()
 
@@ -737,7 +740,7 @@ def atualiza_planej_pac(pac):
                 novo_planejfisico.dtt = obj.id_fase.dosetotal
                 novo_planejfisico.dtd = obj.dose_campo
                 novo_planejfisico.nomecampo = obj.nome_campo
-                novo_planejfisico.usuario = 'API'
+                novo_planejfisico.usuario = API_USER
                 novo_planejfisico.id_mosaiq = obj.id_campo
                 novo_planejfisico.save()
 
@@ -755,7 +758,7 @@ def atualiza_planej_pac(pac):
                     presc.dosettotal = obj.id_fase.dosetotal
                     presc.dosetdiaria = obj.dose_campo
                     presc.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
-                    presc.usuario = 'API'
+                    presc.usuario = API_USER
                     presc.id_mosaiq = obj.id_campo
                     presc.save()
             else:
@@ -770,7 +773,7 @@ def atualiza_planej_pac(pac):
                 novapresc.naplicacoes = obj.id_fase.qtdsessoes
                 novapresc.ntratamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
                 novapresc.codpaciente = codpac_sisac
-                novapresc.usuario = 'API'
+                novapresc.usuario = API_USER
                 novapresc.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
                 novapresc.tecnica = obj.id_fase.tecnica
                 novapresc.tpfeixe = obj.id_fase.modalidade
@@ -864,7 +867,7 @@ def inserepacote(pac):
     entrada.hist = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
     entrada.codmedico = codmedico
     entrada.local = '112'
-    entrada.recep = 'API'
+    entrada.recep = API_USER
     entrada.total = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
     entrada.fechado = 'P'
     entrada.codamb = codamb
@@ -890,7 +893,7 @@ def inserepacote(pac):
     fatura.filme = '0'
     fatura.codmedico = codmedico
     fatura.datasist = datetime.now()
-    fatura.usuario = 'API'
+    fatura.usuario = API_USER
     fatura.codamb = codamb
     fatura.ch = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
     fatura.local = '112'
@@ -908,7 +911,7 @@ def inserepacote(pac):
     exame.descr = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().descr
     exame.quant = '1'
     exame.codmedico = codmedico
-    exame.usuario = 'API'
+    exame.usuario = API_USER
     exame.datasist = datetime.now()
     exame.chave = novo_codmov
     exame.valor = TabAmb.objects.filter(codamb=codamb).filter(codconvenio=codconvenio.hm).first().ch
@@ -962,7 +965,7 @@ def cria_agenda_radio2(pac):
                         agenda.codconvenio = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last().codconvenio
                         agenda.codpaciente = codpac_sisac
                         agenda.obs = 'Sessão de Radioterapia'
-                        agenda.usuario = 'API'
+                        agenda.usuario = API_USER
                         agenda.descr = Entrada.objects.filter(codpaciente=codpac_sisac).order_by('datahoraent').last().codconvenio.descr
                         agenda.datasist = datetime.now()
                         agenda.confatd = 'N'
@@ -1022,7 +1025,7 @@ def entrada(pac):
     entrada.hist = ''
     entrada.codmedico = '001'
     entrada.local = '112'
-    entrada.recep = 'API'
+    entrada.recep = API_USER
     entrada.total = 0
     entrada.fechado = 'P'
     entrada.codamb = ''
