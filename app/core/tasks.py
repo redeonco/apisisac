@@ -20,15 +20,14 @@ from datetime import datetime, date
 from django.db.models import Q
 from django.core.mail import send_mail
 
-
 API_USER = 'AUTO'
-
-
-# Tarefa para atualizar a agenda de tratamento da radioterapia do SISAC comparando com a agenda de tratamento do MOSAIQ
-# A tarefa olha para a agenda do MOSAIQ quais pacientes estão marcados como Completed
-# Para cada paciente marcado como Completed, a tarefa realiza iterações no banco de dados SISAC
-# Gerando registros na tabela Entrada, EntradaRadio e Agenda
-# Confirmando na agenda de radioterapia do SISAC os pacientes tratados no MOSAIQ
+'''
+ Tarefa para atualizar a agenda de tratamento da radioterapia do SISAC comparando com a agenda de tratamento do MOSAIQ
+ A tarefa olha para a agenda do MOSAIQ quais pacientes estão marcados como Completed
+ Para cada paciente marcado como Completed, a tarefa realiza iterações no banco de dados SISAC
+ Gerando registros na tabela Entrada, EntradaRadio e Agenda
+ Confirmando na agenda de radioterapia do SISAC os pacientes tratados no MOSAIQ
+'''
 @shared_task
 def atualizaagenda():
     # Marca a hora de início da tarefa
@@ -651,7 +650,8 @@ def atualiza_planej_pac(pac):
         i += 1
         print('iteração campo', i, obj)
 
-        codpac_sisac = Cadpaciente.objects.exclude(cpf='').filter(cpf=obj.id_paciente.cpf).order_by('datasist').last()
+        pac_mosaiq = Patient.objects.get(id_paciente=pac)
+        codpac_sisac = relaciona_paciente(pac_mosaiq)
 
         if codpac_sisac is not None:
             print('paciente encontrado')
@@ -798,7 +798,7 @@ def atualiza_planej_pac(pac):
                 primeira_agenda.save() 
                 print(f'Alterado a agenda do paciente {codpac_sisac}, dia {primeira_agenda.datahora} com status Planejado OK.')
             else:
-                pass
+                print('Não Identificado')
 
 
 def alta():
@@ -989,7 +989,6 @@ def cria_agenda_radio2(pac):
         msg = f'A tarefa de criação de agenda automática do SISAC reportou existência de agendamentos existentes. \nViolação de integridade foi evitada para o(s) seguinte(s) agendamento(s):{agendamento_existente}'
         sendmail_cria_agenda('Cria Agenda Radio SISAC', msg)
     print(f'Tarefa concluída.')
-
 
 
 def entrada(pac):
