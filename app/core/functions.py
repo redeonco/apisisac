@@ -9,6 +9,7 @@ from django.core.mail import send_mail
 import smtplib
 from celery import shared_task
 from smtplib import SMTPAuthenticationError
+from .logger import API_LOGGER
 
 
 """
@@ -58,7 +59,7 @@ def sendmail(qtdconfirmado, data):
             fail_silently=False,
         )
     except SMTPAuthenticationError:
-        print(f'Falha de autenticação com o servidor SMTP :(')
+        API_LOGGER.error(f'Falha de autenticação com o servidor SMTP :(')
 
 
 @shared_task
@@ -77,7 +78,7 @@ def sendmail_cria_agenda(tarefa, msg):
             fail_silently=False,
         )
     except SMTPAuthenticationError:
-        print(f'Falha de autenticação com o servidor SMTP :(')
+        API_LOGGER.error(f'Falha de autenticação com o servidor SMTP :(')
 
 
 @shared_task
@@ -96,7 +97,7 @@ def sendmail_alta_paciente(pac):
             fail_silently=False,
         )
     except SMTPAuthenticationError:
-        print(f'Falha de autenticação com o servidor SMTP :(')
+        API_LOGGER.error(f'Falha de autenticação com o servidor SMTP :(')
 
 
 def addcodmovimento(codmovimento):
@@ -163,7 +164,7 @@ def senhanova():
     return senhafinal
 
 
-def relaciona_paciente(id_paciente):
+def relaciona_paciente(id_paciente: Patient.id_paciente) -> Cadpaciente:
     """
     id_paciente = Patient.objects.get(id_paciente=pat_id1)
 
@@ -200,6 +201,7 @@ def relaciona_paciente(id_paciente):
                 else:
                     msg = f'Código do prontuário do paciente {id_paciente} no MOSAIQ é igual no SISAC, mas CPF não corresponde. \nCPF no MOSAIQ: {id_paciente.cpf}. CPF no SISAC: {codpac_sisac.cpf}'
                     sendmail('Relaciona Paciente', msg)
+                    API_LOGGER.warning(msg)
                     return False
 
             except ObjectDoesNotExist:
@@ -208,14 +210,16 @@ def relaciona_paciente(id_paciente):
                         cpf=id_paciente.cpf.replace('.', '').replace('-', '').strip())
                     msg = f'Paciente {id_paciente} com número de prontuário digergente. \nProntuário MOSAIQ {id_paciente.codpac_sisac}. Prontuário SISAC {codpac_sisac.codpaciente}'
                     sendmail('Relaciona paciente', msg)
+                    API_LOGGER.warning(msg)
                     return codpac_sisac
                 except ObjectDoesNotExist:
                     msg = f'Nenhum relacionamento encontrado para o paciente {id_paciente}. Nem código do prontário nem CPF correspondem.'
                     sendmail('Relaciona paciente', msg)
+                    API_LOGGER.warning(msg)
                     return False
 
     except ObjectDoesNotExist:
-        print(f'Nenhum paciente MOSAIQ encontrado com o ID {id_paciente}')
+        API_LOGGER.error(f'Nenhum paciente MOSAIQ encontrado com o ID {id_paciente}')
         return False
 
 
@@ -233,6 +237,7 @@ def checafase(fase):
         fase.reference_sit_set_id
         return fase.reference_sit_set_id
     except ObjectDoesNotExist:
+        API_LOGGER.error('Não foi possível encontrar fase de referência para este tratamento no MOSAIQ')
         return False
 
 
