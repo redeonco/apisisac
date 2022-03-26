@@ -40,8 +40,8 @@ def atualizaagenda():
     query_mosaiq = Schedule.objects.filter(dataagenda__year=date.today().year, dataagenda__month=date.today().month, 
                                             dataagenda__day=date.today().day).filter(~Q(activity='MV')).filter(status=' C').filter(version=0).filter(~Q(suppressed=1))
     
-    API_LOGGER.info('Consulta concluída com sucesso.')
-    API_LOGGER.info('Iniciando iteração no resultado da consulta...')
+    API_LOGGER.info('[ATUALIZA_AGENDA] - Consulta concluída com sucesso.')
+    API_LOGGER.info('[ATUALIZA_AGENDA] - Iniciando iteração no resultado da consulta...')
 
     #Inicia contador do número de iterações
     i = 0
@@ -63,8 +63,6 @@ def atualizaagenda():
             # Em seguida chama a função addcodmovimento para incrementar a sequência.
             # O resultado do incremento é utilizado posteriormente para gerar novos registros nas tabelas do SISAC.    
             ultimo_codmov = Entrada.objects.filter(codpaciente=codpac_sisac.pk).filter(filial='01').order_by('natendimento').last()
-            print(ultimo_codmov)
-            print(codpac_sisac)
             novo_codmov = addcodmovimento(str(ultimo_codmov))
 
             # Verifica na tabela Agenda do SISAC algum agendamento de radioterapia para o paciente na data de hoje.
@@ -82,15 +80,14 @@ def atualizaagenda():
             
             # Verifica se o resultado da busca na agenda é válido. Se válido, inicia próxima etapa.
             if agenda_sisac is not None:
-                print(f'Paciente {codpac_sisac} possui agendamento para hoje.')
-                print(f'Verificando existência de prescriçao e planejamento...')
+                API_LOGGER.info(f'[ATUALIZA_AGENDA] - Paciente {codpac_sisac} possui agendamento para hoje.')
+                API_LOGGER.info(f'[ATUALIZA_AGENDA] - Verificando existência de prescriçao e planejamento...')
                 if (
                     prescricao is not None 
                     and planejamentoc is not None
                     ):
-                    print('---------------------------------------------')
-                    API_LOGGER.info('Iniciando execuções para o paciente', codpac_sisac) 
-                    API_LOGGER.info('Gerando registro na tabela entrada...')
+                    API_LOGGER.info('[ATUALIZA_AGENDA] - Iniciando execuções para o paciente', codpac_sisac) 
+                    API_LOGGER.info('[ATUALIZA_AGENDA] - Gerando registro na tabela entrada...')
 
                     # Gera registro de sessão de radioterapia na tabela entrada.
                     entrada = Entrada()
@@ -113,9 +110,9 @@ def atualizaagenda():
                     novocodigo_natendimento = incrementa_natendimento()
                     entrada.natendimento = novocodigo_natendimento
                     entrada.save()
-                    API_LOGGER.info('Registro gerado na tabela entrada.')
+                    API_LOGGER.info('[ATUALIZA_AGENDA] - Registro gerado na tabela entrada.')
 
-                    API_LOGGER.info('Buscando registros de prescrição e planejamento...')
+                    API_LOGGER.info('[ATUALIZA_AGENDA] - Buscando registros de prescrição e planejamento...')
 
                     # Seleciona Última Prescrição do Paciente
                     prescricao = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last()
@@ -143,10 +140,10 @@ def atualizaagenda():
                     # Seleciona planejamento da prescrição, filtrando pela fase.
                     planejamento = Planejfisico.objects.filter(numpresc=prescricao.numpresc).order_by('idplanejfisico').filter(fase=fase)
 
-                    API_LOGGER.info('Busca concluída.')
-                    API_LOGGER.info('Iniciando iteração no resultado da busca...')
+                    API_LOGGER.info('[ATUALIZA_AGENDA] - Busca concluída.')
+                    API_LOGGER.info('[ATUALIZA_AGENDA] - Iniciando iteração no resultado da busca...')
                     n = 0
-                    API_LOGGER.info('Gerando registros na tabela EntradaRadio...')
+                    API_LOGGER.info('[ATUALIZA_AGENDA] - Gerando registros na tabela EntradaRadio...')
 
 
                     campostratados = Dose_Hst.objects.filter(id_paciente=obj.id_paciente).filter(datahora__year=date.today().year,datahora__month=date.today().month, datahora__day=date.today().day).filter(dose_campo__gt=0)
@@ -179,10 +176,10 @@ def atualizaagenda():
                             entradaradio.save()
                             n += 1
                         except Exception as e:
-                            API_LOGGER.error(f'Erro durante gravaçao de registros na tabela EntradaRadio: {e}')
-                    API_LOGGER.info(n, 'registro(s) gerado(s) na tabela EntradaRadio.')
+                            API_LOGGER.error(f'[ATUALIZA_AGENDA] - Erro durante gravaçao de registros na tabela EntradaRadio: {e}')
+                    API_LOGGER.info('[ATUALIZA_AGENDA] - ', n, 'registro(s) gerado(s) na tabela EntradaRadio.')
 
-                    API_LOGGER.info('Confirmando paciente na tabela Agenda Radioterapia...')
+                    API_LOGGER.info('[ATUALIZA_AGENDA] - Confirmando paciente na tabela Agenda Radioterapia...')
 
                     # Todas as etapas acima realizadas, finalmente acessa o agendamento de radioterapia localizada no início da tarefa,
                     # Marca como confirmado, atribuindo 'S' na coluna ConfAtd e inserindo o código de movimento gerado pela função addcodmovimento,
@@ -192,8 +189,8 @@ def atualizaagenda():
                     agenda_sisac.codmovimento = novo_codmov
                     agenda_sisac.datasist = datetime.now()
                     agenda_sisac.save()
-                    API_LOGGER.info('Paciente confirmado.')
-                    API_LOGGER.info('Iteração concluída para o paciente', codpac_sisac)
+                    API_LOGGER.info('[ATUALIZA_AGENDA] - Paciente confirmado.')
+                    API_LOGGER.info('[ATUALIZA_AGENDA] - Iteração concluída para o paciente', codpac_sisac)
 
                     # Verifica a quantidade de sessões realizadas.
                     qtd_realizada = Agenda.objects.filter(tipo='RAD').filter(confatd='S').filter(codpaciente=codpac_sisac).count()
@@ -201,7 +198,7 @@ def atualizaagenda():
 
                     if qtd_realizada == 1:
                         codamb = SolicExa.objects.filter(npresc=prescricao.numpresc).order_by('item').first().codamb                    
-                        print(f'Primeira sessão de radioterapia do paciente {codpac_sisac}. Iniciando lançamento do pacote do tratamento na conta do paciente...')                    
+                        API_LOGGER.info(f'[ATUALIZA_AGENDA] - Primeira sessão de radioterapia do paciente {codpac_sisac}. Iniciando lançamento do pacote do tratamento na conta do paciente...')                    
                         primeira_entrada = Entrada.objects.filter(codpaciente=codpac_sisac).filter(filial='01').order_by('datahoraent').first()
                         codconvenio = solic_tto.codconvenio
                         matricula = primeira_entrada.matricula
@@ -298,17 +295,17 @@ def atualizaagenda():
                             presc.tratado = 'SIM'
                             presc.save()
                         
-                        API_LOGGER.info(f'Última sessão do paciente{str(codpac_sisac)}. {qtd_realizada} sessões realizadas. Inserida flag TRATADO=SIM para o tratamento do paciente.')
+                        API_LOGGER.info(f'[ATUALIZA_AGENDA] - Última sessão do paciente{str(codpac_sisac)}. {qtd_realizada} sessões realizadas. Inserida flag TRATADO=SIM para o tratamento do paciente.')
                         sendmail_alta_paciente(str(codpac_sisac.paciente))
                 else:
-                    API_LOGGER.info(f'Paciente {codpac_sisac} não atendeu aos critérios de execução de rotina. Verificar se possui possui prescrição, ou se possui planejamento.')
+                    API_LOGGER.info(f'[ATUALIZA_AGENDA] - Paciente {codpac_sisac} não atendeu aos critérios de execução de rotina. Verificar se possui possui prescrição, ou se possui planejamento.')
                 i += 1
-    API_LOGGER.info('Atualização da agenda concluída com sucesso.', i, 'pacientes foram confirmados na agenda de tratamento de radioterapia SISAC.')
+    API_LOGGER.info('[ATUALIZA_AGENDA] - Atualização da agenda concluída com sucesso.', i, 'pacientes foram confirmados na agenda de tratamento de radioterapia SISAC.')
 
     # Marca a hora final e calcula tempo total decorrido.
     horafinal = datetime.now()
     tempodecorrido = horafinal - horainicial
-    API_LOGGER.info('Tempo total decorrido:', tempodecorrido)
+    API_LOGGER.info('[ATUALIZA_AGENDA] - Tempo total decorrido:', tempodecorrido)
 
     # Consulta na agenda de radioterapia do SISAC se possui algum paciente que não foi confirmado
     query_sisac2 = Agenda.objects.filter(datahora__year=date.today().year, datahora__month=date.today().month, 
@@ -320,7 +317,7 @@ def atualizaagenda():
     if query_sisac2 is not None:
         for obj in query_sisac2.iterator():
             list.append(str(obj.codpaciente_id) + ' - ' + str(obj.codpaciente))
-        API_LOGGER.info(str(len(list)), 'paciente(s) não confirmado(s):', str(list), ' Verifique se houve tratamento realizado para o(s) paciente(s) informado(s) em', date.today().strftime("%d/%m/%Y") + '.')
+        API_LOGGER.info('[ATUALIZA_AGENDA] - ', str(len(list)), 'paciente(s) não confirmado(s):', str(list), ' Verifique se houve tratamento realizado para o(s) paciente(s) informado(s) em', date.today().strftime("%d/%m/%Y") + '.')
 
 
 @shared_task
@@ -349,18 +346,18 @@ def atualiza_planej():
     i = 0
     for obj in campos.iterator():
         i += 1
-        API_LOGGER.info('iteração campo', i, obj)
+        API_LOGGER.info('[ATUALIZA_PLANEJ] - iteração campo', i, obj)
 
         codpac_sisac = relaciona_paciente(obj.id_paciente)
 
         if codpac_sisac:
-            print('paciente encontrado')
+            API_LOGGER.info(f'[ATUALIZA_PLANEJ] - Paciente encontrado: {codpac_sisac}')
             prescricao = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last()
             if prescricao is not None:
                 planejfisicoc = Planejfisicoc.objects.filter(codpaciente=codpac_sisac).filter(id_mosaiq=obj.id_campo).filter(ativo=1)
 
                 if planejfisicoc.count() > 0:
-                    print('planejamento encontrado para o paciente', codpac_sisac, 'numero do campo', obj.numero_campo)
+                    API_LOGGER.info('[ATUALIZA_PLANEJ] - Planejamento encontrado para o paciente', codpac_sisac, 'numero do campo:', obj.numero_campo)
                     for planej2 in planejfisicoc.iterator():
                         planej2.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
                         planej2.dtt = obj.id_fase.dosetotal
@@ -374,8 +371,8 @@ def atualiza_planej():
                         planej2.id_mosaiq = obj.id_campo
                         planej2.save()
                 else:
-                    API_LOGGER.info('planejamento NÃO encontrado para o paciente', codpac_sisac, 'numero do campo', obj.numero_campo)
-                    API_LOGGER.info('gerando registro na tabela PlanejFisicoC')
+                    API_LOGGER.info('[ATUALIZA_PLANEJ] - planejamento NÃO encontrado para o paciente', codpac_sisac, 'numero do campo', obj.numero_campo)
+                    API_LOGGER.info('[ATUALIZA_PLANEJ] - gerando registro na tabela PlanejFisicoC')
                     novo_planejfisicoc = Planejfisicoc()
                     novo_planejfisicoc.codpaciente = codpac_sisac
                     novo_planejfisicoc.codmovimento = codpac_sisac.codpaciente
@@ -490,7 +487,7 @@ def atualiza_planej():
                     # Realiza a verificação para definir o início do tratamento.
                     iniciotrat = inicio_tratamento(obj)
 
-                    API_LOGGER.info(f'ID Fase: {obj.id_fase}, início trat: {iniciotrat}')
+                    API_LOGGER.info(f'[ATUALIZA_PLANEJ] - ID Fase: {obj.id_fase}, início trat: {iniciotrat}')
                     novapresc.iniciotrat = iniciotrat
                     novapresc.id_mosaiq = obj.id_campo
                     novapresc.id_fase_mosaiq = obj.id_fase_id
@@ -500,12 +497,12 @@ def atualiza_planej():
                 if primeira_agenda is not None:
                     primeira_agenda.planejado = 'S'            
                     primeira_agenda.save() 
-                    API_LOGGER.info(f'Alterado a agenda do paciente {codpac_sisac}, dia {primeira_agenda.datahora} com status Planejado OK.')
+                    API_LOGGER.info(f'[ATUALIZA_PLANEJ] - Alterado a agenda do paciente {codpac_sisac}, dia {primeira_agenda.datahora} com status Planejado OK.')
                 else:
                     pass
 
         else:
-            API_LOGGER.info(f'Paciente {codpac_sisac} sem prescrição médica no SISAC')
+            API_LOGGER.info(f'[ATUALIZA_PLANEJ] - Paciente {codpac_sisac} sem prescrição médica no SISAC')
 
 
 @shared_task
@@ -532,10 +529,10 @@ def cria_agenda_radio():
                 #     altera_primeira_agenda.save()
                 agenda_mosaiq = Schedule.objects.filter(id_paciente=pac.id_paciente).filter(activity='3D').filter(~Q(suppressed=1))
                 for agd in agenda_mosaiq:
-                    API_LOGGER.info(f'Iniciando iterações para paciente {codpac_sisac}...')
+                    API_LOGGER.info(f'[CRIA_AGENDA_RADIO] - Iniciando iterações para paciente {codpac_sisac}...')
                     checa_agenda = Agenda.objects.filter(datahora=agd.dataagenda).filter(obs__icontains='Sessão de Radioterapia')
                     if checa_agenda.count() > 0:
-                        API_LOGGER.info(f'Já existe agendamento no dia {agd.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")}.')
+                        API_LOGGER.info(f'[CRIA_AGENDA_RADIO] - Já existe agendamento no dia {agd.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")}.')
                         dict = {}
                         dict['IDAgenda_SISAC'] = checa_agenda.first().idagenda
                         dict['Paciente'] = str(checa_agenda.first().codpaciente.codpaciente) + ' - ' + str(checa_agenda.first().codpaciente.paciente)
@@ -543,7 +540,7 @@ def cria_agenda_radio():
                         dict['Tentou_Encaixar'] = str(codpac_sisac.codpaciente) + ' - ' + str(codpac_sisac.paciente)
                         agendamento_existente.append(dict)
                     else:
-                        API_LOGGER.info(f'Criando agenda para paciente {codpac_sisac}, dia {agd.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")}')
+                        API_LOGGER.info(f'[CRIA_AGENDA_RADIO] - Criando agenda para paciente {codpac_sisac}, dia {agd.dataagenda.strftime("%d/%m/%Y - %H:%M:%S")}')
                         agenda = Agenda()
                         agenda.codmedico = '103'
                         agenda.datahora = agd.dataagenda
@@ -567,12 +564,13 @@ def cria_agenda_radio():
                         agenda.save()
 
             else:
-                API_LOGGER.info(f'Nada a fazer para o paciente {codpac_sisac}...')
+                API_LOGGER.info(f'[CRIA_AGENDA_RADIO] - Nada a fazer para o paciente {codpac_sisac}...')
 
     if len(agendamento_existente) > 0:
         msg = f'A tarefa de criação de agenda automática do SISAC reportou existência de agendamentos existentes. \nViolação de integridade foi evitada para o(s) seguinte(s) agendamento(s):{agendamento_existente}'
         sendmail_cria_agenda('Cria Agenda Radio SISAC', msg)
-    API_LOGGER.info(f'Tarefa concluída.')
+        API_LOGGER.warning(f'[CRIA_AGENDA_RADIO] - {msg}')
+    API_LOGGER.info(f'[CRIA_AGENDA_RADIO] - Tarefa concluída.')
 
 
 @shared_task
@@ -599,7 +597,7 @@ def atualiza_agenda_sisac():
             novos_pacientes_agendados.append(paciente.id_paciente)
 
     for pac in novos_pacientes_agendados:
-        API_LOGGER.info(f'Paciente {pac}, CPF {pac.cpf}')
+        API_LOGGER.info(f'[ATUALIZA_AGENDA_SISAC] - Paciente {pac}, CPF {pac.cpf}')
         codpac_sisac = relaciona_paciente(pac)
         if codpac_sisac:
             agenda_mosaiq = Schedule.objects.filter(dataagenda__gte=date.today()).order_by('dataagenda').filter(id_paciente=pac.id_paciente).filter(activity='3D').filter(~Q(suppressed=1)).filter(~Q(status=' C'))
@@ -610,10 +608,10 @@ def atualiza_agenda_sisac():
                     if agenda_sisac is not None:
                         agenda_sisac.datahora = agd.dataagenda
                         agenda_sisac.save()
-                        API_LOGGER.info(f'Agenda do paciente {codpac_sisac} atualizada. Dia/hora anterior: {agenda_sisac.datahora.strftime("%d/%m/%Y - %H:%M:%S")}. Dia/hora atuaç: {agd.dataagenda}')                            
+                        API_LOGGER.info(f'[ATUALIZA_AGENDA_SISAC] - Agenda do paciente {codpac_sisac} atualizada. Dia/hora anterior: {agenda_sisac.datahora.strftime("%d/%m/%Y - %H:%M:%S")}. Dia/hora atuaç: {agd.dataagenda}')                            
                 else:
                     if agenda.codpaciente != codpac_sisac:                        
-                        API_LOGGER.info(f'Agendamento do dia {agenda.datahora.strftime("%d/%m/%Y - %H:%M:%S")} pertence ao paciente {agenda.codpaciente}. Inválido alterar para {codpac_sisac}')
+                        API_LOGGER.error(f'[ATUALIZA_AGENDA_SISAC] - Agendamento do dia {agenda.datahora.strftime("%d/%m/%Y - %H:%M:%S")} pertence ao paciente {agenda.codpaciente}. Inválido alterar para {codpac_sisac}')
 
 
 @shared_task

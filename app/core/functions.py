@@ -59,7 +59,7 @@ def sendmail(qtdconfirmado, data):
             fail_silently=False,
         )
     except SMTPAuthenticationError:
-        API_LOGGER.error(f'Falha de autenticação com o servidor SMTP :(')
+        API_LOGGER.error(f'[SENDMAIL] - Falha de autenticação com o servidor SMTP :(')
 
 
 @shared_task
@@ -78,7 +78,7 @@ def sendmail_cria_agenda(tarefa, msg):
             fail_silently=False,
         )
     except SMTPAuthenticationError:
-        API_LOGGER.error(f'Falha de autenticação com o servidor SMTP :(')
+        API_LOGGER.error(f'[SENDMAIL_CRIA_AGENDA] - Falha de autenticação com o servidor SMTP :(')
 
 
 @shared_task
@@ -97,7 +97,7 @@ def sendmail_alta_paciente(pac):
             fail_silently=False,
         )
     except SMTPAuthenticationError:
-        API_LOGGER.error(f'Falha de autenticação com o servidor SMTP :(')
+        API_LOGGER.error(f'[SENDMAIL_ALTA_PACIENTE] - Falha de autenticação com o servidor SMTP :(')
 
 
 def addcodmovimento(codmovimento):
