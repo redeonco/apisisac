@@ -102,7 +102,7 @@ def atualizaagenda():
                     entrada.local = ''
                     entrada.usuario = API_USER
                     entrada.recep = API_USER
-                    entrada.codconvenio = CadConvenio.objects.get(solic_tto.codconvenio)
+                    entrada.codconvenio = CadConvenio.objects.get(codconvenio=solic_tto.codconvenio)
                     entrada.plano = ''
                     entrada.codmedico = solic_tto.codmedico
                     entrada.hist = 'Sessão de Radioterapia'
