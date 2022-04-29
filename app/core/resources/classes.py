@@ -37,7 +37,7 @@ class Treatment:
             .filter(tipo='RAD')\
             .filter(confatd='S')\
             .filter(codpaciente=self.paciente.codpaciente)\
-            .order_by('IDAgenda').first()
+            .order_by('idagenda').first()
 
         return ref_date.datahora if ref_date else datetime.now()
 

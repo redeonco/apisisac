@@ -19,20 +19,20 @@ def lanca_pacote_tratamento(cod_paciente: int):
         .count() == 0
 
     is_there_fatura_tratamento = Fatura.objects\
-        .filter(codpaciente__icontains=cod_paciente.codpaciente)\
+        .filter(codpaciente__icontains=cod_paciente)\
         .filter(codamb=TREATMENT_DATA.codamb)\
         .count() == 0
 
     is_there_exame_tratamento = Exame.objects\
-        .filter(codpaciente__icontains=cod_paciente.codpaciente)\
+        .filter(codpaciente__icontains=cod_paciente)\
         .filter(codamb=TREATMENT_DATA.codamb)\
         .count() == 0
 
     if is_there_entrada_tratamento:
         entrada = Entrada(
             codmovimento=TREATMENT_DATA.novo_codmov,
-            codpaciente=cod_paciente,
-            codconvenio=TREATMENT_DATA.convenio.codconvenio,
+            codpaciente=TREATMENT_DATA.paciente,
+            codconvenio=TREATMENT_DATA.convenio,
             matricula=TREATMENT_DATA.matricula,
             tipo='4',
             datahoraent=TREATMENT_DATA.data_referencia,
@@ -60,7 +60,7 @@ def lanca_pacote_tratamento(cod_paciente: int):
             grupo='1',
             codtaxa=TREATMENT_DATA.codamb,
             descr=TREATMENT_DATA.procedimento.descr,
-            data=TREATMENT_DATA.TREATMENT_DATA.data_referencia,
+            data=TREATMENT_DATA.data_referencia,
             valor=TREATMENT_DATA.procedimento.ch,
             quant='1',
             filme='0',
@@ -92,7 +92,7 @@ def lanca_pacote_tratamento(cod_paciente: int):
             valor=TREATMENT_DATA.procedimento.ch,
             tipo='R',
             dataproc=TREATMENT_DATA.data_referencia,
-            codpacref=cod_paciente,
+            codpacref=TREATMENT_DATA.paciente,
             codigo=incrementa_codigoexame(),
         )
         exame.save()
@@ -103,3 +103,10 @@ def lanca_pacote_tratamento(cod_paciente: int):
 def lanca_pacote_em_massa(lista_pacientes: list) -> None:
     for paciente in lista_pacientes:
         lanca_pacote_tratamento(paciente)
+
+
+"""
+python manage.py shell
+from core.utils import *
+lanca_pacote_tratamento('001767')
+"""
