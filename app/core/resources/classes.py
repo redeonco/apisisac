@@ -45,6 +45,7 @@ class TreatmentConstructor:
     def __init__(self, cod_paciente: int) -> None:
         self.cod_paciente = cod_paciente
     
+    @classmethod
     def construct_initial_data(self) -> Treatment:
         print('\nIniciando constructor de dados iniciais para o tratamento.')
         paciente = Cadpaciente.objects.get(pk=self.cod_paciente)
