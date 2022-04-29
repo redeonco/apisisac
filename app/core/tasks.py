@@ -156,8 +156,7 @@ def atualizaagenda():
                     # Para cada campo encontrado no planejamento, a interação irá gerar um registro na tabela EntradaRadio,
                     # Referênciando os detalhes técnicos presentes no planejamento e na prescrição médica.
                     for campo in campostratados:
-                        # try:
-                        #     #teste
+                        try:
                             print(codpac_sisac)
                             print(campo)  
                             print(campo.id_campo_id)
@@ -181,8 +180,8 @@ def atualizaagenda():
                             entradaradio.filial = '01'
                             entradaradio.save()
                             n += 1
-                        # except Exception as e:
-                        #     print(f'[ATUALIZA_AGENDA] - Erro durante gravaçao de registros na tabela EntradaRadio: {e}')
+                        except Exception as e:
+                            print(f'[ATUALIZA_AGENDA] - Erro durante gravaçao de registros na tabela EntradaRadio: {e}')
                     print('[ATUALIZA_AGENDA] - ', n, 'registro(s) gerado(s) na tabela EntradaRadio.')
 
                     print('[ATUALIZA_AGENDA] - Confirmando paciente na tabela Agenda Radioterapia...')
