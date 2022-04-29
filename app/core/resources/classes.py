@@ -1,6 +1,6 @@
 from datetime import datetime
-from app.core.functions import addcodmovimento
-from app.core.models import Agenda, CadConvenio, Cadpaciente, Entrada, Radioterapia, SolicExa, TabAmb
+from core.functions import addcodmovimento
+from core.models import Agenda, CadConvenio, Cadpaciente, Entrada, Radioterapia, SolicExa, TabAmb
 
 
 class Treatment:
