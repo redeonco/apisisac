@@ -1,7 +1,7 @@
-from app.core.functions import incrementa_codigoexame, incrementa_natendimento
-from app.core.models import Entrada, Exame, Fatura
-from app.core.resources.classes import TreatmentConstructor
-from app.core.resources.constants import API_USER
+from core.functions import incrementa_codigoexame, incrementa_natendimento
+from core.models import Entrada, Exame, Fatura
+from core.resources.classes import TreatmentConstructor
+from core.resources.constants import API_USER
 
 
 def lanca_pacote_tratamento(cod_paciente: int):
