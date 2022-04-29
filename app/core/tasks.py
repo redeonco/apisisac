@@ -206,7 +206,7 @@ def atualizaagenda():
                         codamb = SolicExa.objects.filter(npresc=prescricao.numpresc).order_by('item').first().codamb                    
                         print(f'[ATUALIZA_AGENDA] - Primeira sessão de radioterapia do paciente {codpac_sisac}. Iniciando lançamento do pacote do tratamento na conta do paciente...')                    
                         primeira_entrada = Entrada.objects.filter(codpaciente=codpac_sisac).filter(filial='01').order_by('datahoraent').first()
-                        codconvenio = solic_tto.codconvenio
+                        codconvenio = CadConvenio.objects.get(codconvenio=solic_tto.codconvenio)
                         matricula = primeira_entrada.matricula
                         codmedico = solic_tto.codmedico
                         plano = primeira_entrada.plano
