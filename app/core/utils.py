@@ -101,8 +101,13 @@ def lanca_pacote_tratamento(cod_paciente: int):
     print(f'Finalizado lançamento do tratamento para paciente {TREATMENT_DATA.paciente.paciente}\n')
 
 def lanca_pacote_em_massa(lista_pacientes: list) -> None:
+    pacientes_problematicos = []
     for paciente in lista_pacientes:
-        lanca_pacote_tratamento(paciente)
+        if not lanca_pacote_tratamento(paciente):
+            pacientes_problematicos.append(paciente)
+
+    print('Retornando lista de pacientes problemáticos. Verificar se possui prescricao, planejamento, ou se possui pelo menos 1 entrada no SISAC, ou 1 agendamento de radioterapia')
+    return pacientes_problematicos
 
 
 """
