@@ -156,7 +156,11 @@ def atualizaagenda():
                     # Para cada campo encontrado no planejamento, a interação irá gerar um registro na tabela EntradaRadio,
                     # Referênciando os detalhes técnicos presentes no planejamento e na prescrição médica.
                     for campo in campostratados:
-                        try:                        
+                        # try:
+                        #     #teste
+                            print(codpac_sisac)
+                            print(campo)  
+                            print(campo.id_campo_id)
                             planej = Planejfisico.objects.get(id_mosaiq=campo.id_campo_id)              
                             entradaradio = Entradaradio()
                             entradaradio.codmovimento = novo_codmov
@@ -177,8 +181,8 @@ def atualizaagenda():
                             entradaradio.filial = '01'
                             entradaradio.save()
                             n += 1
-                        except Exception as e:
-                            print(f'[ATUALIZA_AGENDA] - Erro durante gravaçao de registros na tabela EntradaRadio: {e}')
+                        # except Exception as e:
+                        #     print(f'[ATUALIZA_AGENDA] - Erro durante gravaçao de registros na tabela EntradaRadio: {e}')
                     print('[ATUALIZA_AGENDA] - ', n, 'registro(s) gerado(s) na tabela EntradaRadio.')
 
                     print('[ATUALIZA_AGENDA] - Confirmando paciente na tabela Agenda Radioterapia...')
@@ -327,8 +331,8 @@ def atualiza_planej():
     # Localiza planejamentos no MOSAIQ que aprovados na data de hoje.
     # Não significa que geraram uma nova versão do tratamento
     # Pois para pacientes novos, a data de Criação é igual à data de Aprovação
-    campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month=date.today().month, sanct_dt__day=date.today().day)
-    # campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month__gte='09', sanct_dt__day__gte='01')
+    campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(edit_dt__year=date.today().year, edit_dt__month=date.today().month, edit_dt__day=date.today().day)
+    # campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(edit_dt__year=date.today().year, edit_dt__month__gte='09', edit_dt__day__gte='01')
 
    # Inicializa um dicionário para as unidades de medida da energia do tratamento
     energia_unidade_dict = {
@@ -338,7 +342,7 @@ def atualiza_planej():
         '3': 'MeV'
         }
 
-    campos_antigos = TxField.objects.filter(version__gt=0).filter(dose_campo__gt=0).filter(sanct_dt__year=date.today().year, sanct_dt__month=date.today().month, sanct_dt__day=date.today().day)
+    campos_antigos = TxField.objects.filter(version__gt=0).filter(dose_campo__gt=0).filter(edit_dt__year=date.today().year, edit_dt__month=date.today().month, edit_dt__day=date.today().day)
     if campos_antigos is not None:
         for campo in campos_antigos:
             Planejfisico.objects.filter(id_mosaiq=campo.id_campo).delete()
@@ -1040,3 +1044,199 @@ def entrada(pac):
     entrada.datamarcada = datetime.now()
     entrada.save()
 
+
+def atualiza_planej_ref_date(ref_date: datetime):
+    # Localiza planejamentos no MOSAIQ que aprovados na data de hoje.
+    # Não significa que geraram uma nova versão do tratamento
+    # Pois para pacientes novos, a data de Criação é igual à data de Aprovação
+    campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(edit_dt__year=ref_date.year, edit_dt__month=ref_date.month, edit_dt__day=ref_date.day)
+    # campos = TxField.objects.filter(version=0).filter(dose_campo__gt=0).filter(edit_dt__year=ref_date.year, edit_dt__month__gte='09', edit_dt__day__gte='01')
+
+   # Inicializa um dicionário para as unidades de medida da energia do tratamento
+    energia_unidade_dict = {
+        '0': '',
+        '1': 'KV',
+        '2': 'MV',
+        '3': 'MeV'
+        }
+
+    campos_antigos = TxField.objects.filter(version__gt=0).filter(dose_campo__gt=0).filter(edit_dt__year=ref_date.year, edit_dt__month=ref_date.month, edit_dt__day=ref_date.day)
+    if campos_antigos is not None:
+        for campo in campos_antigos:
+            Planejfisico.objects.filter(id_mosaiq=campo.id_campo).delete()
+            Planejfisicoc.objects.filter(id_mosaiq=campo.id_campo).delete()
+            PrescrRadio.objects.filter(id_mosaiq=campo.id_campo).delete()
+
+    i = 0
+    for obj in campos.iterator():
+        i += 1
+        print('[ATUALIZA_PLANEJ] - iteração campo', i, obj)
+
+        codpac_sisac = relaciona_paciente(obj.id_paciente)
+
+        if codpac_sisac:
+            print(f'[ATUALIZA_PLANEJ] - Paciente encontrado: {codpac_sisac}')
+            prescricao = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last()
+            if prescricao is not None:
+                planejfisicoc = Planejfisicoc.objects.filter(codpaciente=codpac_sisac).filter(id_mosaiq=obj.id_campo).filter(ativo=1)
+
+                if planejfisicoc.count() > 0:
+                    print('[ATUALIZA_PLANEJ] - Planejamento encontrado para o paciente', codpac_sisac, 'numero do campo:', obj.numero_campo)
+                    for planej2 in planejfisicoc.iterator():
+                        planej2.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
+                        planej2.dtt = obj.id_fase.dosetotal
+                        planej2.dtd = obj.dose_campo
+                        planej2.locanatomica = obj.id_fase.locanatomica
+                        planej2.unidade_monitora = obj.unidade_monitora
+                        planej2.ordemcampo = obj.numero_campo
+                        planej2.fase = obj.id_fase.numerofase
+                        planej2.incidencia = '3D'
+                        planej2.tpfeixe = obj.id_fase.modalidade
+                        planej2.id_mosaiq = obj.id_campo
+                        planej2.save()
+                else:
+                    print('[ATUALIZA_PLANEJ] - planejamento NÃO encontrado para o paciente', codpac_sisac, 'numero do campo', obj.numero_campo)
+                    print('[ATUALIZA_PLANEJ] - gerando registro na tabela PlanejFisicoC')
+                    novo_planejfisicoc = Planejfisicoc()
+                    novo_planejfisicoc.codpaciente = codpac_sisac
+                    novo_planejfisicoc.codmovimento = codpac_sisac.codpaciente
+                    novo_planejfisicoc.numpresc = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().numpresc
+                    novo_planejfisicoc.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
+                    novo_planejfisicoc.dtt = obj.id_fase.dosetotal
+                    novo_planejfisicoc.dtd = obj.dose_campo
+                    novo_planejfisicoc.naplicacoes = obj.id_fase.qtdsessoes
+                    novo_planejfisicoc.datasist = datetime.now()
+                    novo_planejfisicoc.ativo = 1
+                    novo_planejfisicoc.unidade_monitora = obj.unidade_monitora
+                    novo_planejfisicoc.nplanejamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
+                    novo_planejfisicoc.ntratamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
+                    novo_planejfisicoc.locanatomica = obj.id_fase.locanatomica
+                    novo_planejfisicoc.ncampo = obj.numero_campo
+                    novo_planejfisicoc.ordemcampo = obj.numero_campo
+
+                    # Realizada chamada na função inicio_tratamento(), passando como parâmetro o obj iterado no loop anterior
+                    # Realiza a verificação para definir o início do tratamento.
+                    iniciotrat = inicio_tratamento(obj)
+
+                    novo_planejfisicoc.iniciotrat = iniciotrat
+                    novo_planejfisicoc.incidencia = '3D'
+                    novo_planejfisicoc.tpfeixe = obj.id_fase.modalidade
+                    novo_planejfisicoc.fase = obj.id_fase.numerofase
+                    novo_planejfisicoc.usuario = API_USER
+                    novo_planejfisicoc.id_mosaiq = obj.id_campo
+                    novo_planejfisicoc.id_fase_mosaiq = obj.id_fase_id
+                    novo_planejfisicoc.save()
+
+                planejfisico = Planejfisico.objects.filter(codpaciente=codpac_sisac).filter(id_mosaiq=obj.id_campo).filter(ativo=1)
+
+                if planejfisico.count() > 0:
+                    for planej in planejfisico:
+                        planej.incidencia = '3D'
+                        planej.nomecampo = obj.nome_campo
+                        planej.ncampo = obj.numero_campo
+                        planej.dtt = obj.id_fase.dosetotal
+                        planej.dtd = obj.dose_campo
+                        planej.fase = obj.id_fase.numerofase
+                        planej.unidade_monitora = obj.unidade_monitora
+                        planej.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
+                        planej.tecnica = obj.id_fase.tecnica
+                        planej.angulacao = 'G-' + str(obj.txfieldpoint_set.first().gantry) + ';M-' + str(obj.txfieldpoint_set.first().mesa) + ';C-' + str(obj.txfieldpoint_set.first().colimador)
+                        planej.datasist = datetime.now()
+                        planej.usuario = API_USER
+                        planej.id_mosaiq = obj.id_campo
+                        planej.save()
+                else:            
+                    novo_planejfisico = Planejfisico()
+                    novo_planejfisico.idplanejfisicoc = Planejfisicoc.objects.filter(codpaciente=codpac_sisac).order_by('idplanejfisicoc').last()
+                    novo_planejfisico.codpaciente = codpac_sisac
+                    novo_planejfisico.codmovimento = codpac_sisac.codpaciente
+                    novo_planejfisico.numpresc = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().numpresc
+                    novo_planejfisico.incidencia = '3D'
+                    novo_planejfisico.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
+                    novo_planejfisico.tecnica = obj.id_fase.tecnica
+                    novo_planejfisico.unidade_monitora = obj.unidade_monitora
+                    novo_planejfisico.angulacao = 'G-' + str(obj.txfieldpoint_set.first().gantry) + ';M-' + str(obj.txfieldpoint_set.first().mesa) + ';C-' + str(obj.txfieldpoint_set.first().colimador)
+                    novo_planejfisico.nplanejamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
+                    novo_planejfisico.ntratamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
+                    novo_planejfisico.ncampo = obj.numero_campo
+                    novo_planejfisico.fase = obj.id_fase.numerofase
+                    novo_planejfisico.ativo = 1
+                    novo_planejfisico.datasist = datetime.now()
+                    novo_planejfisico.dtt = obj.id_fase.dosetotal
+                    novo_planejfisico.dtd = obj.dose_campo
+                    novo_planejfisico.nomecampo = obj.nome_campo
+                    novo_planejfisico.usuario = API_USER
+                    novo_planejfisico.id_mosaiq = obj.id_campo 
+                    novo_planejfisico.id_fase_mosaiq = obj.id_fase_id
+                    novo_planejfisico.save()
+
+                prescrradio = PrescrRadio.objects.filter(codpaciente=codpac_sisac).filter(numpresc=Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().numpresc).filter(tratado='NAO').filter(id_mosaiq=obj.id_campo)
+
+                if prescrradio.count() > 0:
+                    for presc in prescrradio:
+                        presc.ncampos = obj.numero_campo
+                        presc.locanatomica = obj.id_fase.locanatomica
+                        presc.datasist = datetime.now()
+                        presc.incidencia = '3D'
+                        presc.naplicacoes = obj.id_fase.qtdsessoes
+                        presc.tecnica = obj.id_fase.tecnica
+                        presc.tpfeixe = obj.id_fase.modalidade
+                        presc.dosettotal = obj.id_fase.dosetotal
+                        presc.dosetdiaria = obj.dose_campo
+                        presc.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
+                        presc.usuario = API_USER
+                        presc.id_mosaiq = obj.id_campo
+                        presc.save()
+                else:
+                    novapresc = PrescrRadio()
+                    novapresc.ncampos = obj.numero_campo
+                    novapresc.idradio = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().idradio
+                    novapresc.codmovimento = codpac_sisac.codpaciente
+                    novapresc.locanatomica = obj.id_fase.locanatomica
+                    novapresc.datasist = datetime.now()
+                    novapresc.numpresc = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().numpresc
+                    novapresc.incidencia = '3D'
+                    novapresc.naplicacoes = obj.id_fase.qtdsessoes
+                    novapresc.ntratamento = Radioterapia.objects.filter(codpaciente=codpac_sisac).order_by('numpresc').last().ntratamento
+                    novapresc.codpaciente = codpac_sisac
+                    novapresc.usuario = API_USER
+                    novapresc.energia = str(obj.txfieldpoint_set.first().energia) + energia_unidade_dict[str(obj.txfieldpoint_set.first().energia_unidade)]
+                    novapresc.tecnica = obj.id_fase.tecnica
+                    novapresc.tpfeixe = obj.id_fase.modalidade
+                    novapresc.dosettotal = obj.id_fase.dosetotal
+                    novapresc.dosetdiaria = obj.dose_campo
+                    novapresc.fase = obj.id_fase.numerofase
+
+                    # Realizada chamada na função inicio_tratamento(), passando como parâmetro o obj iterado no loop anterior
+                    # Realiza a verificação para definir o início do tratamento.
+                    iniciotrat = inicio_tratamento(obj)
+
+                    print(f'[ATUALIZA_PLANEJ] - ID Fase: {obj.id_fase}, início trat: {iniciotrat}')
+                    novapresc.iniciotrat = iniciotrat
+                    novapresc.id_mosaiq = obj.id_campo
+                    novapresc.id_fase_mosaiq = obj.id_fase_id
+                    novapresc.save()
+
+                primeira_agenda = Agenda.objects.filter(codpaciente=codpac_sisac).filter(tipo='RAD').filter(planejado='N').filter(confatd='N').order_by('idagenda').first()
+                if primeira_agenda is not None:
+                    primeira_agenda.planejado = 'S'            
+                    primeira_agenda.save() 
+                    print(f'[ATUALIZA_PLANEJ] - Alterado a agenda do paciente {codpac_sisac}, dia {primeira_agenda.datahora} com status Planejado OK.')
+                else:
+                    pass
+
+        else:
+            print(f'[ATUALIZA_PLANEJ] - Paciente {codpac_sisac} sem prescrição médica no SISAC')
+
+from datetime import date, timedelta
+
+def daterange(start_date, end_date):
+    for n in range(int((end_date - start_date).days)):
+        yield start_date + timedelta(n)
+
+
+def batata(start_date, end_date):
+    for single_date in daterange(start_date, end_date):
+        print('##################################################')
+        print(single_date)
+        atualiza_planej_ref_date(single_date)
