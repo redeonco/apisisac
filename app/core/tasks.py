@@ -22,7 +22,7 @@ from datetime import datetime, date
 from django.db.models import Q
 from django.core.mail import send_mail
 # from .logger import API_LOGGER
-from app.core.resources.constants import API_USER
+from core.resources.constants import API_USER
 
 '''
  Tarefa para atualizar a agenda de tratamento da radioterapia do SISAC comparando com a agenda de tratamento do MOSAIQ
@@ -102,7 +102,7 @@ def atualizaagenda():
                     entrada.local = ''
                     entrada.usuario = API_USER
                     entrada.recep = API_USER
-                    entrada.codconvenio = solic_tto.codconvenio
+                    entrada.codconvenio = CadConvenio.objects.get(solic_tto.codconvenio)
                     entrada.plano = ''
                     entrada.codmedico = solic_tto.codmedico
                     entrada.hist = 'Sessão de Radioterapia'
