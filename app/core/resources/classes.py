@@ -42,10 +42,9 @@ class Treatment:
         return ref_date.datahora if ref_date else datetime.now()
 
 class TreatmentConstructor:
-    def __init__(self, cod_paciente: int) -> None:
+    def __init__(self, cod_paciente: str) -> None:
         self.cod_paciente = cod_paciente
     
-    @classmethod
     def construct_initial_data(self) -> Treatment:
         print('\nIniciando constructor de dados iniciais para o tratamento.')
         paciente = Cadpaciente.objects.get(pk=self.cod_paciente)

@@ -5,9 +5,7 @@ from core.resources.constants import API_USER
 
 
 def lanca_pacote_tratamento(cod_paciente: int):
-    TreatmentConstructor(cod_paciente)
-
-    TREATMENT_DATA = TreatmentConstructor.construct_initial_data()
+    TREATMENT_DATA = TreatmentConstructor(cod_paciente).construct_initial_data()
 
     if not TREATMENT_DATA:
         print('Nenhum dado de tratamento disponível... Retornando False.')
