@@ -81,6 +81,20 @@ def sendmail_cria_agenda(tarefa, msg):
         API_LOGGER.error(f'[SENDMAIL_CRIA_AGENDA] - Falha de autenticação com o servidor SMTP :(')
 
 
+def sendmail_generic_task(tarefa, msg):
+    try:
+        send_mail(
+            'Núcleo de Sistemas - Relatório API - SISAC',
+            'Núcleo de Sistemas - Relatório API - SISAC. \n Olá. Segue resumo da execução da tarefa ' + tarefa + ', em ' + datetime.now().strftime("%d/%m/%Y às %H:%M:%S") +
+            '.\nA tarefa retornou a seguinte resposta: ' + msg + '.',
+            'chamado@oncoradium.com.br',
+            lista_emails(),
+            fail_silently=False,
+        )
+    except SMTPAuthenticationError:
+        API_LOGGER.error(f'[SENDMAIL_CRIA_AGENDA] - Falha de autenticação com o servidor SMTP :(')
+
+
 @shared_task
 def sendmail_alta_paciente(pac):
     """
@@ -187,7 +201,7 @@ def relaciona_paciente(id_paciente: Patient.id_paciente) -> Cadpaciente:
             codpac_sisac = Cadpaciente.objects.get(
                 codpaciente=busca.codpac_sisac)
             return codpac_sisac
-        except ObjectDoesNotExist:
+        except:
             try:
                 codpac_sisac = Cadpaciente.objects.exclude(
                     cpf='').get(codpaciente=id_paciente.codpac_sisac)
@@ -200,25 +214,25 @@ def relaciona_paciente(id_paciente: Patient.id_paciente) -> Cadpaciente:
                     return codpac_sisac
                 else:
                     msg = f'Código do prontuário do paciente {id_paciente} no MOSAIQ é igual no SISAC, mas CPF não corresponde. \nCPF no MOSAIQ: {id_paciente.cpf}. CPF no SISAC: {codpac_sisac.cpf}'
-                    sendmail('Relaciona Paciente', msg)
+                    sendmail_generic_task('Relaciona Paciente', msg)
                     API_LOGGER.warning(msg)
                     return False
 
-            except ObjectDoesNotExist:
+            except:
                 try:
                     codpac_sisac = Cadpaciente.objects.exclude(cpf='').get(
                         cpf=id_paciente.cpf.replace('.', '').replace('-', '').strip())
                     msg = f'Paciente {id_paciente} com número de prontuário digergente. \nProntuário MOSAIQ {id_paciente.codpac_sisac}. Prontuário SISAC {codpac_sisac.codpaciente}'
-                    sendmail('Relaciona paciente', msg)
+                    sendmail_generic_task('Relaciona paciente', msg)
                     API_LOGGER.warning(msg)
                     return codpac_sisac
-                except ObjectDoesNotExist:
+                except:
                     msg = f'Nenhum relacionamento encontrado para o paciente {id_paciente}. Nem código do prontário nem CPF correspondem.'
-                    sendmail('Relaciona paciente', msg)
+                    sendmail_generic_task('Relaciona paciente', msg)
                     API_LOGGER.warning(msg)
                     return False
 
-    except ObjectDoesNotExist:
+    except:
         API_LOGGER.error(f'Nenhum paciente MOSAIQ encontrado com o ID {id_paciente}')
         return False
 
